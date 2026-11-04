@@ -706,7 +706,7 @@ let routeFareOverrides={};try{routeFareOverrides=JSON.parse(localStorage.getItem
 let fareDiscountOverrides={};try{fareDiscountOverrides=JSON.parse(localStorage.getItem('busFareDeskFareDiscountOverrides')||'{}')}catch(e){fareDiscountOverrides={}}
 let routeDiscountOverrides={};try{routeDiscountOverrides=JSON.parse(localStorage.getItem('busFareDeskRouteDiscountOverrides')||'{}')}catch(e){routeDiscountOverrides={}}
 const routeFareKey=(from,to)=>from+' → '+to;
-function getFareFromMap(map,from,to){const key=routeFareKey(from,to);if(Object.prototype.hasOwnProperty.call(map,key))return Number(map[key]);const reverse=routeFareKey(to,from);if(Object.prototype.hasOwnProperty.call(map,reverse))return Number(map[reverse]);return null;}
+function getFareFromMap(map,from,to){const key=routeFareKey(from,to);return Object.prototype.hasOwnProperty.call(map,key)?Number(map[key]):null;}
 function getRouteFare(from,to){return getFareFromMap(routeFareOverrides,from,to)}
 function getRouteDiscountFare(from,to){return getFareFromMap(routeDiscountOverrides,from,to)}
 function fareForPlace(name){const assignedArea=areaForPlace[name];return Number.isFinite(Number(fareOverrides[name]))?Number(fareOverrides[name]):(road2AreaFare[name]??baseFare[name]??(assignedArea?(road2AreaFare[assignedArea]??baseFare[assignedArea]):undefined)??18)}
