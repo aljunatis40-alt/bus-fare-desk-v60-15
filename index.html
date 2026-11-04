@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#ffffff"><title>BUS FARE DESK · V60.14 Personal Edition</title>
+<meta name="theme-color" content="#ffffff"><title>BUS FARE DESK · V60.15 Personal Edition</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <style>
 :root{--blue:#1769e8;--blue-dark:#1054c5;--ink:#000;--muted:#555;--line:#e5e7eb;--pale:#f6f9ff}
@@ -163,7 +163,7 @@ body.one-hand .mode-box{min-height:100px;padding:18px 12px}body.one-hand .settin
 .route-location-panel{margin:4px 0 10px;padding:7px;border:1px solid #dbe7df;border-radius:13px;background:linear-gradient(180deg,rgba(248,252,249,.94),rgba(255,255,255,.98));box-shadow:0 4px 15px rgba(15,60,40,.10);display:grid;gap:6px;position:relative;z-index:1}
 .route-location-panel[hidden]{display:none!important}
 .route-map-head{display:flex;align-items:center;justify-content:space-between;padding:0 3px;color:#166534;font-size:10px;font-weight:850;letter-spacing:.06em}
-.route-map-frame{height:112px;min-height:112px;border-radius:9px;overflow:hidden;background:linear-gradient(135deg,#edf4ef,#e6eee9);position:relative;box-shadow:inset 0 0 0 1px rgba(22,101,52,.12)}
+.route-map-frame{height:210px;min-height:210px;border-radius:9px;overflow:hidden;background:linear-gradient(135deg,#edf4ef,#e6eee9);position:relative;box-shadow:inset 0 0 0 1px rgba(22,101,52,.12)}
 #liveRouteMap{height:100%;width:100%;opacity:.88}
 .route-map-placeholder{position:absolute;inset:0;display:grid;place-items:center;color:#557565;font-size:11px;font-weight:700;pointer-events:none;background:linear-gradient(135deg,rgba(238,246,240,.72),rgba(225,237,229,.62));z-index:400}
 .route-map-placeholder[hidden]{display:none!important}
@@ -408,7 +408,7 @@ body.family-active .change-result strong{font-size:19px}
  <div class="extra-subhead">🖐️ One-hand conductor mode</div><button type="button" id="oneHandToggle" class="extras-theme-link" aria-pressed="false">Enable larger controls</button><div class="muted-small">Enlarges the main controls for easier use on a phone.</div>
  <div class="extra-subhead">🧾 Change history and version control</div><div id="fareChangeHistory" class="quick-change-result" aria-live="polite">No fare changes recorded yet.</div><button type="button" id="undoFareChange" class="extras-theme-link">↩ Undo last fare edit</button><button type="button" id="clearFareChangeHistory" class="extras-theme-link">Clear fare change history</button><p class="muted-small">Undo restores the saved fare data snapshot from before the latest edit in the fare editor or route fare editor.</p>
  <div class="extra-subhead">🏷️ Fare table version control</div>
- <div id="fareVersionPanel" class="quick-change-result" aria-live="polite">App version: V60.14 · Fare data version will be checked on this device.</div>
+ <div id="fareVersionPanel" class="quick-change-result" aria-live="polite">App version: V60.15 · Fare data version will be checked on this device.</div>
  <div class="quick-tools"><button type="button" id="checkFareVersion">🔄 Check version</button><button type="button" id="markFareVersion">✅ Mark current data</button></div>
  <div class="extra-subhead">🔎 Smart name matching</div>
  <label class="muted-small" for="smartPlaceSearch">Type the full name, part of the name, or an alternate spelling.</label>
@@ -558,7 +558,7 @@ body.family-active .change-result strong{font-size:19px}
  <div class="theme-actions"><button type="button" id="saveThemeSettings">💾 Save design</button><button type="button" id="resetThemeSettings">↩ Restore default design</button></div>
  <div id="themeFeedback" class="settings-feedback" aria-live="polite"></div>
 </div></div></section>
-</main><div id="floatingToast" class="floating-toast" role="status" aria-live="polite"></div><div class="footer">BUS FARE DESK · V60.14 · PERSONAL EDITION</div>
+</main><div id="floatingToast" class="floating-toast" role="status" aria-live="polite"></div><div class="footer">BUS FARE DESK · V60.15 · PERSONAL EDITION</div>
 <div id="extrasOverlay" class="extras-overlay" aria-hidden="true">
  <section class="extras-dialog" role="dialog" aria-modal="true" aria-labelledby="extrasDialogTitle">
   <div class="extras-dialog-head"><strong id="extrasDialogTitle">🧰 Additional tools · v27–v29</strong><button type="button" id="closeExtras" class="extras-close" aria-label="Isara ang mga dagdag na tools">×</button></div>
@@ -4827,7 +4827,7 @@ function choose(p){
    modeNote.textContent='Family mode: iisang sakayan, magkakaibang babaan at uri ng pasahero.';
    renderFamily();updateFare();renderPayment(false);showToast(appLanguage==='en'?'Passenger '+(familySearchIndex+1)+' destination selected.':'Napili ang babaan ng Pasahero '+(familySearchIndex+1)+'.','good');return;
  }
- searchWrap.classList.remove('target-board','target-alight','target-family');if(activeMode==='board')boardingPlace=p;else alightingPlace=p;resetPayment();
+ searchWrap.classList.remove('target-board','target-alight','target-family');const selectingDestination=activeMode==='alight';if(activeMode==='board')boardingPlace=p;else alightingPlace=p;if(selectingDestination&&typeof window.busFareDeskSetDestination==='function')window.busFareDeskSetDestination(p);resetPayment();
  distanceKm.value='';
  syncPlaceLabels();
  input.value='';box.classList.remove('show');box.innerHTML='';clear.style.display='none';
@@ -5028,24 +5028,52 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
  const routeGpsMeta=document.getElementById('routeGpsMeta');
  const routeMapStatus=document.getElementById('routeMapStatus');
  const routeMapPlaceholder=document.getElementById('routeMapPlaceholder');
- let routeMap=null,routeBusMarker=null,routeAccuracyCircle=null;
+ let routeMap=null,routeBusMarker=null,routeAccuracyCircle=null,routeTrackLine=null,destinationMarker=null,destinationRouteLine=null,destinationCoords=null,lastRouteRequestAt=0,lastRouteOrigin=null,routeTrackPoints=[];
  const busMapIcon=()=>window.L?L.divIcon({className:'',html:'<div class="bus-live-marker">🚌</div>',iconSize:[30,30],iconAnchor:[15,15]}):null;
  // GPS-OFF map is a neutral regional map canvas, not a claimed current position.
  const initIdleMap=()=>{
    if(!window.L||routeMap||!document.getElementById('liveRouteMap'))return;
    try{
-     routeMap=L.map('liveRouteMap',{zoomControl:false,attributionControl:false,scrollWheelZoom:false,doubleClickZoom:false,dragging:true,touchZoom:true}).setView([14.66,121.02],10);
+     routeMap=L.map('liveRouteMap',{zoomControl:false,attributionControl:true,scrollWheelZoom:false,doubleClickZoom:false,dragging:true,touchZoom:true}).setView([14.66,121.02],10);
      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(routeMap);
      setTimeout(()=>routeMap&&routeMap.invalidateSize(),250);
    }catch(error){routeMap=null;if(routeMapStatus)routeMapStatus.textContent='MAP UNAVAILABLE';}
  };
  initIdleMap();
+ const updateDestinationRoute=async(origin)=>{
+   if(!destinationCoords||!routeMap||!window.L)return;
+   const now=Date.now(),originLatLng=L.latLng(origin[0],origin[1]);
+   if(lastRouteOrigin&&originLatLng.distanceTo(L.latLng(lastRouteOrigin[0],lastRouteOrigin[1]))<150&&now-lastRouteRequestAt<30000)return;
+   if(now-lastRouteRequestAt<12000)return;
+   lastRouteRequestAt=now;lastRouteOrigin=origin.slice();
+   try{
+     const url='https://router.project-osrm.org/route/v1/driving/'+origin[1]+','+origin[0]+';'+destinationCoords[1]+','+destinationCoords[0]+'?overview=full&geometries=geojson';
+     const response=await fetch(url,{headers:{'Accept':'application/json'}});
+     if(!response.ok)throw new Error('Route service HTTP '+response.status);
+     const data=await response.json(),coordinates=data.routes?.[0]?.geometry?.coordinates;
+     if(!Array.isArray(coordinates)||!coordinates.length)throw new Error('No route returned');
+     const points=coordinates.map(([lon,lat])=>[lat,lon]);
+     if(!destinationRouteLine)destinationRouteLine=L.polyline(points,{color:'#db2777',weight:4,opacity:.9}).addTo(routeMap);
+     else destinationRouteLine.setLatLngs(points);
+     if(routeMapStatus)routeMapStatus.textContent='LIVE · GPS + ROUTE';
+   }catch(error){
+     if(routeMapStatus)routeMapStatus.textContent='LIVE · GPS · ROUTE UNAVAILABLE';
+     debugText('GPS active; destination route could not be loaded. Check internet connection.');
+   }
+ };
  const updateLiveMap=(lat,lon,accuracy)=>{
    if(!window.L)return;
    const point=[Number(lat),Number(lon)];
    if(!Number.isFinite(point[0])||!Number.isFinite(point[1]))return;
    if(!routeMap)initIdleMap();
    if(!routeMap)return;
+   if(!routeTrackLine)routeTrackLine=L.polyline([],{color:'#2563eb',weight:4,opacity:.85}).addTo(routeMap);
+   const previous=routeTrackPoints.length?routeTrackPoints[routeTrackPoints.length-1]:null;
+   if(!previous||L.latLng(previous).distanceTo(L.latLng(point))>=5){
+     routeTrackPoints.push(point);
+     if(routeTrackPoints.length>3000)routeTrackPoints.shift();
+     routeTrackLine.setLatLngs(routeTrackPoints);
+   }
    if(!routeBusMarker){
      routeBusMarker=L.marker(point,{icon:busMapIcon(),keyboard:false}).addTo(routeMap);
      routeAccuracyCircle=L.circle(point,{radius:Math.max(accuracy||25,10),color:'#16a34a',weight:1,fillColor:'#22c55e',fillOpacity:.10}).addTo(routeMap);
@@ -5055,8 +5083,40 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
      routeBusMarker.setLatLng(point);routeAccuracyCircle.setLatLng(point).setRadius(Math.max(accuracy||25,10));
      routeMap.panTo(point,{animate:true,duration:.35});
    }
+   if(destinationCoords)updateDestinationRoute(point);
    if(routeMapPlaceholder)routeMapPlaceholder.hidden=true;
-   if(routeMapStatus)routeMapStatus.textContent='LIVE · GPS';
+   if(routeMapStatus)routeMapStatus.textContent=destinationCoords?'LIVE · GPS + DESTINATION':'LIVE · GPS · TRACKING';
+ };
+ window.busFareDeskSetDestination=async(place)=>{
+   const destination=String(place||'').trim();
+   if(!destination)return;
+   if(!routeMap)initIdleMap();
+   if(routeMapStatus)routeMapStatus.textContent='SEARCHING DESTINATION';
+   try{
+     const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q='+encodeURIComponent(destination+', Philippines');
+     const response=await fetch(url,{headers:{'Accept':'application/json'}});
+     if(!response.ok)throw new Error('Place search HTTP '+response.status);
+     const results=await response.json(),match=Array.isArray(results)?results[0]:null;
+     if(!match)throw new Error('Destination not found');
+     const lat=Number(match.lat),lon=Number(match.lon);
+     if(!Number.isFinite(lat)||!Number.isFinite(lon))throw new Error('Invalid destination coordinates');
+     destinationCoords=[lat,lon];
+     if(!routeMap)initIdleMap();
+     if(!routeMap)return;
+     if(!destinationMarker)destinationMarker=L.marker(destinationCoords).addTo(routeMap);
+     else destinationMarker.setLatLng(destinationCoords);
+     if(destinationMarker.bindTooltip)destinationMarker.bindTooltip('DESTINATION: '+destination,{direction:'top'});
+     if(lastCoords){
+       updateDestinationRoute([Number(lastCoords.lat),Number(lastCoords.lon)]);
+       routeMap.fitBounds([ [Number(lastCoords.lat),Number(lastCoords.lon)],destinationCoords ],{padding:[24,24],maxZoom:15});
+     }else routeMap.setView(destinationCoords,14);
+     if(routeMapPlaceholder)routeMapPlaceholder.hidden=true;
+     if(routeMapStatus)routeMapStatus.textContent='DESTINATION SET · GPS OFF';
+   }catch(error){
+     destinationCoords=null;
+     if(routeMapStatus)routeMapStatus.textContent='DESTINATION NOT FOUND';
+     notify('Hindi mahanap sa map ang destination na '+destination+'. Pumili ng mas tiyak na place name.','short');
+   }
  };
  const matchedPlaceName=(raw)=>{
    const n=norm(raw);let best='';
@@ -5226,7 +5286,7 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
  };
  const startGps=()=>{
    if(enabled)return;
-   enabled=true;lastReverseAt=0;unmatchedNotified=false;
+   enabled=true;lastReverseAt=0;unmatchedNotified=false;routeTrackPoints=[];if(routeTrackLine)routeTrackLine.setLatLngs([]);if(destinationRouteLine)destinationRouteLine.setLatLngs([]);lastRouteOrigin=null;lastRouteRequestAt=0;
    button.setAttribute('aria-pressed','true');
    button.setAttribute('aria-label','Turn GPS off');
    buttonText.textContent='GPS ON';
