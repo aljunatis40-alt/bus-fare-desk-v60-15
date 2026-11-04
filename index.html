@@ -661,7 +661,7 @@ const knownAreas=['Dulo ng Sapang Palay','Road 2','Quarry','Road 1',...Object.ke
 newAreaSelect.innerHTML='<option value="">— Choose an area —</option>'+knownAreas.map(a=>'<option>'+a+'</option>').join('');
 function refreshPlaces(){places=[...new Set([...places,...customPlaces.map(x=>x.name)])]}
 function normalizeSearchText(value){return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase().trim()}
-function renderCustomPlaces(){customPlaceList.innerHTML='';const query=normalizeSearchText(placeEditSearch?.value||'');const filtered=customPlaces.map((p,i)=>({p,i})).filter(({p})=>normalizeSearchText(p.name+' '+p.area).includes(query));if(!customPlaces.length){customPlaceList.textContent=appLanguage==='en'?'No added places yet.':'None yetng idinagdag na places.';return}if(!filtered.length){customPlaceList.textContent=appLanguage==='en'?'No matching places. Try another letter or name.':'No  tugmang places. Subukan ang ibang letra o pangalan.';return}filtered.forEach(({p,i})=>{const row=document.createElement('div');row.className='custom-place-row';const label=document.createElement('span');label.textContent=p.name+' · '+p.area;const actions=document.createElement('div');actions.className='place-actions';const edit=document.createElement('button');edit.type='button';edit.className='edit-place';edit.textContent='✏️';edit.title=appLanguage==='en'?'Edit place name':'I-edit ang pangalan';edit.setAttribute('aria-label',(appLanguage==='en'?'Edit ':'I-edit ang ')+p.name);edit.onclick=()=>{const next=prompt(appLanguage==='en'?'Edit place name:':'I-edit ang pangalan ng places:',p.name);if(next===null)return;const name=next.trim();if(!name){showToast(appLanguage==='en'?'Place name cannot be blank.':'Place name cannot be blank.','short');return}if(places.some(x=>x.toLowerCase()===name.toLowerCase()&&x.toLowerCase()!==p.name.toLowerCase())){showToast(appLanguage==='en'?'That place name already exists.':'May kapareho nang pangalan sa listahan.','short');return}const old=p.name;p.name=name;areaForPlace[name]=p.area;if(old!==name){delete areaForPlace[old];places=places.filter(x=>x!==old);if(Object.prototype.hasOwnProperty.call(fareOverrides,old)){fareOverrides[name]=fareOverrides[old];delete fareOverrides[old];localStorage.setItem('busFareDeskFareOverrides',JSON.stringify(fareOverrides));}const remapRouteKey=(key)=>{const parts=key.split(' → ');return parts.length===2?routeFareKey(parts[0]===old?name:parts[0],parts[1]===old?name:parts[1]):key};const remapped={};Object.entries(routeFareOverrides).forEach(([key,value])=>{remapped[remapRouteKey(key)]=value});routeFareOverrides=remapped;localStorage.setItem('busFareDeskRouteFareOverrides',JSON.stringify(routeFareOverrides));}localStorage.setItem('busFareDeskCustomPlaces',JSON.stringify(customPlaces));refreshPlaces();fillRouteFarePlaces();renderCustomPlaces();render();showToast(appLanguage==='en'?'✓ Place name updated and saved.':'✓ Na-update at na-save ang pangalan ng places.','good')};const del=document.createElement('button');del.type='button';del.className='delete-place';del.textContent='🗑️';del.setAttribute('aria-label','Remove '+p.name);del.onclick=()=>{customPlaces.splice(i,1);localStorage.setItem('busFareDeskCustomPlaces',JSON.stringify(customPlaces));refreshPlaces();renderCustomPlaces();render();showToast(appLanguage==='en'?'Place removed.':'Inalis ang places.','good')};actions.append(edit,del);row.append(label,actions);customPlaceList.appendChild(row)})}
+function renderCustomPlaces(){customPlaceList.innerHTML='';const query=normalizeSearchText(placeEditSearch?.value||'');const filtered=customPlaces.map((p,i)=>({p,i})).filter(({p})=>normalizeSearchText(p.name+' '+p.area).includes(query));if(!customPlaces.length){customPlaceList.textContent=appLanguage==='en'?'No added places yet.':'None yetng idinagdag na places.';return}if(!filtered.length){customPlaceList.textContent=appLanguage==='en'?'No matching places. Try another letter or name.':'No  tugmang places. Subukan ang ibang letra o pangalan.';return}filtered.forEach(({p,i})=>{const row=document.createElement('div');row.className='custom-place-row';const label=document.createElement('span');label.textContent=p.name+' · '+p.area;const actions=document.createElement('div');actions.className='place-actions';const edit=document.createElement('button');edit.type='button';edit.className='edit-place';edit.textContent='✏️';edit.title=appLanguage==='en'?'Edit place name':'I-edit ang pangalan';edit.setAttribute('aria-label',(appLanguage==='en'?'Edit ':'I-edit ang ')+p.name);edit.onclick=()=>{const next=prompt(appLanguage==='en'?'Edit place name:':'I-edit ang pangalan ng places:',p.name);if(next===null)return;const name=next.trim();if(!name){showToast(appLanguage==='en'?'Place name cannot be blank.':'Place name cannot be blank.','short');return}if(places.some(x=>x.toLowerCase()===name.toLowerCase()&&x.toLowerCase()!==p.name.toLowerCase())){showToast(appLanguage==='en'?'That place name already exists.':'May kapareho nang pangalan sa listahan.','short');return}const old=p.name;p.name=name;areaForPlace[name]=p.area;if(old!==name){delete areaForPlace[old];places=places.filter(x=>x!==old);const remapPlaceOverride=(map)=>{if(Object.prototype.hasOwnProperty.call(map,old)){map[name]=map[old];delete map[old];}};remapPlaceOverride(fareOverrides);remapPlaceOverride(fareDiscountOverrides);const remapRouteOverrides=(map)=>{const remapped={};Object.entries(map).forEach(([key,value])=>{const parts=key.split(' → ');const nextKey=parts.length===2?routeFareKey(parts[0]===old?name:parts[0],parts[1]===old?name:parts[1]):key;remapped[nextKey]=value});return remapped};routeFareOverrides=remapRouteOverrides(routeFareOverrides);routeDiscountOverrides=remapRouteOverrides(routeDiscountOverrides);localStorage.setItem('busFareDeskFareOverrides',JSON.stringify(fareOverrides));localStorage.setItem('busFareDeskFareDiscountOverrides',JSON.stringify(fareDiscountOverrides));localStorage.setItem('busFareDeskRouteFareOverrides',JSON.stringify(routeFareOverrides));localStorage.setItem('busFareDeskRouteDiscountOverrides',JSON.stringify(routeDiscountOverrides));try{const favorites=JSON.parse(localStorage.getItem('busFareDeskFavoriteRoutesV1')||'[]');if(Array.isArray(favorites)){favorites.forEach(route=>{if(route.from===old)route.from=name;if(route.to===old)route.to=name});localStorage.setItem('busFareDeskFavoriteRoutesV1',JSON.stringify(favorites));}}catch(e){}}localStorage.setItem('busFareDeskCustomPlaces',JSON.stringify(customPlaces));refreshPlaces();fillRouteFarePlaces();renderCustomPlaces();render();showToast(appLanguage==='en'?'✓ Place name updated and saved.':'✓ Na-update at na-save ang pangalan ng places.','good')};const del=document.createElement('button');del.type='button';del.className='delete-place';del.textContent='🗑️';del.setAttribute('aria-label','Remove '+p.name);del.onclick=()=>{customPlaces.splice(i,1);localStorage.setItem('busFareDeskCustomPlaces',JSON.stringify(customPlaces));refreshPlaces();renderCustomPlaces();render();showToast(appLanguage==='en'?'Place removed.':'Inalis ang places.','good')};actions.append(edit,del);row.append(label,actions);customPlaceList.appendChild(row)})}
 const translations={
 'tl':{'settingsText':'SETTINGS','modeNoteSolo':'Solo: piliin ang sakayan at babaan.','board':'BOARDING POINT','alight':'DESTINATION','search':'Search for a place…','settingsHeading':'⚙️ Settings','languageLabel':'🌐 Language','placeManagerLabel':'📍 Add place at area','newPlaceLabel':'Place name','newAreaLabel':'Assigned area','savePlace':'＋ Save place','savedPlacesLabel':'🏷️ Added places — tap ✏️ to edit','languageMenuText':'Language','addMenuText':'Add place','editMenuText':'Edit places','fareMenuText':'I-edit ang pamasahe','fareEditorLabel':'💸 Edit fares for all places','fareLabel':'TOTAL FARE','paymentTitle':'💵 PAYMENT & CHANGE','solo':'SOLO','group':'GRUPO'},
 'en':{'settingsText':'SETTINGS','modeNoteSolo':'Solo: choose a boarding point and destination.','board':'BOARDING POINT','alight':'DESTINATION','search':'Search for a place…','settingsHeading':'⚙️ Settings','languageLabel':'🌐 Language','placeManagerLabel':'📍 Add a place and area','newPlaceLabel':'Place name','newAreaLabel':'Assigned area','savePlace':'＋ Save place','savedPlacesLabel':'🏷️ Added places — tap ✏️ to edit','languageMenuText':'Language','addMenuText':'Add place','editMenuText':'Edit places','fareMenuText':'Edit fares','fareEditorLabel':'💸 Edit fares for all places','fareLabel':'TOTAL FARE','paymentTitle':'💵 PAYMENT & CHANGE','solo':'SOLO','group':'GROUP'}};
@@ -709,7 +709,7 @@ const routeFareKey=(from,to)=>from+' → '+to;
 function getFareFromMap(map,from,to){const key=routeFareKey(from,to);if(Object.prototype.hasOwnProperty.call(map,key))return Number(map[key]);const reverse=routeFareKey(to,from);if(Object.prototype.hasOwnProperty.call(map,reverse))return Number(map[reverse]);return null;}
 function getRouteFare(from,to){return getFareFromMap(routeFareOverrides,from,to)}
 function getRouteDiscountFare(from,to){return getFareFromMap(routeDiscountOverrides,from,to)}
-function fareForPlace(name){return Number.isFinite(Number(fareOverrides[name]))?Number(fareOverrides[name]):(road2AreaFare[name]??baseFare[name]??18)}
+function fareForPlace(name){const assignedArea=areaForPlace[name];return Number.isFinite(Number(fareOverrides[name]))?Number(fareOverrides[name]):(road2AreaFare[name]??baseFare[name]??(assignedArea?(road2AreaFare[assignedArea]??baseFare[assignedArea]):undefined)??18)}
 function discountedFareForPlace(name){return Number.isFinite(Number(fareDiscountOverrides[name]))?Number(fareDiscountOverrides[name]):null}
 const fareSearch=document.getElementById('fareSearch'),fareEditList=document.getElementById('fareEditList');
 function renderFareAudit(){const el=document.getElementById('fareAuditNotice');if(!el)return;const groups={};Object.entries(userRoad2FareByArea).forEach(([area,fare])=>{(groups[fare]??=[]).push(area.replace(/^Area /,''));});const duplicates=Object.entries(groups).filter(([,areas])=>areas.length>1).map(([fare,areas])=>'₱'+fare+': '+areas.join(' / '));el.innerHTML='<strong>FARE CHECK — Road 2 origin</strong><br>'+ (duplicates.length?'Magkaparehong presyo: '+duplicates.join('; ')+'.':'Walang magkaparehong presyo sa area list.')+'<br>Napansing hindi pataas ang pagkakasunod: Welcome Rotonda ₱110 → España ₱150 → Quiapo ₱120. Iniwan ang halaga ayon sa ibinigay mo; ikaw ang mag-a-adjust kung may correction.';}
@@ -807,8 +807,9 @@ const towervilleOriginFares=[
  [18,15],[18,15],[20,15],[25,20],[25,20],[35,30],[40,30],[45,40],[45,40],[50,45],[55,45],[60,50],[65,50],[75,60],[85,70],[90,65],[95,75],[100,80],[105,85],[105,85],[115,95],[120,95],[125,100],[135,110],[145,115],[150,120],[155,125],[170,135]
 ];
 function findCanonicalArea(place){
- const key=normV49(place);
- const parts=String(place||'').split(/[\/|,·]+/).map(normV49).filter(Boolean);
+ const lookupPlace=areaForPlace[place]||place;
+ const key=normV49(lookupPlace);
+ const parts=String(lookupPlace||'').split(/[\/|,·]+/).map(normV49).filter(Boolean);
  return canonicalAreasV49.find(area=>{const aliases=[area.name,...area.places,...(area===canonicalAreasV49[0]?['Towerville Area']:[])].map(normV49);return aliases.includes(key)||parts.some(part=>aliases.includes(part));})||null;
 }
 function isTowervilleOrigin(place){const key=normV49(place);return towervilleOriginAliases.some(alias=>normV49(alias)===key);}
@@ -4093,6 +4094,7 @@ const canonicalV60Aliases = (() => {
 })();
 function canonicalizeV60(place){
  const key=normV49(place); if(canonicalV60Aliases.has(key)) return canonicalV60Aliases.get(key);
+ const assignedArea=areaForPlace[place];const assignedKey=normV49(assignedArea);if(assignedArea&&canonicalV60Aliases.has(assignedKey))return canonicalV60Aliases.get(assignedKey);
  const legacy=findCanonicalArea(place);
  if(legacy){const aliases={
   'Area ng Towerville':'Towerville','Area ng Palmera':'Palmera','Area ng Tungko':'Tungko',
@@ -4169,6 +4171,24 @@ function palmeraFareForDestination(place,type){const area=findCanonicalArea(plac
 function isPalmeraToSMFairviewV60(from,to){const area=findCanonicalArea(to);return isPalmeraOrigin(from)&&!!area&&area.name==='Area SM Fairview';}
 function towervilleFareForDestination(place,type){const area=findCanonicalArea(place);if(!area)return null;const index=canonicalAreasV49.indexOf(area);if(index<0)return null;return towervilleOriginFares[index][type==='regular'?0:1];}
 
+function getEditableFareOverride(from,to){
+ if(!from||!to)return null;
+ const exact=getRouteFare(from,to);
+ if(exact!==null){
+  const regular=Math.round(Number(exact));if(!Number.isFinite(regular)||regular<=0)return null;
+  const savedDiscount=getRouteDiscountFare(from,to);
+  const discounted=savedDiscount!==null&&Number.isFinite(Number(savedDiscount))&&Number(savedDiscount)>0?Math.round(Number(savedDiscount)):fareAfterGlobalDiscount20(regular);
+  return {regular,discounted,source:'exact route'};
+ }
+ const placeName=Object.prototype.hasOwnProperty.call(fareOverrides,to)?to:(Object.prototype.hasOwnProperty.call(fareOverrides,from)?from:null);
+ if(placeName!==null){
+  const regular=Math.round(Number(fareOverrides[placeName]));if(!Number.isFinite(regular)||regular<=0)return null;
+  const savedDiscount=discountedFareForPlace(placeName);
+  const discounted=savedDiscount!==null&&Number.isFinite(Number(savedDiscount))&&Number(savedDiscount)>0?Math.round(Number(savedDiscount)):fareAfterGlobalDiscount20(regular);
+  return {regular,discounted,source:'place'};
+ }
+ return null;
+}
 function familyFareCore(from,to,type,personKm=1){
  if(!from||!to)return null;
  if(isPalmeraToSMFairviewV60(from,to))return type==='regular'?40:35;
@@ -4213,6 +4233,8 @@ function fareAfterGlobalDiscount20(regularFare){
  return !Number.isFinite(rawRegular)||rawRegular<=0?null:Math.round((rawRegular*0.80)/5)*5;
 }
 function familyFare(from,to,type,personKm=1){
+ const editableOverride=getEditableFareOverride(from,to);
+ if(editableOverride)return type==='regular'?editableOverride.regular:editableOverride.discounted;
  if(isPalmeraToSMFairviewV60(from,to))return type==='regular'?40:35;
  const regular=familyFareCore(from,to,'regular',personKm);
  if(regular===null||regular===undefined)return null;
@@ -4752,6 +4774,20 @@ function updateFareCore(){
 // legacy area tables, confirmed route cards, reverse fares, and saved regular fares.
 function updateFare(){
  const selectedType=passengerType;
+ const editableOverride=getEditableFareOverride(boardingPlace,alightingPlace);
+ if(editableOverride){
+  distancePanel.style.display='none';
+  const applied=selectedType==='regular'?editableOverride.regular:editableOverride.discounted;
+  const label={regular:'Regular',senior:'Senior',student:'Student',pwd:'PWD'}[selectedType]||'Pasahero';
+  fareAmount.textContent='₱'+applied;
+  fareRoute.textContent=boardingPlace+' → '+alightingPlace+' · '+label;
+  fareFoot.textContent='Saved '+editableOverride.source+' fare is applied first. Regular ₱'+editableOverride.regular+' | Student / Senior / PWD ₱'+editableOverride.discounted+'.';
+  passengerNote.textContent=label+' fare: ₱'+applied+'.';
+  const preview=document.getElementById('regularFarePreview');if(preview)preview.textContent='₱'+editableOverride.regular;
+  document.querySelectorAll('.passenger-option').forEach(btn=>{const small=btn.querySelector('small');if(small)small.textContent='₱'+(btn.dataset.type==='regular'?editableOverride.regular:editableOverride.discounted);});
+  if(typeof renderPayment==='function')renderPayment(false);
+  return;
+ }
  passengerType='regular';
  try{updateFareCore();}finally{passengerType=selectedType;}
  const raw=String(fareAmount.textContent||'').replace(/[₱,\s]/g,'');
