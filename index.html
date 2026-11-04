@@ -4180,12 +4180,14 @@ function getEditableFareOverride(from,to){
   const discounted=savedDiscount!==null&&Number.isFinite(Number(savedDiscount))&&Number(savedDiscount)>0?Math.round(Number(savedDiscount)):fareAfterGlobalDiscount20(regular);
   return {regular,discounted,source:'exact route'};
  }
- const placeName=Object.prototype.hasOwnProperty.call(fareOverrides,to)?to:(Object.prototype.hasOwnProperty.call(fareOverrides,from)?from:null);
+ const candidates=[to,from,areaForPlace[to],areaForPlace[from]].filter((name,index,list)=>name&&list.indexOf(name)===index);
+ const placeName=candidates.find(name=>Object.prototype.hasOwnProperty.call(fareOverrides,name))||null;
  if(placeName!==null){
   const regular=Math.round(Number(fareOverrides[placeName]));if(!Number.isFinite(regular)||regular<=0)return null;
   const savedDiscount=discountedFareForPlace(placeName);
   const discounted=savedDiscount!==null&&Number.isFinite(Number(savedDiscount))&&Number(savedDiscount)>0?Math.round(Number(savedDiscount)):fareAfterGlobalDiscount20(regular);
-  return {regular,discounted,source:'place'};
+  const source=(placeName===to||placeName===from)?'place':'assigned area';
+  return {regular,discounted,source};
  }
  return null;
 }
