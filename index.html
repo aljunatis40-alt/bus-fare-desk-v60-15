@@ -5090,6 +5090,9 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
  window.busFareDeskSetDestination=async(place)=>{
    const destination=String(place||'').trim();
    if(!destination)return;
+   destinationCoords=null;lastRouteOrigin=null;lastRouteRequestAt=0;
+   if(destinationRouteLine)destinationRouteLine.setLatLngs([]);
+   if(destinationMarker&&routeMap){routeMap.removeLayer(destinationMarker);destinationMarker=null;}
    if(!routeMap)initIdleMap();
    if(routeMapStatus)routeMapStatus.textContent='SEARCHING DESTINATION';
    try{
