@@ -6,11 +6,18 @@ on:
     paths:
       - 'index.html'
       - '.github/workflows/android.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - '.github/workflows/android.yml'
+
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Get project files
         uses: actions/checkout@v4
@@ -26,6 +33,41 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: Validate inline JavaScript
+        run: |
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          class Scripts(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.active = False
+                  self.external = False
+                  self.parts = []
+                  self.scripts = []
+              def handle_starttag(self, tag, attrs):
+                  if tag == "script":
+                      self.active = True
+                      self.external = any(k == "src" for k, _ in attrs)
+                      self.parts = []
+              def handle_data(self, data):
+                  if self.active and not self.external:
+                      self.parts.append(data)
+              def handle_endtag(self, tag):
+                  if tag == "script" and self.active:
+                      code = "".join(self.parts)
+                      if code.strip():
+                          self.scripts.append(code)
+                      self.active = False
+          parser = Scripts()
+          parser.feed(Path("index.html").read_text(encoding="utf-8"))
+          Path("/tmp/bus-fare-scripts").mkdir(exist_ok=True)
+          for i, code in enumerate(parser.scripts):
+              Path(f"/tmp/bus-fare-scripts/{i}.js").write_text(code, encoding="utf-8")
+          print(f"Checking {len(parser.scripts)} inline JavaScript blocks")
+          PY
+          for file in /tmp/bus-fare-scripts/*.js; do node --check "$file"; done
+
       - name: Prepare Android project
         run: |
           mkdir -p www
@@ -36,7 +78,7 @@ jobs:
             "name": "bus-fare-desk",
             "version": "1.0.0",
             "private": true,
-            "description": "BUS FARE DESK Personal Edition"
+            "description": "BUS FARE DESK V60.15 Personal Edition"
           }
           EOF
 
@@ -49,9 +91,158 @@ jobs:
           EOF
 
           npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
-
           npx cap add android
           npx cap sync android
+
+          python3 - <<'PY'
+          from pathlib import Path
+          manifest = Path("android/app/src/main/AndroidManifest.xml")
+          content = manifest.read_text(encoding="utf-8")
+          permissions = [
+              "android.permission.INTERNET",
+              "android.permission.ACCESS_FINE_LOCATION",
+              "android.permission.ACCESS_COARSE_LOCATION"
+          ]
+          missing = [p for p in permissions if p not in content]
+          if missing:
+              tags = "".join(f'    <uses-permission android:name="{p}" />\\n' for p in missing)
+              content = content.replace("<application", tags + "    <application", 1)
+          manifest.write_text(content, encoding="utf-8")
+          PY
+
+          mkdir -p android/app/src/main/java/com/aljunatis/busfaredesk
+          cat > android/app/src/main/java/com/aljunatis/busfaredesk/MainActivity.java <<'JAVA'
+          package com.aljunatis.busfaredesk;
+
+          import android.Manifest;
+          import android.content.pm.PackageManager;
+          import android.location.Location;
+          import android.location.LocationListener;
+          import android.location.LocationManager;
+          import android.os.Bundle;
+          import android.webkit.JavascriptInterface;
+          import com.getcapacitor.BridgeActivity;
+          import java.util.Locale;
+
+          public class MainActivity extends BridgeActivity {
+              private static final int LOCATION_PERMISSION_REQUEST = 7401;
+              private LocationManager locationManager;
+              private boolean locationStarted = false;
+
+              @Override
+              public void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+                  getBridge().getWebView().addJavascriptInterface(new LocationBridge(), "BusFareLocation");
+              }
+
+              private final LocationListener locationListener = new LocationListener() {
+                  @Override public void onLocationChanged(Location location) {
+                      sendCoordinates(location.getLatitude(), location.getLongitude());
+                  }
+                  @Override public void onProviderEnabled(String provider) {}
+                  @Override public void onProviderDisabled(String provider) {
+                      sendStatus("Phone location provider disabled");
+                  }
+                  @Override public void onStatusChanged(String provider, int status, Bundle extras) {}
+              };
+
+              private class LocationBridge {
+                  @JavascriptInterface public void start() {
+                      runOnUiThread(() -> startLocationUpdates());
+                  }
+                  @JavascriptInterface public void stop() {
+                      runOnUiThread(() -> stopLocationUpdates());
+                  }
+              }
+
+              private void startLocationUpdates() {
+                  if (locationStarted) return;
+                  if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                      checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                      requestPermissions(new String[] {
+                          Manifest.permission.ACCESS_FINE_LOCATION,
+                          Manifest.permission.ACCESS_COARSE_LOCATION
+                      }, LOCATION_PERMISSION_REQUEST);
+                      return;
+                  }
+                  try {
+                      boolean gps = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                      boolean network = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                      if (!gps && !network) {
+                          sendStatus("Phone location is turned off");
+                          return;
+                      }
+                      if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && gps) {
+                          locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1500L, 3f, locationListener);
+                      }
+                      if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED && network) {
+                          locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 4000L, 8f, locationListener);
+                      }
+                      locationStarted = true;
+                      Location last = null;
+                      if (gps && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                          last = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                      }
+                      if (last == null && network && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                          last = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                      }
+                      if (last != null) sendCoordinates(last.getLatitude(), last.getLongitude());
+                  } catch (SecurityException error) {
+                      sendStatus("Location permission is required");
+                  } catch (Exception error) {
+                      sendStatus("Unable to start native GPS");
+                  }
+              }
+
+              private void stopLocationUpdates() {
+                  if (locationManager != null) {
+                      try { locationManager.removeUpdates(locationListener); } catch (SecurityException ignored) {}
+                  }
+                  locationStarted = false;
+              }
+
+              private void sendCoordinates(double latitude, double longitude) {
+                  String script = String.format(Locale.US,
+                      "window.onNativeCoordinates && window.onNativeCoordinates(%.7f,%.7f);",
+                      latitude, longitude);
+                  runOnUiThread(() -> {
+                      if (getBridge() != null && getBridge().getWebView() != null) {
+                          getBridge().getWebView().evaluateJavascript(script, null);
+                      }
+                  });
+              }
+
+              private void sendStatus(String message) {
+                  String safe = message.replace("\\", "").replace("'", "");
+                  String script = "window.onNativeLocationStatus && window.onNativeLocationStatus('" + safe + "');";
+                  runOnUiThread(() -> {
+                      if (getBridge() != null && getBridge().getWebView() != null) {
+                          getBridge().getWebView().evaluateJavascript(script, null);
+                      }
+                  });
+              }
+
+              @Override
+              public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+                  super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+                  if (requestCode == LOCATION_PERMISSION_REQUEST) {
+                      boolean granted = false;
+                      for (int result : grantResults) {
+                          if (result == PackageManager.PERMISSION_GRANTED) granted = true;
+                      }
+                      if (granted) startLocationUpdates();
+                      else sendStatus("Location permission denied");
+                  }
+              }
+
+              @Override
+              public void onDestroy() {
+                  stopLocationUpdates();
+                  super.onDestroy();
+              }
+          }
+          JAVA
 
       - name: Build APK
         run: |
@@ -62,7 +253,7 @@ jobs:
       - name: Save APK
         uses: actions/upload-artifact@v4
         with:
-          name: BUS-FARE-DESK-APK
+          name: BUS-FARE-DESK-V60.15-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
-          
+          retention-days: 14
