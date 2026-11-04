@@ -105,7 +105,7 @@ jobs:
           ]
           missing = [p for p in permissions if p not in content]
           if missing:
-              tags = "".join(f'    <uses-permission android:name="{p}" />\\n' for p in missing)
+              tags = "".join(f'    <uses-permission android:name="{p}" />\n' for p in missing)
               content = content.replace("<application", tags + "    <application", 1)
           manifest.write_text(content, encoding="utf-8")
           PY
