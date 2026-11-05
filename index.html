@@ -593,7 +593,7 @@ body.family-active .change-result strong{font-size:19px}
 <script>
 let places = [
 'Dulo ng Sapang Palay','Road 2','Quarry','Road 1','España','Area ng Towerville','Area ng Palmera','Area ng Tungko','Area ng Malaria hanggang Sampaguita','Area Pangarap','Area Amparo','Area SM Fairview','Area Regalado Ave','Area North Fairview to FCM','Area Peacock','Area Commonwealth','Area ng Ever','Area ng Tandang Sora','Area Philcoa','Area Visayas','Area Lung Center','Area Q. Ave','Area Domingo','Area Welcome Rotonda','Area España','Area Quiapo','Area Lawton','Area UN','Area Taft','Area Buendia','Area Seaside','Area Aseana','Area Parañaque',
-'Blumentritt','Maceda','Quiapo','Lawton','Quintos','City Hall Manila','Finance','PNR','Vicente','Dela Fuente','Lacson','Florida','Arellano Avida','Faura / PGH','Pedro Gil','UST Gate 1','UST Gate 2','Malvar','Nakpil','Remedios','P. Noval','Quirino','Green Mall','Morayta','Lerma','La Salle','Vito Cruz','Buendia','Leveriza','Harrison','World Trade','PNB','Seaside','HK','Petron Macapagal','Tytana','Met Live','DoubleDragon','Heritage','Shell Residence','MOA','ICE Tower','W Mall','DFA','Parqal','COD','Ayala Mall','Coastal Road','PITX',
+'España Boulevard','España Blvd','Blumentritt','Maceda','Quiapo','Lawton','Quintos','City Hall Manila','Finance','PNR','Vicente','Dela Fuente','Lacson','Florida','Arellano','Avida','Arellano Avida','Faura / PGH','Pedro Gil','UST Gate 1','UST Gate 2','Malvar','Nakpil','Remedios','P. Noval','Quirino','Green Mall','Morayta','Lerma','La Salle','Vito Cruz','Buendia','DLTB','Leveriza','Harrison','World Trade','World Trade Center','PNB','Seaside','HK','Hobbies','Petron Macapagal','Tytana','Met Live','DoubleDragon','Heritage','Shell Residence','MOA','ICE Tower','W Mall','DFA','Parqal','COD','Ayala Mall','Coastal Road','PITX',
 'Newtown','Towerville','Tialo','Sto Cristo','Classics','Curba','Northgate',
 'Palmera','Egay','Francisco','Grace Hospital',
 'SM / Builders','Paradise / North Diamond','Skyline / Robes / Gumaok East','Marcela II','Pacific Wave','Savano / Diamond Crest',"Pleasant 1'2 / Colinas",
@@ -647,9 +647,9 @@ const areaLocations={
 'Area Lawton':['Lawton / City Hall','SM / Intramuros','Finance Road'],
 'Area UN':['UN / Kalaw','Adamson'],
 'Area Taft':['Faura / PGH','Pedro Gil / Malvar / Nakpil','Remedios / Quirino','Green Mall / La Salle','Estrada / Vito Cruz'],
-'Area España':['Blumentritt / Maceda','Quintos / PNR','Vicente / Dela Fuente / Lacson','UST 1,2 / P. Noval / Morayta','FEU / Lerma'],
-'Area Buendia':['Buendia / DLTB','Boarding point Laguna','McDo / Leveriza / Harrison'],
-'Area Seaside':['World Trade / PNB / HK','Hobbies / Petron Macapagal','Tytana'],
+'Area España':['España Boulevard','España Blvd','Blumentritt / Maceda','Blumentritt','Maceda','Quintos / PNR','Quintos','PNR','Vicente / Dela Fuente','Vicente','Dela Fuente','Lacson / Florida','Lacson','Florida','UST Gate 1 & 2','UST Gate 1','UST Gate 2','P. Noval','Morayta','FEU / Lerma','FEU','Lerma'],
+'Area Buendia':['Buendia / DLTB','Buendia','DLTB','Boarding point Laguna','Laguna Bus Terminal','Arellano','Avida','Arellano Avida','McDo / Leveriza / Harrison','Leveriza','Harrison','World Trade','World Trade Center'],
+'Area Seaside':['PNB / Seaside','PNB','Seaside','HK','Hobbies','Petron Macapagal','Hobbies / Petron Macapagal','Tytana'],
 'Area Aseana':['Met Live / Double Dragon','Heritage / Shell Residence','MOA / ICE Tower','Escape / Island / W. Mall','DFA / Parqal / COD','Ayala Mall'],
 'Area Parañaque':['Coastal / PITX']};
 const areaForPlace={};Object.entries(areaLocations).forEach(([area,names])=>{areaForPlace[area]=area;names.forEach(name=>areaForPlace[name]=area)});
@@ -4122,6 +4122,11 @@ const canonicalV60Aliases = (() => {
  add('Sapang Palay',['Sapang Palay','Dulo ng Sapang Palay','Road 2','Quarry','Road 1']);
  // Explicitly preserve well-known short aliases and merged Pangarap/Amparo sub-places.
  add('SM Fairview',['SMIS','Dela Coastal','Dela Costal','Amparo Gate 1','Amparo Gate 2','Amparo Gate 3','Guadanoville','Guadanoville / Mt. Heights','Mt. Heights','Mt Heights','Adeline','Adeline / Pangarap','Pangarap','Bankers']);
+ // España origin-zone sub-areas: every listed boarding point resolves to the same España matrix zone.
+ add('España',['España Boulevard','España Blvd','Blumentritt / Maceda','Blumentritt','Maceda','Quintos / PNR','Quintos','PNR','Vicente / Dela Fuente','Vicente','Dela Fuente','Lacson / Florida','Lacson','Florida','UST Gate 1 & 2','UST Gate 1','UST Gate 2','P. Noval','Morayta','FEU / Lerma','FEU','Lerma','UST 1,2 / P. Noval / Morayta']);
+ // Buendia and Seaside sub-areas follow the corrected grouping supplied by the user.
+ add('Buendia',['Buendia / DLTB','Buendia','DLTB','Boarding point Laguna','Laguna Bus Terminal','Arellano','Avida','Arellano Avida','McDo / Leveriza / Harrison','Leveriza','Harrison','World Trade','World Trade Center']);
+ add('Seaside',['PNB / Seaside','PNB','Seaside','HK','Hobbies','Petron Macapagal','Hobbies / Petron Macapagal','Tytana']);
  add('Amparo',['Amparo 1','Amparo 2','Amparo 3']);
  add('Regalado Ave',['Regalado Avenue']); add('North Fairview to FCM',['North Fairview','Fairlane','FCM','Pearl Drive']);
  add('Aseana',['Parqal','DFA','COD','DFA / Parqal / COD','Park & Ride','City of Dreams']);
