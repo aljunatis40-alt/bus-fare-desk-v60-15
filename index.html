@@ -5341,12 +5341,13 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
 </script>
 
 
+<script>
 // Filipino voice assistant. It reuses the existing place selector and fare calculator.
 (function(){
  const mic=document.getElementById('voiceFareStart'), speakBtn=document.getElementById('voiceFareSpeak'), status=document.getElementById('voiceFareStatus');
  if(!mic||!speakBtn||!status)return;
  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
- const norm=v=>String(v||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLocaleLowerCase('fil-PH').replace(/[^a-z0-9\\s]/g,' ').replace(/\\s+/g,' ').trim();
+ const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fil-PH').replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
  function say(message){
   if(!('speechSynthesis' in window)){status.textContent=message;return;}
   try{window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(message);u.lang='fil-PH';u.rate=0.92;window.speechSynthesis.speak(u);}catch(e){status.textContent=message;}
@@ -5358,10 +5359,10 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
  }
  function parseRoute(raw){
   const t=norm(raw);
-  const split=t.match(/^(.*?)\\s+(?:at )?(?:baba|bababa|ibaba|ibaba na|ibaba sa|drop off|destination|papunta)(?:\\s+sa)?\\s+(.+)$/);
+  const split=t.match(/^(.*?)\s+(?:at )?(?:baba|bababa|ibaba|ibaba na|ibaba sa|drop off|destination|papunta)(?:\s+sa)?\s+(.+)$/);
   if(!split)return null;
-  let from=split[1].replace(/^(?:sumakay|sakay|mula|galing)(?:\\s+sa)?\\s+/,'').trim();
-  let to=split[2].replace(/^(?:sa|ay)\\s+/,'').trim();
+  let from=split[1].replace(/^(?:sumakay|sakay|mula|galing)(?:\s+sa)?\s+/,'').trim();
+  let to=split[2].replace(/^(?:sa|ay)\s+/,'').trim();
   const origin=findPlace(from), destination=findPlace(to);
   return origin&&destination?{origin,destination}:null;
  }
@@ -5406,5 +5407,5 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
   try{rec.start();}catch(e){mic.disabled=false;mic.textContent='🎤 Magsalita';status.textContent='Hindi mabuksan ang mikropono. Suriin ang microphone permission ng app.';}
  });
 })();
-
+</script>
 </body></html>
