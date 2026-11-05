@@ -5362,7 +5362,7 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
   const split=t.match(/^(.*?)\s+(?:at )?(?:baba|bababa|ibaba|ibaba na|ibaba sa|drop off|destination|papunta)(?:\s+sa)?\s+(.+)$/);
   if(!split)return null;
   let from=split[1].replace(/^(?:sumakay|sakay|mula|galing)(?:\s+sa)?\s+/,'').trim();
-  let to=split[2].replace(/^(?:sa|ay)\s+/,'').trim();
+  let to=split[2].replace(/^(?:sa|ay|ng)\s+/,'').trim();
   const origin=findPlace(from), destination=findPlace(to);
   return origin&&destination?{origin,destination}:null;
  }
