@@ -629,9 +629,8 @@ const areaLocations={
 'Area ng Palmera':['Palmera','Egay','Francisco','Grace Hospital'],
 'Area ng Tungko':['SM / Builders','Paradise / North Diamond','Skyline / Robes / Gumaok East','Marcela II','Pacific Wave','Savano / Diamond Crest',"Pleasant 1'2 / Colinas"],
 'Area ng Malaria hanggang Sampaguita':['Sampaguita / Ascoville','Malaria / Sepels / S. Alat'],
-'Area Pangarap':['Guadanoville / Mt. Heights','Adeline / Pangarap','Bankers'],
 'Area Amparo':['Delacosta','Amparo 1','Amparo 2','Amparo 3'],
-'Area SM Fairview':['Petron / SM Fairview','Trees / Lagro / Fatima','South East / Access'],
+'Area SM Fairview':['Petron / SM Fairview','Trees / Lagro / Fatima','South East / Access','SMIS','Dela Coastal','Dela Costal','Amparo Gate 1','Amparo Gate 2','Amparo Gate 3','Guadanoville / Mt. Heights','Guadanoville','Mt. Heights','Mt Heights','Adeline / Pangarap','Adeline','Pangarap','Bankers'],
 'Area Regalado Ave':['Brittany / Mindanao','Casamilan / Geneva / BIR','Labayani','Regalado stoplight / Iglesia'],
 'Area North Fairview to FCM':['North Fairview / Fairlane','FCM / Pearl Drive'],
 'Area Peacock':['Peacock BDO','Winston / Marlboro'],
@@ -701,6 +700,29 @@ Object.entries(areaLocations).forEach(([area,names])=>{
  if(fare!==undefined){road2AreaFare[area]=fare;baseFare[area]=fare;names.forEach(name=>{road2AreaFare[name]=fare;baseFare[name]=fare;});}
 });
 // Keep the route origin entries as route markers; destination tariffs start at Towerville.
+// V60 one-time migration: preserve old fare edits before clearing legacy point/area overrides.
+// Only these four fare-override stores are reset; custom places, favorites, routes and other app data stay intact.
+const v60FareOverrideBackupKey='busFareDeskV60FareOverrideBackupV1';
+const v60FareOverrideMigrationKey='busFareDeskV60FareOverrideMigrationV1';
+try{
+ if(localStorage.getItem(v60FareOverrideMigrationKey)!=='done'){
+  const keys=['busFareDeskFareOverrides','busFareDeskRouteFareOverrides','busFareDeskFareDiscountOverrides','busFareDeskRouteDiscountOverrides'];
+  const oldValues={};keys.forEach(key=>oldValues[key]=localStorage.getItem(key));
+  if(!localStorage.getItem(v60FareOverrideBackupKey)){
+   localStorage.setItem(v60FareOverrideBackupKey,JSON.stringify({version:1,createdAt:new Date().toISOString(),values:oldValues}));
+  }
+  const savedBackup=JSON.parse(localStorage.getItem(v60FareOverrideBackupKey)||'null');
+  const backupVerified=!!savedBackup&&savedBackup.version===1&&keys.every(key=>savedBackup.values&&Object.prototype.hasOwnProperty.call(savedBackup.values,key));
+  if(backupVerified){
+   keys.forEach(key=>localStorage.removeItem(key));
+   localStorage.setItem(v60FareOverrideMigrationKey,'done');
+  }else{
+   console.warn('V60 fare migration skipped: backup verification failed; existing fare overrides were kept.');
+  }
+ }
+}catch(migrationError){
+ console.warn('V60 fare migration skipped; existing fare overrides were kept.',migrationError);
+}
 let fareOverrides={};try{fareOverrides=JSON.parse(localStorage.getItem('busFareDeskFareOverrides')||'{}')}catch(e){fareOverrides={}}
 let routeFareOverrides={};try{routeFareOverrides=JSON.parse(localStorage.getItem('busFareDeskRouteFareOverrides')||'{}')}catch(e){routeFareOverrides={}}
 let fareDiscountOverrides={};try{fareDiscountOverrides=JSON.parse(localStorage.getItem('busFareDeskFareDiscountOverrides')||'{}')}catch(e){fareDiscountOverrides={}}
@@ -775,9 +797,9 @@ const canonicalAreasV49=[
   {name:'Area ng Palmera',fare:20,discount:15,places:['Palmera','Egay','Igay','Francisco','Grace Hospital']},
   {name:'Area ng Tungko',fare:25,discount:20,places:['SM / Builders','SM','Builders','SM Tungko','Paradise / North Diamond','Paradise','North Diamond','Skyline / Robes / Gumaok East','Skyline','Robes','Gumaok East','Gumaok','Marcela II','Marcela 2','Pacific Wave','Savano / Diamond Crest','Savano','Diamond Crest','Pleasant Gate 1&2 / Colinas','Pleasant Gate 1','Pleasant Gate 2','Colinas']},
   {name:'Area ng Malaria hanggang Sampaguita',fare:30,discount:25,places:['Sampaguita / Ascoville','Sampaguita','Ascoville','Malaria / Sepels / S. Alat','Malaria','Sepels','S. Alat','S Alat','Sayang Alat']},
-  {name:'Area Pangarap',fare:30,discount:25,places:['Guadanoville / Mt. Heights','Guadanoville','Mt. Heights','Mt Heights','Adeline / Pangarap','Adeline','Pangarap','Bankers']},
-  {name:'Area Amparo',fare:40,discount:30,places:['Dela Costa','Dela Costal','Delacosta','Amparo 1, 2, 3','Amparo 1','Amparo 2','Amparo 3','Amparo Gate 1','Amparo Gate 2','Amparo Gate 3']},
-  {name:'Area SM Fairview',fare:45,discount:35,places:['Petron SM','Petron / SM Fairview','Petron','SM Fairview','Trees / Lagro / Fatima','Trees','Lagro','Fatima','Southeast / Access','Southeast','South East / Access','Access']},
+  {name:'Area Pangarap',fare:30,discount:25,places:[]},
+  {name:'Area Amparo',fare:40,discount:30,places:['Dela Costa','Dela Costal','Delacosta','Amparo 1, 2, 3','Amparo 1','Amparo 2','Amparo 3']},
+  {name:'Area SM Fairview',fare:45,discount:35,places:['Petron SM','Petron / SM Fairview','Petron','SM Fairview','Trees / Lagro / Fatima','Trees','Lagro','Fatima','Southeast / Access','Southeast','South East / Access','Access','SMIS','Dela Coastal','Dela Costal','Amparo Gate 1','Amparo Gate 2','Amparo Gate 3','Guadanoville / Mt. Heights','Guadanoville','Mt. Heights','Mt Heights','Adeline / Pangarap','Adeline','Pangarap','Bankers']},
   {name:'Area Regalado Avenue',fare:50,discount:40,places:['Brittany / Mindanao','Brittany / Mindanao Avenue','Brittany','Mindanao','Mindanao Avenue','Casamilan / Geneva / BIR','Casamilan','Geneva','BIR','Labayani','Regalado Stoplight / Iglesia','Regalado Stoplight','Iglesia']},
   {name:'Area North Fairview hanggang FCM',fare:50,discount:40,places:['North Fairview / Fairlane','North Fairview','Fairlane','FCM / Pearl Drive','FCM','Pearl Drive']},
   {name:'Area Peacock',fare:55,discount:45,places:['Peacock / BDO','Peacock','BDO','Winston / Marlboro','Winston','Marlboro']},
@@ -4071,7 +4093,7 @@ const canonicalV60Aliases = (() => {
  add('Sapang Palay',['Dulo ng Sapang Palay','Road 2','Quarry','Road 1','Sapang Palay']);
  const legacyToV60 = {
   'Area ng Towerville':'Towerville','Area ng Palmera':'Palmera','Area ng Tungko':'Tungko',
-  'Area ng Malaria hanggang Sampaguita':'Malaria hanggang Sampaguita','Area Pangarap':'Malaria hanggang Sampaguita','Area Amparo':'Amparo',
+  'Area ng Malaria hanggang Sampaguita':'Malaria hanggang Sampaguita','Area Pangarap':'SM Fairview','Area Amparo':'Amparo',
   'Area SM Fairview':'SM Fairview','Area Regalado Avenue':'Regalado Ave','Area North Fairview hanggang FCM':'North Fairview to FCM',
   'Area Peacock':'Peacock','Area Commonwealth':'Commonwealth','Area Ever':'Ever','Area Tandang Sora':'Tandang Sora',
   'Area Philcoa':'Philcoa','Area Visayas':'Visayas','Area Lung Center':'Lung Center','Area Quezon Avenue':'Q. Ave',
@@ -4085,8 +4107,8 @@ const canonicalV60Aliases = (() => {
  });
  add('Sapang Palay',['Sapang Palay','Dulo ng Sapang Palay','Road 2','Quarry','Road 1']);
  // Explicitly preserve well-known short aliases and merged Pangarap/Amparo sub-places.
- add('Malaria hanggang Sampaguita',['Pangarap','Bankers','Guadanoville','Mt. Heights','Mt Heights','Adeline','Delacosta','Dela Costa','Dela Costal']);
- add('Amparo',['Amparo 1','Amparo 2','Amparo 3','Amparo Gate 1','Amparo Gate 2','Amparo Gate 3']);
+ add('SM Fairview',['SMIS','Dela Coastal','Dela Costal','Amparo Gate 1','Amparo Gate 2','Amparo Gate 3','Guadanoville','Guadanoville / Mt. Heights','Mt. Heights','Mt Heights','Adeline','Adeline / Pangarap','Pangarap','Bankers']);
+ add('Amparo',['Amparo 1','Amparo 2','Amparo 3']);
  add('Regalado Ave',['Regalado Avenue']); add('North Fairview to FCM',['North Fairview','Fairlane','FCM','Pearl Drive']);
  add('Aseana',['Parqal','DFA','COD','DFA / Parqal / COD','Park & Ride','City of Dreams']);
  add('Q. Ave',['Quezon Avenue']); add('Domingo',['Santo Domingo']); add('UN Ave',['UN Avenue']); add('Parañaque / PITX',['PITX','PITX Terminal','Coastal Road','Coastal / PITX']);
@@ -4098,7 +4120,7 @@ function canonicalizeV60(place){
  const legacy=findCanonicalArea(place);
  if(legacy){const aliases={
   'Area ng Towerville':'Towerville','Area ng Palmera':'Palmera','Area ng Tungko':'Tungko',
-  'Area ng Malaria hanggang Sampaguita':'Malaria hanggang Sampaguita','Area Pangarap':'Malaria hanggang Sampaguita','Area Amparo':'Amparo',
+  'Area ng Malaria hanggang Sampaguita':'Malaria hanggang Sampaguita','Area Pangarap':'SM Fairview','Area Amparo':'Amparo',
   'Area SM Fairview':'SM Fairview','Area Regalado Avenue':'Regalado Ave','Area North Fairview hanggang FCM':'North Fairview to FCM',
   'Area Peacock':'Peacock','Area Commonwealth':'Commonwealth','Area Ever':'Ever','Area Tandang Sora':'Tandang Sora',
   'Area Philcoa':'Philcoa','Area Visayas':'Visayas','Area Lung Center':'Lung Center','Area Quezon Avenue':'Q. Ave',
@@ -4110,58 +4132,10 @@ function canonicalizeV60(place){
  return null;
 }
 latestPointFareV59 = function(from,to,type){
- // Exact user-confirmed route fares must be checked BEFORE the broad 28-area
- // matrix. Otherwise Blumentritt is grouped under España and returns the
- // unrelated Malaria-to-España fare.
- const routeNorm = v => String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();
- const f=routeNorm(from), t=routeNorm(to);
- // User-approved endpoint fare: Road 2 / Sapang Palay ↔ PITX, both directions.
- const road2Aliases=['road 2','quarry','road 1','dulo ng sapang palay','sapang palay'];
- const pitxAliases=['pitx','pitx terminal','paranaque pitx','paranaque pitx terminal','coastal pitx','paranaque'];
- const isRoad2=x=>road2Aliases.includes(x);
- const isPitx=x=>pitxAliases.includes(x);
- if((isRoad2(f)&&isPitx(t))||(isPitx(f)&&isRoad2(t)))
-   return type==='regular'?170:135;
- const malariaAliases=['malaria','malaria hanggang sampaguita','area ng malaria hanggang sampaguita','area malaria','sepels','sampaguita','sayang alat','s alat'];
- const blumentrittAliases=['blumentritt','blumentritt maceda','blumentritt / maceda','maceda'];
- const isMalaria=x=>malariaAliases.some(v=>routeNorm(v)===x);
- const isBlumentritt=x=>blumentrittAliases.some(v=>routeNorm(v)===x);
- if((isMalaria(f)&&isBlumentritt(t))||(isBlumentritt(f)&&isMalaria(t)))
-   return type==='regular'?90:70;
- // User-confirmed exact route corrections take priority over the generic matrix.
- const isHarrison=f=>['harrison','mcdo leveriza harrison','mcdo leveriza harrison street','mcdonalds leveriza harrison street'].includes(f);
- const isLerma=t=>['lerma','feu lerma'].includes(t);
- if(isHarrison(f)&&isLerma(t)) return type==='regular'?30:25;
  const a=canonicalizeV60(from), b=canonicalizeV60(to);
- if(a==='Palmera' && b==='SM Fairview') return type==='regular'?40:35;
- // España → PITX schedule supplied by the user: every listed España boarding
- // point uses the same fare for each destination zone. This must run before
- // the broad area matrix so (for example) Lerma → Buendia is ₱30, not ₱20.
- const zoneNormV60 = v => routeNorm(v);
- const espanaOriginsV60 = [
-  'blumentritt','maceda','quintos','pnr','vicente','dela fuente','lacson','florida',
-  'ust gate 1','ust gate 2','ust 1','ust 2','p noval','p noval street','morayta','feu','lerma',
-  'blumentritt maceda','quintos pnr','vicente dela fuente','vicente dela fuente lacson',
-  'lacson florida','ust gate 1 2','ust 1 2','ust 1 2 p noval morayta','feu lerma'
- ].map(zoneNormV60);
- const isEspanaOriginV60 = espanaOriginsV60.includes(f);
- if(isEspanaOriginV60){
-  const destinationZonesV60 = [
-   {fare:18, aliases:['quiapo','quiapo church','lawton','lawton city hall','city hall manila','finance','finance road','kalaw','un','un avenue','un kalaw']},
-   {fare:20, aliases:['faura','faura pgh','pgh','pedro gil','malvar','nakpil','malvar nakpil','pedro gil malvar nakpil','remedios','remedies','remedios quirino','quirino']},
-   {fare:25, aliases:['green mall','greenmall','la salle','green mall la salle','vito cruz','vitocruz','vito cruz ocampo']},
-   {fare:30, aliases:['arellano','avida','arellano avida','buendia','buendia dltb','dltb','leveriza','harrison','leveriza harrison','mcdo leveriza harrison','world trade','world trade center']},
-   {fare:35, aliases:['pnb','seaside','pnb seaside','hk','hobbies','petron macapagal','tytana']},
-   {fare:40, aliases:['met live','metlive','double dragon','met live double dragon','heritage','shell residence','shell residences','heritage shell residence','moa','ice tower','moa ice tower','w mall','wmall','dfa','w mall dfa','parqal','parqual','cod','parqal cod','ayala mall','ayala malls manila bay']},
-   {fare:50, aliases:['coastal road','coastal','pitx','coastal pitx','paranaque pitx']}
-  ];
-  for(const zone of destinationZonesV60){
-   if(zone.aliases.some(alias=>{const n=zoneNormV60(alias);return t===n || t.includes(n) || n.includes(t);}))
-    return type==='regular'?zone.fare:Math.round((zone.fare*0.8)/5)*5;
-  }
- }
  if(!a||!b)return null;
- const pair=officialFareMatrixV60[a]?.[b]; if(!pair)return null;
+ const pair=officialFareMatrixV60[a]?.[b];
+ if(!pair)return null;
  return pair[type==='regular'?'regular':'discounted'];
 };
 
@@ -4378,30 +4352,8 @@ function showLtfrbMissingFare(from,to){
  if(typeof renderPayment==='function')renderPayment(false);
 }
 function updateFareCore(){
- // V60.4 FIX: Resolve Road 2 / Quarry / Road 1 as an ORIGIN ZONE before
- // every legacy point-to-point matrix. Either direction uses the same zone pair.
- // This prevents an older matrix row from returning ₱20 for Malaria ↔ Road 2
- // when the confirmed zone fare is ₱30 (discounted ₱25).
- const sapangOriginNamesV603=new Set(['dulo ng sapang palay','road 2','quarry','road 1']);
- const boardKeyV603=normV49(boardingPlace), alightKeyV603=normV49(alightingPlace);
- const boardIsSapangV603=sapangOriginNamesV603.has(boardKeyV603);
- const alightIsSapangV603=sapangOriginNamesV603.has(alightKeyV603);
- const areaForSapangV603=boardIsSapangV603?findCanonicalArea(alightingPlace):(alightIsSapangV603?findCanonicalArea(boardingPlace):null);
- if((boardIsSapangV603||alightIsSapangV603)&&areaForSapangV603){
-   distancePanel.style.display='none';
-   const regularV603=areaForSapangV603.fare;
-   const discountedV603=Math.round((regularV603*0.8)/5)*5;
-   const typeLabelV603={regular:'Regular',student:'Student',senior:'Senior',pwd:'PWD'}[passengerType]||'Pasahero';
-   const amountV603=passengerType==='regular'?regularV603:discountedV603;
-   fareAmount.textContent='₱'+amountV603;
-   fareRoute.textContent=boardingPlace+' → '+alightingPlace+' · '+areaForSapangV603.name+' · '+typeLabelV603;
-   fareFoot.textContent='Road 2 / Quarry / Road 1 zone fare. Regular ₱'+regularV603+'; Student / Senior / PWD ₱'+discountedV603+'.';
-   passengerNote.textContent=passengerType==='regular'?'Regular fare: ₱'+regularV603+'.':'Discounted fare: ₱'+discountedV603+'.';
-   const previewV603=document.getElementById('regularFarePreview');if(previewV603)previewV603.textContent='₱'+regularV603;
-   document.querySelectorAll('.passenger-option').forEach(btn=>{const small=btn.querySelector('small');if(!small)return;small.textContent=btn.dataset.type==='regular'?'₱'+regularV603:'₱'+discountedV603;});
-   if(typeof renderPayment==='function')renderPayment(false);return;
- }
- // V60 official matrix follows only after the confirmed Road 2 zone lookup.
+ // All boarding and alighting place aliases now use the exact 28x28 area matrix.
+ // The V60 official area matrix is the single default fare source.
  if(boardingPlace && alightingPlace){
    const v60Regular=latestPointFareV59(boardingPlace,alightingPlace,'regular');
    const v60Applied=latestPointFareV59(boardingPlace,alightingPlace,passengerType);
