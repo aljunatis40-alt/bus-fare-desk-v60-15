@@ -359,17 +359,16 @@ body.family-active .change-result strong{font-size:19px}
 
 .tutorial-center{color:inherit}.tutorial-intro{font-size:12px;line-height:1.55;color:#475569}.tutorial-callout{padding:11px 12px;border:1px solid #d6b45b;border-radius:11px;background:linear-gradient(135deg,#f0fdf4,#fffbeb);font-size:12px;line-height:1.5;margin:10px 0}.tutorial-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:10px 0}.tutorial-actions button,.tutorial-step button{border:1px solid #b9a05b;border-radius:9px;padding:9px;background:#f5f7ed;color:#174b32;font:inherit;font-size:11px;font-weight:800}.tutorial-step{border:1px solid #d8dee8;border-radius:11px;margin:8px 0;background:#fff;overflow:hidden}.tutorial-step summary{padding:12px;font-size:12px;font-weight:850;color:#174b32;cursor:pointer;background:#f7f8f2}.tutorial-step p{font-size:11px;line-height:1.6;margin:9px 12px;color:#263445}.tutorial-step button{margin:2px 12px 12px}.tutorial-footnote{font-size:11px;line-height:1.6;padding:10px;border-left:3px solid #c49b36;background:#fffbeb;color:#57451b}.tutorial-center details[open] summary{border-bottom:1px solid #e2e8f0}body.dark-mode .tutorial-step,body.dark-mode .tutorial-step summary{background:#1e293b;color:#e5edf8;border-color:#475569}body.dark-mode .tutorial-step p{color:#e5edf8}body.dark-mode .tutorial-callout,body.dark-mode .tutorial-footnote{background:#263528;color:#f4e7bd}
 
+#voiceFarePanel.voice-listening{border-color:#1769e8;background:#eff6ff}#voiceFarePanel.voice-listening #voiceFareStart{background:#0f3f9f;box-shadow:0 0 0 5px rgba(23,105,232,.13)}#voiceFarePanel.voice-listening svg path{animation:voiceWave .72s ease-in-out infinite alternate;transform-origin:center}@keyframes voiceWave{from{transform:scaleY(.55)}to{transform:scaleY(1.12)}}
 </style></head><body><main class="app">
 <header class="brand"><div class="bus" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="2.8" width="14" height="18" rx="3"/><path d="M5 8h14M8 15h.01M16 15h.01M8 18.5v2M16 18.5v2M8 5.5h8" stroke-linecap="round"/></svg></div><div><div class="brand-name">Bus Fare Desk</div><div class="brand-sub">Quick place search</div><div class="creator-signature" aria-label="Created by Aljun Atis"><span class="signature-script">Aljun Atis</span><span class="signature-caption">CREATED BY · PERSONAL EDITION</span></div></div></header>
-<section id="voiceFarePanel" aria-label="Voice fare assistant" style="margin:-12px 0 18px;padding:14px;border:1px solid #bfdbfe;border-radius:14px;background:#eff6ff">
- <div style="font-size:14px;font-weight:850;color:#123b70">🎙️ Kausap na Pamasahe · Filipino</div>
- <p style="font-size:12px;line-height:1.5;color:#334155;margin:6px 0 10px">Pindutin ang mikropono at sabihin: “Sumakay sa Palmera, baba sa Quiapo.”</p>
- <div style="display:flex;gap:8px;flex-wrap:wrap">
-  <button type="button" id="voiceFareStart" style="flex:1;min-height:44px;border:0;border-radius:10px;background:#1769e8;color:white;font-weight:800">🎤 Magsalita</button>
-  <button type="button" id="voiceFareSpeak" style="flex:1;min-height:44px;border:1px solid #93c5fd;border-radius:10px;background:white;color:#123b70;font-weight:800">🔊 Basahin ang pamasahe</button>
- </div>
- <div id="voiceFareStatus" role="status" aria-live="polite" style="font-size:12px;line-height:1.5;color:#334155;margin-top:9px">Handa na. Maaari ring gamitin ang manual na pagpili kung hindi suportado ang voice recognition.</div>
-</section>
+<div id="voiceFarePanel" style="display:flex;align-items:center;gap:9px;margin:-8px 0 14px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:12px;background:#fff">
+ <button type="button" id="voiceFareStart" aria-label="Magsalita para sa sakayan at babaan" title="Magsalita" style="width:48px;height:44px;flex:0 0 48px;border:0;border-radius:12px;background:#1769e8;color:white;display:grid;place-items:center">
+  <svg viewBox="0 0 48 28" width="32" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M3 14h3m4-7v14m5-19v24m5-18v12m5-17v22m5-15v8m5-12v16m5-11v6m5-3h1"/></svg>
+ </button>
+ <div style="min-width:0;flex:1"><div style="font-size:12px;font-weight:800;color:#123b70">VOICE · SAKAY / BABA</div><div id="voiceFareStatus" role="status" aria-live="polite" style="font-size:11px;line-height:1.35;color:#475569">Pindutin ang wave at sabihin ang sakayan at babaan.</div></div>
+ <button type="button" id="voiceFareSpeak" aria-label="Basahin ang pamasahe" title="Basahin ang pamasahe" style="width:40px;height:40px;flex:0 0 40px;border:1px solid #cbd5e1;border-radius:10px;background:white;color:#123b70;font-size:19px">🔊</button>
+</div>
 <div id="liveLocation" class="live-location" aria-live="polite" hidden><span class="live-dot"></span><span id="liveLocationName"></span></div>
 <section id="routeLocationPanel" class="route-location-panel" aria-live="polite">
  <div class="route-map-head"><span>LIVE MAP · BUS POSITION</span><span id="routeMapStatus">GPS OFF</span></div>
@@ -5360,67 +5359,77 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
 
 
 <script>
-// Filipino voice assistant. It reuses the existing place selector and fare calculator.
+// Filipino voice assistant: prefer the native Android SpeechRecognizer bridge in the APK.
 (function(){
- const mic=document.getElementById('voiceFareStart'), speakBtn=document.getElementById('voiceFareSpeak'), status=document.getElementById('voiceFareStatus');
+ const panel=document.getElementById('voiceFarePanel'), mic=document.getElementById('voiceFareStart'), speakBtn=document.getElementById('voiceFareSpeak'), status=document.getElementById('voiceFareStatus');
  if(!mic||!speakBtn||!status)return;
- const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
- const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fil-PH').replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+ const norm=v=>String(v||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9\\s]/g,' ').replace(/\\s+/g,' ').trim();
+ let listening=false, oldBoard='', oldAlight='';
  function say(message){
   if(!('speechSynthesis' in window)){status.textContent=message;return;}
-  try{window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(message);u.lang='fil-PH';u.rate=0.92;window.speechSynthesis.speak(u);}catch(e){status.textContent=message;}
+  try{window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(message);u.lang='fil-PH';u.rate=.94;window.speechSynthesis.speak(u);}catch(e){status.textContent=message;}
  }
- function findPlace(part){
-  const q=norm(part);if(!q||!window.busFareDeskVoiceBridge)return null;
-  return window.busFareDeskVoiceBridge.findPlace(part);
- }
+ function setListening(on){listening=on;panel.classList.toggle('voice-listening',on);mic.setAttribute('aria-pressed',String(on));mic.title=on?'Itigil ang pakikinig':'Magsalita';}
+ function findPlace(part){if(!norm(part)||!window.busFareDeskVoiceBridge)return null;return window.busFareDeskVoiceBridge.findPlace(part);}
  function parseRoute(raw){
   const t=norm(raw);
-  const split=t.match(/^(.*?)\s+(?:at )?(?:baba|bababa|ibaba|ibaba na|ibaba sa|drop off|destination|papunta)(?:\s+sa)?\s+(.+)$/);
+  const split=t.match(/^(.*?)\\s+(?:at )?(?:baba|bababa|ibaba|ibaba na|ibaba sa|drop off|destination|papunta)(?:\\s+sa)?\\s+(.+)$/);
   if(!split)return null;
-  let from=split[1].replace(/^(?:sumakay|sakay|mula|galing)(?:\s+sa)?\s+/,'').trim();
-  let to=split[2].replace(/^(?:sa|ay|ng)\s+/,'').trim();
+  const from=split[1].replace(/^(?:sumakay|sakay|mula|galing)(?:\\s+sa)?\\s+/,'').trim();
+  const to=split[2].replace(/^(?:sa|ay|ng)\\s+/,'').trim();
   const origin=findPlace(from), destination=findPlace(to);
   return origin&&destination?{origin,destination}:null;
  }
- function readFare(){
-  const from=document.getElementById('boardPlaceLabel')?.textContent||'';
-  const to=document.getElementById('alightPlaceLabel')?.textContent||'';
-  const amount=document.getElementById('fareAmount')?.textContent||'';
-  const regular=document.getElementById('fareRegularValue')?.textContent||'';
-  const student=document.getElementById('fareStudentValue')?.textContent||'';
-  const senior=document.getElementById('fareSeniorValue')?.textContent||'';
-  const pwd=document.getElementById('farePwdValue')?.textContent||'';
-  const numeric=Number(amount.replace(/[^0-9.]/g,''));
-  if(!from||from==='Tap to search'||!to||to==='Tap to search'||!Number.isFinite(numeric)||numeric<=0){
-   status.textContent='Pumili muna ng wastong sakayan at babaan. Hindi ako magbibigay ng hula na pamasahe.';
-   return;
-  }
-  const message='Ang pamasahe mula '+from+' papuntang '+to+' ay '+amount+'. Regular '+regular+'. Estudyante '+student+'. Senior '+senior+'. P W D '+pwd+'.';
-  status.textContent=message;say(message);
+ function showLiveDraft(raw){
+  const t=norm(raw), split=t.match(/^(.*?)\\s+(?:at )?(?:baba|bababa|ibaba|ibaba na|ibaba sa|drop off|destination|papunta)(?:\\s+sa)?\\s*(.*)$/);
+  const board=document.getElementById('boardPlaceLabel'), alight=document.getElementById('alightPlaceLabel');
+  if(!board||!alight)return;
+  const origin=split?findPlace(split[1].replace(/^(?:sumakay|sakay|mula|galing)(?:\\s+sa)?\\s*/,'')):findPlace(t.replace(/^(?:sumakay|sakay|mula|galing)(?:\\s+sa)?\\s*/,'')); 
+  if(origin)board.textContent='🎙️ '+origin+'…';
+  if(split&&split[2]){const dest=findPlace(split[2]);if(dest)alight.textContent='🎙️ '+dest+'…';}
  }
+ function restoreDraft(){const b=document.getElementById('boardPlaceLabel'),a=document.getElementById('alightPlaceLabel');if(b&&b.textContent.startsWith('🎙️'))b.textContent=oldBoard;if(a&&a.textContent.startsWith('🎙️'))a.textContent=oldAlight;}
+ function readFare(){
+  const from=document.getElementById('boardPlaceLabel')?.textContent||'',to=document.getElementById('alightPlaceLabel')?.textContent||'',amount=document.getElementById('fareAmount')?.textContent||'';
+  const regular=document.getElementById('fareRegularValue')?.textContent||'',student=document.getElementById('fareStudentValue')?.textContent||'',senior=document.getElementById('fareSeniorValue')?.textContent||'',pwd=document.getElementById('farePwdValue')?.textContent||'';
+  const numeric=Number(amount.replace(/[^0-9.]/g,''));
+  if(!from||from==='Tap to search'||!to||to==='Tap to search'||!Number.isFinite(numeric)||numeric<=0){status.textContent='Pumili muna ng wastong sakayan at babaan.';return;}
+  const msg='Ang pamasahe mula '+from+' papuntang '+to+' ay '+amount+'. Regular '+regular+'. Estudyante '+student+'. Senior '+senior+'. P W D '+pwd+'.';
+  status.textContent=msg;say(msg);
+ }
+ function handleTranscript(text,isFinal){
+  if(!isFinal){showLiveDraft(text);status.textContent='Naririnig: '+text;return;}
+  const route=parseRoute(text);
+  if(!route){restoreDraft();status.textContent='Hindi ko matukoy ang sakayan at babaan. Ulitin o gamitin ang manual na pagpili.';return;}
+  try{
+   if(!window.busFareDeskVoiceBridge?.setRoute(route.origin,route.destination))throw new Error('group');
+   status.textContent='Napili: '+route.origin+' → '+route.destination;
+   setTimeout(()=>{readFare();},250);
+  }catch(e){restoreDraft();status.textContent='Hindi naitakda ang ruta. Gamitin muna ang manual na pagpili.';}
+ }
+ function finish(){setListening(false);mic.disabled=false;}
+ function startNative(){
+  if(!window.BusFareSpeech){return false;}
+  try{oldBoard=document.getElementById('boardPlaceLabel')?.textContent||'';oldAlight=document.getElementById('alightPlaceLabel')?.textContent||'';setListening(true);status.textContent='Nakikinig… sabihin ang sakayan at babaan.';window.BusFareSpeech.start();return true;}
+  catch(e){finish();status.textContent='Hindi mabuksan ang mikropono. Tingnan ang permission ng app.';return true;}
+ }
+ window.onBusFareSpeechPartial=t=>{if(t)handleTranscript(String(t),false);};
+ window.onBusFareSpeechResult=t=>{handleTranscript(String(t||''),true);finish();};
+ window.onBusFareSpeechError=e=>{finish();restoreDraft();status.textContent='Hindi gumana ang voice recognition ('+String(e||'error')+'). Subukan ulit o gamitin ang manual na pagpili.';};
  speakBtn.addEventListener('click',readFare);
  mic.addEventListener('click',()=>{
-  if(!SpeechRecognition){status.textContent='Hindi suportado ng browser na ito ang pagkilala ng boses. Gamitin muna ang manual na pagpili; maaari pa ring basahin ng app ang pamasahe kung may Filipino voice ang cellphone.';return;}
-  if(typeof familyMode!=='undefined'&&familyMode){status.textContent='I-off muna ang GROUP mode para gamitin ang voice command sa isang ruta.';return;}
-  let rec;
-  try{rec=new SpeechRecognition();rec.lang='fil-PH';rec.continuous=false;rec.interimResults=false;rec.maxAlternatives=3;}
-  catch(e){status.textContent='Hindi masimulan ang mikropono. Subukan ang manual na pagpili.';return;}
-  mic.disabled=true;mic.textContent='🎙️ Nakikinig…';status.textContent='Nakikinig ako. Sabihin ang sakayan at babaan, halimbawa: “Sumakay sa Palmera, baba sa Quiapo.”';
-  rec.onresult=event=>{
-   const alternatives=Array.from(event.results[0]||[]).map(x=>x.transcript||'');
-   const transcript=alternatives[0]||'';status.textContent='Narinig: “'+transcript+'”';
-   const route=parseRoute(transcript);
-   if(!route){status.textContent+=' Hindi ko matukoy nang sigurado ang dalawang lugar. Ulitin nang malinaw o piliin nang mano-mano.';return;}
-   try{
-    if(!window.busFareDeskVoiceBridge?.setRoute(route.origin,route.destination))throw new Error('Group mode is active');
-    status.textContent='Napili: '+route.origin+' → '+route.destination+'. Kinukuwenta ang pamasahe…';
-    window.setTimeout(readFare,350);
-   }catch(e){status.textContent='Hindi naitakda ang ruta. Piliin muna nang mano-mano ang sakayan at babaan.';}
-  };
-  rec.onerror=event=>{status.textContent='Hindi gumana ang pagkilala ng boses ('+(event.error||'unknown')+'). Maaari mong subukan ulit o gamitin ang manual na pagpili.';};
-  rec.onend=()=>{mic.disabled=false;mic.textContent='🎤 Magsalita';};
-  try{rec.start();}catch(e){mic.disabled=false;mic.textContent='🎤 Magsalita';status.textContent='Hindi mabuksan ang mikropono. Suriin ang microphone permission ng app.';}
+  if(listening){if(window.BusFareSpeech)window.BusFareSpeech.stop();finish();restoreDraft();status.textContent='Huminto ang pakikinig.';return;}
+  if(typeof familyMode!=='undefined'&&familyMode){status.textContent='I-off muna ang GROUP mode para sa voice route.';return;}
+  if(startNative())return;
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){status.textContent='Hindi suportado ang voice recognition sa browser na ito. Gamitin ang manual na pagpili.';return;}
+  let rec;try{rec=new SR();rec.lang='fil-PH';rec.continuous=false;rec.interimResults=true;rec.maxAlternatives=3;}catch(e){status.textContent='Hindi masimulan ang mikropono.';return;}
+  oldBoard=document.getElementById('boardPlaceLabel')?.textContent||'';oldAlight=document.getElementById('alightPlaceLabel')?.textContent||'';
+  mic.disabled=true;setListening(true);status.textContent='Nakikinig… sabihin ang sakayan at babaan.';
+  rec.onresult=ev=>{let interim='',final='';for(let i=ev.resultIndex;i<ev.results.length;i++){const t=ev.results[i][0]?.transcript||'';if(ev.results[i].isFinal)final+=t;else interim+=t;}if(interim)handleTranscript(interim,false);if(final)handleTranscript(final,true);};
+  rec.onerror=ev=>window.onBusFareSpeechError(ev.error||'error');
+  rec.onend=finish;
+  try{rec.start();}catch(e){finish();status.textContent='Hindi mabuksan ang mikropono. Suriin ang microphone permission.';}
  });
 })();
 </script>
