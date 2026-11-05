@@ -116,6 +116,14 @@ jobs:
           package com.aljunatis.busfaredesk;
 
           import android.Manifest;
+          import android.content.Intent;
+          import android.os.Build;
+          import android.speech.RecognizerIntent;
+          import android.speech.SpeechRecognizer;
+          import android.speech.RecognitionListener;
+          import android.content.Context;
+          import org.json.JSONObject;
+          import java.util.ArrayList;
           import android.content.pm.PackageManager;
           import android.location.Location;
           import android.location.LocationListener;
@@ -126,7 +134,7 @@ jobs:
           import java.util.Locale;
 
           public class MainActivity extends BridgeActivity {
-              private static final int LOCATION_PERMISSION_REQUEST = 7401;
+              private static final int LOCATION_PERMISSION_REQUEST = 7401;\n              private static final int AUDIO_PERMISSION_REQUEST = 7402;\n              private SpeechRecognizer speechRecognizer;
               private LocationManager locationManager;
               private boolean locationStarted = false;
 
@@ -134,7 +142,7 @@ jobs:
               public void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
                   locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-                  getBridge().getWebView().addJavascriptInterface(new LocationBridge(), "BusFareLocation");
+                  getBridge().getWebView().addJavascriptInterface(new LocationBridge(), "BusFareLocation");\n                  getBridge().getWebView().addJavascriptInterface(new SpeechBridge(), "BusFareSpeech");
               }
 
               private final LocationListener locationListener = new LocationListener() {
@@ -155,6 +163,71 @@ jobs:
                   @JavascriptInterface public void stop() {
                       runOnUiThread(() -> stopLocationUpdates());
                   }
+              }
+
+              private class SpeechBridge {
+                  @JavascriptInterface public void start() { runOnUiThread(() -> startSpeechRecognition()); }
+                  @JavascriptInterface public void stop() { runOnUiThread(() -> stopSpeechRecognition()); }
+              }
+
+              private void startSpeechRecognition() {
+                  if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                      requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, AUDIO_PERMISSION_REQUEST);
+                      return;
+                  }
+                  if (!SpeechRecognizer.isRecognitionAvailable(this)) { sendSpeechError("not-available"); return; }
+                  try {
+                      if (speechRecognizer != null) { speechRecognizer.destroy(); speechRecognizer = null; }
+                      speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+                      speechRecognizer.setRecognitionListener(new RecognitionListener() {
+                          @Override public void onReadyForSpeech(Bundle params) { sendSpeechPartial(""); }
+                          @Override public void onBeginningOfSpeech() {}
+                          @Override public void onRmsChanged(float rmsdB) {}
+                          @Override public void onBufferReceived(byte[] buffer) {}
+                          @Override public void onEndOfSpeech() {}
+                          @Override public void onError(int error) { sendSpeechError(String.valueOf(error)); destroySpeechRecognizer(); }
+                          @Override public void onResults(Bundle results) {
+                              ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                              if (matches != null && !matches.isEmpty()) sendSpeechResult(matches.get(0));
+                              destroySpeechRecognizer();
+                          }
+                          @Override public void onPartialResults(Bundle results) {
+                              ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                              if (matches != null && !matches.isEmpty()) sendSpeechPartial(matches.get(0));
+                          }
+                          @Override public void onEvent(int eventType, Bundle params) {}
+                      });
+                      Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                      intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                      intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "fil-PH");
+                      intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "fil-PH");
+                      intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
+                      intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
+                      intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getPackageName());
+                      speechRecognizer.startListening(intent);
+                  } catch (Exception error) { sendSpeechError("start-failed"); destroySpeechRecognizer(); }
+              }
+
+              private void stopSpeechRecognition() {
+                  if (speechRecognizer != null) {
+                      try { speechRecognizer.stopListening(); } catch (Exception ignored) {}
+                      destroySpeechRecognizer();
+                  }
+              }
+
+              private void destroySpeechRecognizer() {
+                  if (speechRecognizer != null) {
+                      try { speechRecognizer.cancel(); speechRecognizer.destroy(); } catch (Exception ignored) {}
+                      speechRecognizer = null;
+                  }
+              }
+
+              private void sendSpeechPartial(String value) { sendSpeechCallback("onBusFareSpeechPartial", value); }
+              private void sendSpeechResult(String value) { sendSpeechCallback("onBusFareSpeechResult", value); }
+              private void sendSpeechError(String value) { sendSpeechCallback("onBusFareSpeechError", value); }
+              private void sendSpeechCallback(String function, String value) {
+                  String script = "window." + function + " && window." + function + "(" + JSONObject.quote(value == null ? "" : value) + ");";
+                  runOnUiThread(() -> { if (getBridge() != null && getBridge().getWebView() != null) getBridge().getWebView().evaluateJavascript(script, null); });
               }
 
               private void startLocationUpdates() {
@@ -227,7 +300,7 @@ jobs:
               @Override
               public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
                   super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-                  if (requestCode == LOCATION_PERMISSION_REQUEST) {
+                  if (requestCode == AUDIO_PERMISSION_REQUEST) {\n                      if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) startSpeechRecognition();\n                      else sendSpeechError("microphone-permission-denied");\n                  } else if (requestCode == LOCATION_PERMISSION_REQUEST) {
                       boolean granted = false;
                       for (int result : grantResults) {
                           if (result == PackageManager.PERMISSION_GRANTED) granted = true;
