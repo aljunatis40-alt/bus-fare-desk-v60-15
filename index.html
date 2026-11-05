@@ -4829,6 +4829,9 @@ window.busFareDeskVoiceBridge={
   if(familyMode)return false;
   activeMode='board';choose(from);
   activeMode='alight';choose(to);
+  activeMode='';
+  boardMode.setAttribute('aria-pressed','false');alightMode.setAttribute('aria-pressed','false');
+  searchWrap.classList.remove('target-board','target-alight','target-family');
   return true;
  },
  isFamily:function(){return familyMode;}
