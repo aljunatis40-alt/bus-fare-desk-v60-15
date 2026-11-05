@@ -4818,6 +4818,21 @@ function choose(p){
  modeNote.textContent=activeMode==='board'?'Boarding point ang pinipili. I-tap ang alinmang kahon para palitan ang places.':'Destination ang pinipili. I-tap ang alinmang kahon para palitan ang places.';
  updateFare();if(familyMode)renderFamily();renderPayment(false);showToast(appLanguage==='en'?(chosenMode==='board'?'Boarding point selected: ':'Destination selected: ')+p:(chosenMode==='board'?'Napili ang sakayan: ':'Napili ang babaan: ')+p,'good');
 }
+// Public, narrow bridge for the separate voice UI; all route changes still go through the existing chooser and fare calculator.
+window.busFareDeskVoiceBridge={
+ findPlace:function(part){
+  const q=normalizeSearchText(part);if(!q)return null;
+  const candidates=places.slice().sort((a,b)=>normalizeSearchText(b).length-normalizeSearchText(a).length);
+  return candidates.find(p=>q===normalizeSearchText(p)||q.includes(normalizeSearchText(p))||normalizeSearchText(p).includes(q))||null;
+ },
+ setRoute:function(from,to){
+  if(familyMode)return false;
+  activeMode='board';choose(from);
+  activeMode='alight';choose(to);
+  return true;
+ },
+ isFamily:function(){return familyMode;}
+};
 function setMode(mode){
  activeMode=mode;boardMode.setAttribute('aria-pressed',String(mode==='board'));alightMode.setAttribute('aria-pressed',String(mode==='alight'));familyBoardButton.setAttribute('aria-pressed',String(mode==='family-board'));searchWrap.classList.remove('target-board','target-alight','target-family');searchWrap.classList.add((mode==='board'?'target-board':(mode==='alight'?'target-alight':'target-family')));
  searchWrap.classList.add('active');modeNote.textContent=mode==='board'?'BOARDING POINT ang pinili. Mag-type; lalabas agad ang mga places sa floating list.':mode==='family'?'Pumili ng babaan para sa Pasahero '+(familySearchIndex+1)+'.':mode==='family-board'?'Pumili ng iisang sakayan para sa buong grupo.':'DESTINATION ang pinili. Mag-type; lalabas agad ang mga places sa floating list.';
@@ -4848,7 +4863,7 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
  const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
  function recent(){const r=safeRead(RECENT_KEY,[]);return Array.isArray(r)?r:[]}
  function addRecent(from,to){if(!from||!to||from===to)return;let a=recent().filter(x=>!(x.from===from&&x.to===to));a.unshift({from,to,when:new Date().toLocaleString('en-PH')});safeWrite(RECENT_KEY,a.slice(0,12));drawRecent();refreshDashboard()}
- function drawRecent(){const host=$('recentRoutes');if(!host)return;host.innerHTML='';const arr=recent();if(!arr.length){host.innerHTML='<span class="muted-small">No search history yet.</span>';return}arr.forEach(r=>{const b=document.createElement('button');b.type='button';b.className='recent-route';b.textContent=r.from+' → '+r.to;b.title=r.when||'Recent route';b.addEventListener('click',()=>{if(typeof familyMode!=='undefined'&&familyMode){showToast('Lumipat muna sa SOLO mode.','short');return}boardingPlace=r.from;alightingPlace=r.to;resetPayment();if($('distanceKm'))$('distanceKm').value='';syncPlaceLabels();updateFare();renderPayment(false);refreshDashboard()});host.appendChild(b)})}
+ function drawRecent(){const host=$('recentRoutes');if(!host)return;host.innerHTML='';const arr=recent();if(!arr.length){host.innerHTML='<span class="muted-small">No search history yet.</span>';return}arr.forEach(r=>{const b=document.createElement('button');b.type='button';b.className='recent-route';b.textContent=r.from+' → '+r.to;b.title=r.when||'Recent route';b.addEventListener('click',()=>{if(window.busFareDeskVoiceBridge?.isFamily()){showToast('Lumipat muna sa SOLO mode.','short');return}boardingPlace=r.from;alightingPlace=r.to;resetPayment();if($('distanceKm'))$('distanceKm').value='';syncPlaceLabels();updateFare();renderPayment(false);refreshDashboard()});host.appendChild(b)})}
  function fareStatus(){const foot=(($('fareFoot')&&$('fareFoot').textContent)||'').toLowerCase();if(!boardingPlace||!alightingPlace)return 'None yetng ruta';if(foot.includes('estimate')||foot.includes('minimum')||foot.includes('hindi pa')||foot.includes('kilometro')||foot.includes('distance'))return 'Estimate / beripikahin';return 'Check ang fare note'}
  function refreshOfflineStatus(){const el=$('offlineStatus');if(!el)return;const online=navigator.onLine;el.textContent=online?'📶 May internet connection. Naka-save pa rin sa device ang local settings at fares.':'📴 Offline mode: maaari pa ring gamitin ang lokal na HTML app. Ang external links gaya ng Google Maps ay maaaring hindi gumana.';}window.addEventListener('online',refreshOfflineStatus);window.addEventListener('offline',refreshOfflineStatus);refreshOfflineStatus();
  function refreshDashboard(){if(!$('dashRoute'))return;const route=boardingPlace&&alightingPlace?boardingPlace+' → '+alightingPlace:'None yet';$('dashRoute').textContent=route;$('dashFare').textContent=$('fareAmount')?$('fareAmount').textContent:'—';$('dashFareStatus').textContent=fareStatus();$('dashboardStatus').textContent=boardingPlace&&alightingPlace?'May napiling ruta':'Ready to search';const tx=safeRead('busFareDeskTransactionsV15',[]);$('dashTrips').textContent=Array.isArray(tx)?String(tx.length):'0';const recentCount=recent().length;$('statSearches').textContent=String(recentCount);$('statPayments').textContent=Array.isArray(tx)?String(tx.length):'0';const total=Array.isArray(tx)?tx.reduce((sum,t)=>sum+(Number(t.total)||0),0):0;$('statTotal').textContent='₱'+total.toLocaleString('en-PH',{maximumFractionDigits:2});const q=$('quickPaid');if(q)updateQuickChange()}
@@ -5353,9 +5368,8 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
   try{window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(message);u.lang='fil-PH';u.rate=0.92;window.speechSynthesis.speak(u);}catch(e){status.textContent=message;}
  }
  function findPlace(part){
-  const q=norm(part);if(!q||!Array.isArray(places))return null;
-  const candidates=places.slice().sort((a,b)=>norm(b).length-norm(a).length);
-  return candidates.find(p=>q===norm(p)||q.includes(norm(p))||norm(p).includes(q))||null;
+  const q=norm(part);if(!q||!window.busFareDeskVoiceBridge)return null;
+  return window.busFareDeskVoiceBridge.findPlace(part);
  }
  function parseRoute(raw){
   const t=norm(raw);
@@ -5396,8 +5410,7 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
    const route=parseRoute(transcript);
    if(!route){status.textContent+=' Hindi ko matukoy nang sigurado ang dalawang lugar. Ulitin nang malinaw o piliin nang mano-mano.';return;}
    try{
-    activeMode='board';choose(route.origin);
-    activeMode='alight';choose(route.destination);
+    if(!window.busFareDeskVoiceBridge?.setRoute(route.origin,route.destination))throw new Error('Group mode is active');
     status.textContent='Napili: '+route.origin+' → '+route.destination+'. Kinukuwenta ang pamasahe…';
     window.setTimeout(readFare,350);
    }catch(e){status.textContent='Hindi naitakda ang ruta. Piliin muna nang mano-mano ang sakayan at babaan.';}
