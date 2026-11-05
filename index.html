@@ -4090,6 +4090,20 @@ const canonicalV60Aliases = (() => {
  const add = (canonical, values) => values.forEach(v => map.set(normV49(v), canonical));
  const names = Object.keys(officialFareMatrixV60);
  names.forEach(n => add(n,[n]));
+ // Match every visible Area label to its exact V60 matrix row/column.
+ const areaLabelAliasesV60={
+  'Area ng Towerville':'Towerville','Area ng Palmera':'Palmera','Area ng Tungko':'Tungko',
+  'Area ng Malaria hanggang Sampaguita':'Malaria hanggang Sampaguita','Area Pangarap':'SM Fairview',
+  'Area Amparo':'Amparo','Area SM Fairview':'SM Fairview','Area Regalado Ave':'Regalado Ave',
+  'Area North Fairview to FCM':'North Fairview to FCM','Area Peacock':'Peacock',
+  'Area Commonwealth':'Commonwealth','Area ng Ever':'Ever','Area ng Tandang Sora':'Tandang Sora',
+  'Area Philcoa':'Philcoa','Area Visayas':'Visayas','Area Lung Center':'Lung Center',
+  'Area Q. Ave':'Q. Ave','Area Domingo':'Domingo','Area Welcome Rotonda':'Welcome Rotonda',
+  'Area España':'España','Area Quiapo':'Quiapo','Area Lawton':'Lawton','Area UN':'UN Ave',
+  'Area Taft':'Taft','Area Buendia':'Buendia','Area Seaside':'Seaside','Area Aseana':'Aseana',
+  'Area Parañaque':'Parañaque / PITX'
+ };
+ Object.entries(areaLabelAliasesV60).forEach(([label,canonical])=>add(canonical,[label]));
  add('Sapang Palay',['Dulo ng Sapang Palay','Road 2','Quarry','Road 1','Sapang Palay']);
  const legacyToV60 = {
   'Area ng Towerville':'Towerville','Area ng Palmera':'Palmera','Area ng Tungko':'Tungko',
