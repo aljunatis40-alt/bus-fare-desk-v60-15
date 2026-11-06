@@ -127,7 +127,6 @@ jobs:
           import android.speech.tts.UtteranceProgressListener;
           import android.media.AudioAttributes;
           import android.media.AudioManager;
-          import java.util.HashMap;
           import android.content.Context;
           import org.json.JSONObject;
           import java.util.ArrayList;
@@ -254,9 +253,9 @@ jobs:
                       return;
                   }
                   try {
-                      HashMap<String, String> parameters = new HashMap<>();
-                      parameters.put(TextToSpeech.Engine.KEY_PARAM_VOLUME, "1.0");
-                      parameters.put(TextToSpeech.Engine.KEY_PARAM_STREAM, String.valueOf(AudioManager.STREAM_MUSIC));
+                      Bundle parameters = new Bundle();
+                      parameters.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0f);
+                      parameters.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
                       textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, parameters, "busfare-" + System.currentTimeMillis());
                   } catch (Exception error) {
                       sendTtsStatus("error");
