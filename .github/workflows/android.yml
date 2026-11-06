@@ -597,7 +597,7 @@ jobs:
                       OfflineTtsConfig config = new OfflineTtsConfig();
                       config.setModel(modelConfig);
                       config.setMaxNumSentences(1);
-                      OfflineTts loaded = new OfflineTts(activity.getAssets(), config);
+                      OfflineTts loaded = new OfflineTts(null, config);
                       if (closed) { loaded.release(); return; }
                       engine = loaded;
                       notifyStatus("ready");
