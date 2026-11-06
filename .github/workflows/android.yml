@@ -137,6 +137,8 @@ jobs:
               private static final int LOCATION_PERMISSION_REQUEST = 7401;
               private static final int AUDIO_PERMISSION_REQUEST = 7402;
               private SpeechRecognizer speechRecognizer;
+              private int speechLanguageAttempt = 0;
+              private final String[] speechLanguages = {"fil-PH", "fil", "en-PH", ""};
               private LocationManager locationManager;
               private boolean locationStarted = false;
 
@@ -179,8 +181,13 @@ jobs:
                       return;
                   }
                   if (!SpeechRecognizer.isRecognitionAvailable(this)) { sendSpeechError("not-available"); return; }
+                  speechLanguageAttempt = 0;
+                  startSpeechRecognitionAttempt();
+              }
+
+              private void startSpeechRecognitionAttempt() {
                   try {
-                      if (speechRecognizer != null) { speechRecognizer.destroy(); speechRecognizer = null; }
+                      destroySpeechRecognizer();
                       speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
                       speechRecognizer.setRecognitionListener(new RecognitionListener() {
                           @Override public void onReadyForSpeech(Bundle params) { sendSpeechPartial(""); }
@@ -188,10 +195,20 @@ jobs:
                           @Override public void onRmsChanged(float rmsdB) {}
                           @Override public void onBufferReceived(byte[] buffer) {}
                           @Override public void onEndOfSpeech() {}
-                          @Override public void onError(int error) { sendSpeechError(String.valueOf(error)); destroySpeechRecognizer(); }
+                          @Override public void onError(int error) {
+                              if (error == SpeechRecognizer.ERROR_NO_MATCH && speechLanguageAttempt < speechLanguages.length - 1) {
+                                  speechLanguageAttempt++;
+                                  sendSpeechRetry();
+                                  startSpeechRecognitionAttempt();
+                                  return;
+                              }
+                              sendSpeechError(String.valueOf(error));
+                              destroySpeechRecognizer();
+                          }
                           @Override public void onResults(Bundle results) {
                               ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                               if (matches != null && !matches.isEmpty()) sendSpeechResult(matches.get(0));
+                              else sendSpeechError("no-match");
                               destroySpeechRecognizer();
                           }
                           @Override public void onPartialResults(Bundle results) {
@@ -202,13 +219,21 @@ jobs:
                       });
                       Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
                       intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                      intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "fil-PH");
-                      intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "fil-PH");
+                      String language = speechLanguages[speechLanguageAttempt];
+                      if (!language.isEmpty()) {
+                          intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, language);
+                          intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, language);
+                      }
                       intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
                       intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
                       intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getPackageName());
                       speechRecognizer.startListening(intent);
                   } catch (Exception error) { sendSpeechError("start-failed"); destroySpeechRecognizer(); }
+              }
+
+              private void sendSpeechRetry() {
+                  String script = "window.onBusFareSpeechRetry && window.onBusFareSpeechRetry();";
+                  runOnUiThread(() -> { if (getBridge() != null && getBridge().getWebView() != null) getBridge().getWebView().evaluateJavascript(script, null); });
               }
 
               private void stopSpeechRecognition() {
