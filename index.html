@@ -4327,7 +4327,7 @@ function currentFareTotal(){
  const single=document.getElementById('fareAmount'),group=document.getElementById('familyGrandTotal');
  if(!single||!group)return;
  let enabled=true,lastSpoken='',speakTimer=0;
- try{const saved=localStorage.getItem('busFareDeskAutoFareVoice');if(saved==='0')enabled=false;else if(saved!=='1')localStorage.setItem('busFareDeskAutoFareVoice','1');}catch(e){}
+ try{localStorage.setItem('busFareDeskAutoFareVoice','1');}catch(e){}
  function syncButtons(){buttons.forEach(btn=>{btn.setAttribute('aria-pressed',String(enabled));btn.textContent=enabled?'🔊 Boses: NAKA-ON':'🔇 Boses: NAKA-MUTE';});}
  window.busFareDeskSpeakTagalog=function(message){
   if(!enabled||!message||!('speechSynthesis' in window))return;
