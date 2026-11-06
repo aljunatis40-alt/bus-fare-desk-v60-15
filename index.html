@@ -5392,22 +5392,41 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
  }
  function setListening(on){listening=on;panel.classList.toggle('voice-listening',on);mic.setAttribute('aria-pressed',String(on));mic.title=on?'Itigil ang pakikinig':'Magsalita';}
  function findPlace(part){if(!norm(part)||!window.busFareDeskVoiceBridge)return null;return window.busFareDeskVoiceBridge.findPlace(part);}
+ function extractSpokenPlaces(raw){
+  const words=norm(raw).split(/\\s+/).filter(Boolean);
+  const found=[];
+  const trimCommand=value=>value
+   .replace(/^(?:(?:ako ay|ako|tayo|kami)\\s+)*(?:(?:sumakay|sakay|sakay na|mula|galing|sa|ang|yung|at|tapos|then)\\s+)*/,'')
+   .replace(/\\s+(?:(?:baba|bababa|ibaba|ibaba na|ibaba sa|drop off|destination|papunta|sa|ang|yung|po|lang|please|ako|naman)\\s*)+$/,'')
+   .trim();
+  // Hanapin ang maiikling pangalan ng lugar mula kaliwa pakanan.
+  // Ang unang makitang lugar ang SAKAY; ang huling magkahiwalay na lugar ang BABA.
+  for(let i=0;i<words.length;){
+   let match=null,used=0;
+   for(let len=1;len<=Math.min(5,words.length-i);len++){
+    const phrase=trimCommand(words.slice(i,i+len).join(' '));
+    if(!phrase)continue;
+    const place=findPlace(phrase);
+    if(place){match=place;used=len;break;}
+   }
+   if(match){
+    if(!found.length||found[found.length-1].place!==match)found.push({place:match,start:i,end:i+used});
+    i+=Math.max(1,used);
+   }else i++;
+  }
+  return found;
+ }
  function parseRoute(raw){
-  const t=norm(raw);
-  const split=t.match(/^(.*?)\\s+(?:at )?(?:baba|bababa|ibaba|ibaba na|ibaba sa|drop off|destination|papunta)(?:\\s+sa)?\\s+(.+)$/);
-  if(!split)return null;
-  const from=split[1].replace(/^(?:(?:ako\\s+ay|ako)\\s+)?(?:sumakay|sakay|mula|galing)(?:\\s+ako)?(?:\\s+sa)?\\s+/,'').trim();
-  const to=split[2].replace(/^(?:(?:ako\\s+ay|ako)\\s+)?(?:sa|ay|ng|ako\\s+sa)\\s+/,'').trim();
-  const origin=findPlace(from), destination=findPlace(to);
-  return origin&&destination?{origin,destination}:null;
+  const found=extractSpokenPlaces(raw);
+  if(found.length<2)return null;
+  return {origin:found[0].place,destination:found[found.length-1].place};
  }
  function showLiveDraft(raw){
-  const t=norm(raw), split=t.match(/^(.*?)\\s+(?:at )?(?:baba|bababa|ibaba|ibaba na|ibaba sa|drop off|destination|papunta)(?:\\s+sa)?\\s*(.*)$/);
+  const found=extractSpokenPlaces(raw);
   const board=document.getElementById('boardPlaceLabel'), alight=document.getElementById('alightPlaceLabel');
   if(!board||!alight)return;
-  const origin=split?findPlace(split[1].replace(/^(?:sumakay|sakay|mula|galing)(?:\\s+sa)?\\s*/,'')):findPlace(t.replace(/^(?:sumakay|sakay|mula|galing)(?:\\s+sa)?\\s*/,'')); 
-  if(origin)board.textContent='🎙️ '+origin+'…';
-  if(split&&split[2]){const dest=findPlace(split[2]);if(dest)alight.textContent='🎙️ '+dest+'…';}
+  if(found.length>=1)board.textContent='🎙️ '+found[0].place+'…';
+  if(found.length>=2)alight.textContent='🎙️ '+found[found.length-1].place+'…';
  }
  function restoreDraft(){const b=document.getElementById('boardPlaceLabel'),a=document.getElementById('alightPlaceLabel');if(b&&b.textContent.startsWith('🎙️'))b.textContent=oldBoard;if(a&&a.textContent.startsWith('🎙️'))a.textContent=oldAlight;}
  function readFare(){
