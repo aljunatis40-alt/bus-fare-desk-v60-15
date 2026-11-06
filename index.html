@@ -4321,58 +4321,57 @@ function currentFareTotal(){
  const t=(fareAmount.textContent||'').replace(/[₱,\s]/g,'');const n=Number(t);return Number.isFinite(n)?n:0;
 }
 
-// V60.15 quick fare voice: user enables it once; subsequent fare totals are spoken automatically.
+// V60.16: automatic Tagalog fare and payment announcements.
 (function(){
  const buttons=[...document.querySelectorAll('[data-fare-voice]')];
- const single=document.getElementById('fareAmount');
- const group=document.getElementById('familyGrandTotal');
- if(!buttons.length||!single||!group)return;
- let enabled=false,lastSpoken='',speakTimer=0;
- try{enabled=localStorage.getItem('busFareDeskAutoFareVoice')==='1';}catch(e){}
- function syncButtons(){
-  buttons.forEach(btn=>{btn.setAttribute('aria-pressed',String(enabled));btn.textContent=enabled?'🔊 Auto Voice: ON':'🔊 Auto Voice: OFF';});
- }
- function amountText(){
-  const raw=(familyMode?group:single).textContent||'';
-  const value=Number(raw.replace(/[^0-9.]/g,''));
-  return Number.isFinite(value)&&value>0?value:null;
- }
- function speakTotal(force=false){
-  const value=amountText();
-  if(value===null){if(force&&typeof showToast==='function')showToast('Pumili muna ng sakayan at babaan para may total.','short');return;}
-  if(!('speechSynthesis' in window)){if(force&&typeof showToast==='function')showToast('Hindi suportado ang voice output sa device na ito.','short');return;}
-  const key=(familyMode?'GROUP':'SOLO')+':'+value;
-  if(!force&&key===lastSpoken)return;
-  lastSpoken=key;
+ const single=document.getElementById('fareAmount'),group=document.getElementById('familyGrandTotal');
+ if(!single||!group)return;
+ let enabled=true,lastSpoken='',speakTimer=0;
+ try{const saved=localStorage.getItem('busFareDeskAutoFareVoice');if(saved==='0')enabled=false;else if(saved!=='1')localStorage.setItem('busFareDeskAutoFareVoice','1');}catch(e){}
+ function syncButtons(){buttons.forEach(btn=>{btn.setAttribute('aria-pressed',String(enabled));btn.textContent=enabled?'🔊 Boses: NAKA-ON':'🔇 Boses: NAKA-MUTE';});}
+ window.busFareDeskSpeakTagalog=function(message){
+  if(!enabled||!message||!('speechSynthesis' in window))return;
   try{
    window.speechSynthesis.cancel();
-   const utterance=new SpeechSynthesisUtterance('Kabuuang pamasahe: '+value+' pesos.');
-   utterance.lang='fil-PH';
-   utterance.rate=1.12;
-   utterance.pitch=1;
+   const utterance=new SpeechSynthesisUtterance(String(message));
+   utterance.lang='fil-PH';utterance.rate=1.08;utterance.pitch=1;
    const voices=window.speechSynthesis.getVoices();
    const filipino=voices.find(v=>/^fil(-|$)|^tl(-|$)/i.test(v.lang));
    if(filipino)utterance.voice=filipino;
    window.speechSynthesis.speak(utterance);
-  }catch(e){if(typeof showToast==='function')showToast('Hindi masimulan ang voice output.','short');}
+  }catch(e){}
+ };
+ function currentSpokenFare(){
+  const el=familyMode?group:single;
+  const raw=(el.textContent||'').replace(/[₱,\s]/g,'');
+  const value=Number(raw);
+  return Number.isFinite(value)&&value>0?value:null;
+ }
+ function announceFare(){
+  const value=currentSpokenFare();
+  if(value===null||!boardingPlace||(!familyMode&&!alightingPlace))return;
+  const routeKey=familyMode?'GROUP:'+boardingPlace+':'+familyPassengers.map(p=>p.destination).join('|')+':'+value:
+   'SOLO:'+boardingPlace+':'+alightingPlace+':'+passengerType+':'+value;
+  if(routeKey===lastSpoken)return;
+  lastSpoken=routeKey;
+  window.busFareDeskSpeakTagalog('Ang kabuuang pamasahe ay '+value+' pesos.');
  }
  buttons.forEach(btn=>btn.addEventListener('click',()=>{
   enabled=!enabled;
   try{localStorage.setItem('busFareDeskAutoFareVoice',enabled?'1':'0');}catch(e){}
   syncButtons();
-  if(enabled)speakTotal(true);
-  else if('speechSynthesis' in window)window.speechSynthesis.cancel();
+  if(!enabled&&'speechSynthesis' in window)window.speechSynthesis.cancel();
+  else announceFare();
  }));
  const observer=new MutationObserver(()=>{
   if(!enabled)return;
   clearTimeout(speakTimer);
-  speakTimer=setTimeout(()=>speakTotal(false),180);
+  speakTimer=setTimeout(announceFare,280);
  });
  observer.observe(single,{childList:true,characterData:true,subtree:true});
  observer.observe(group,{childList:true,characterData:true,subtree:true});
  syncButtons();
 })();
-window.busFareDeskNotify=(message,kind='')=>showToast(message,kind);
 function showToast(message,kind=''){
  floatingToast.textContent=message;floatingToast.className='floating-toast show'+(kind?' '+kind:'');
  if(toastTimer)clearTimeout(toastTimer);
@@ -4390,10 +4389,17 @@ function renderPayment(announce=false){
  const total=Math.round(currentFareTotal());paymentFareTotal.textContent=money(total);paymentPaid.textContent=money(paidAmount);
  if(cashStackDisplay){cashStackDisplay.innerHTML='';const entries=Object.keys(paidDenomCounts).map(Number).filter(v=>paidDenomCounts[v]>0).sort((a,b)=>b-a);if(!entries.length){cashStackDisplay.textContent='Wala pang naidaragdag na bayad.';}else{entries.forEach(v=>{const chip=document.createElement('span');chip.className='cash-chip';chip.textContent=(v>=20?'💵 ':'🪙 ')+'₱'+v.toLocaleString('en-PH');const count=document.createElement('b');count.textContent='×'+paidDenomCounts[v];chip.appendChild(count);cashStackDisplay.appendChild(chip);});}}
  const diff=paidAmount-total;changeResult.classList.remove('short','wait');
- if(total<=0){changeResult.classList.add('wait');changeLabel.textContent='CHANGE / SHORTAGE';changeAmount.textContent='—';changeSub.textContent='Please select first ang sakayan at babaan para makalkula ang total.';}
- else if(paidAmount===0){changeResult.classList.add('wait');changeLabel.textContent='CHANGE / SHORTAGE';changeAmount.textContent='₱0';changeSub.textContent='Tap one of the payment amounts above.';}
- else if(diff>=0){changeLabel.textContent='CHANGE';changeAmount.textContent=money(diff);changeSub.textContent=diff===0?'Saktong bayad. No  sukli.':'Sukli na dapat ibalik sa pasahero.';if(announce)showToast(diff===0?'Saktong bayad!':'Sukli: '+money(diff),'good');}
- else{changeResult.classList.add('short');changeLabel.textContent='REMAINING';changeAmount.textContent=money(-diff);changeSub.textContent='Add payment to cover the full fare.';if(announce)showToast('Kulang pa ng '+money(-diff)+'. Dagdagan ang bayad.','short');}
+ if(total<=0){changeResult.classList.add('wait');changeLabel.textContent='CHANGE / SHORTAGE';changeAmount.textContent='—';changeSub.textContent='Pumili muna ng sakayan at babaan para makuwenta ang pamasahe.';}
+ else if(paidAmount===0){changeResult.classList.add('wait');changeLabel.textContent='CHANGE / SHORTAGE';changeAmount.textContent='₱0';changeSub.textContent='Pindutin ang halaga ng perang ibinayad.';}
+ else if(diff>=0){changeLabel.textContent='SUKLI / CHANGE';changeAmount.textContent=money(diff);changeSub.textContent=diff===0?'Saktong bayad. Walang sukli.':'Sukli na dapat ibalik sa pasahero.';if(announce)showToast(diff===0?'Saktong bayad!':'Sukli: '+money(diff),'good');}
+ else{changeResult.classList.add('short');changeLabel.textContent='KULANG / REMAINING';changeAmount.textContent=money(-diff);changeSub.textContent='Dagdagan pa ang bayad para mabuo ang pamasahe.';if(announce)showToast('Kulang pa ng '+money(-diff)+'. Dagdagan ang bayad.','short');}
+ if(announce&&total>0&&typeof window.busFareDeskSpeakTagalog==='function'){
+  const paid=paidAmount;
+  const message=diff>=0
+   ?'Nagbayad ng '+paid+' pesos. '+(diff===0?'Saktong bayad. Walang sukli.':'Ang sukli ay '+diff+' pesos.')
+   :'Nagbayad ng '+paid+' pesos. Kulang pa ng '+Math.abs(diff)+' pesos.';
+  window.busFareDeskSpeakTagalog(message);
+ }
 }
 function resetPayment(){paidAmount=0;Object.keys(paidDenomCounts).forEach(k=>delete paidDenomCounts[k]);renderPayment(false);}
 denominations.forEach(value=>{const btn=document.createElement('button');btn.type='button';btn.className='denom';btn.dataset.value=String(value);btn.setAttribute('aria-label','Magdagdag ng '+value+' piso');const sticker=document.createElement('span');sticker.className='denom-sticker';sticker.textContent='₱'+value.toLocaleString('en-PH');const caption=document.createElement('span');caption.style.fontSize='10px';caption.style.fontWeight='750';caption.textContent=value>=20?'💵 Papel':'🪙 Barya';btn.append(sticker,caption);btn.addEventListener('click',()=>{paidAmount+=value;paidDenomCounts[value]=(paidDenomCounts[value]||0)+1;renderPayment(true);});denomGrid.appendChild(btn);});
