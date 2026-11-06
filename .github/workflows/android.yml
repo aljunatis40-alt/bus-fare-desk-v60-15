@@ -123,6 +123,10 @@ jobs:
           content = app.read_text(encoding="utf-8")
           if "com.github.k2-fsa:sherpa-onnx" not in content:
               content = content.replace("dependencies {", "dependencies {\n    implementation('com.github.k2-fsa:sherpa-onnx:v2.0.1') {\n        exclude group: 'com.github.k2-fsa.sherpa-onnx', module: 'sherpa-onnx-jvm'\n    }", 1)
+          if "abiFilters 'arm64-v8a'" not in content:
+              content = content.replace("defaultConfig {", "defaultConfig {\n        ndk { abiFilters 'arm64-v8a', 'armeabi-v7a' }", 1)
+          if "sherpa-onnx/native/**" not in content:
+              content = content.replace("android {", "android {\n    packagingOptions { resources { excludes += ['sherpa-onnx/native/**'] } }", 1)
           app.write_text(content, encoding="utf-8")
           PY
 
