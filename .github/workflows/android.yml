@@ -652,7 +652,7 @@ jobs:
 
               private void playAudio(GeneratedAudio audio) throws Exception {
                   float[] samples = audio.getSamples();
-                  int sampleRate = Math.max(8000, Math.min(48000, Math.round(audio.getSampleRate() * playbackPitch)));
+                  int sampleRate = audio.getSampleRate();
                   int minBuffer = AudioTrack.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
                   if (minBuffer <= 0) minBuffer = 8192;
                   AudioTrack track = new AudioTrack.Builder()
@@ -670,6 +670,7 @@ jobs:
                       .build();
                   activeTrack = track;
                   track.setVolume(1.0f);
+                  track.setPlaybackRate(Math.max(8000, Math.min(48000, Math.round(sampleRate * playbackPitch))));
                   track.play();
                   short[] pcm = new short[2048];
                   int offset = 0;
