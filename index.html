@@ -5148,18 +5148,22 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
    if(!best)return '';
    return best.split(' ').map(w=>w? w.charAt(0).toUpperCase()+w.slice(1):w).join(' ');
  };
- const routeOrder=aliases.map(x=>x[0]); // Existing recorded order: Towerville through PITX.
  const recordedStopOrder=Object.entries(areaLocations||{}).flatMap(([area,names])=>names.map(name=>({area,name})));
  const matchRecordedStop=(raw)=>{
-   const n=norm(raw);let best=null;
-   for(const stop of recordedStopOrder){const k=norm(stop.name);if(k&&(` ${n} `).includes(` ${k} `)&&(!best||k.length>norm(best.name).length))best=stop;}
+   const n=' '+norm(raw)+' ';let best=null;
+   // Match only a complete recorded stop label. Do not infer a stop from broad
+   // area aliases (for example, "Quirino" in Quirino Highway must not mean Taft).
+   for(const stop of recordedStopOrder){
+     const k=norm(stop.name);
+     if(k.length>=5&&n.includes(' '+k+' ')&&(!best||k.length>norm(best.name).length))best=stop;
+   }
    return best;
  };
  const showArea=(raw,fullAddress='',roadLabel='')=>{
    if(!enabled)return;
    const exactText=String(roadLabel||'').trim()||String(raw||'').trim()||'Kinukuha ang eksaktong GPS address…';
-   const area=matchPlace(raw);
-   // GREEN is always the live GPS/reverse-geocoded location, never an inferred route-zone label.
+   // GREEN is the live reverse-geocoded road/address. Yellow and pink are
+   // shown only when that address matches a complete stop in the recorded order.
    label.textContent=exactText;
    wrap.hidden=false;
    wrap.classList.add('active');
@@ -5168,23 +5172,18 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
    if(routeCurrent)routeCurrent.textContent=exactText;
    if(routeCurrentStop)routeCurrentStop.textContent=exactText;
    if(routeAddress)routeAddress.textContent=fullAddress||raw||'Kumpletong address ay hindi available.';
-   if(area){
-     const exactStop=matchRecordedStop(raw);
-     if(exactStop){
-       const stopIndex=recordedStopOrder.findIndex(x=>x.area===exactStop.area&&x.name===exactStop.name);
-       if(routePassed)routePassed.textContent=stopIndex>0?recordedStopOrder[stopIndex-1].name:'Wala pang naunang recorded stop';
-       if(routeNext)routeNext.textContent=stopIndex>=0&&stopIndex<recordedStopOrder.length-1?recordedStopOrder[stopIndex+1].name:'Huling recorded stop';
-     }else{
-       const index=routeOrder.indexOf(area);
-       if(routePassed)routePassed.textContent=index>0?routeOrder[index-1]:'Wala pang naunang area';
-       if(routeNext)routeNext.textContent=index>=0&&index<routeOrder.length-1?routeOrder[index+1]:(index===routeOrder.length-1?'Huling area ng recorded route':'Hindi matukoy ang susunod na area');
-     }
-     unmatchedNotified=false;
+   const exactStop=matchRecordedStop(raw);
+   if(exactStop){
+     const stopIndex=recordedStopOrder.findIndex(x=>x.area===exactStop.area&&x.name===exactStop.name);
+     if(routePassed)routePassed.textContent=stopIndex>0?recordedStopOrder[stopIndex-1].name:'Wala pang naunang recorded stop';
+     if(routeNext)routeNext.textContent=stopIndex>=0&&stopIndex<recordedStopOrder.length-1?recordedStopOrder[stopIndex+1].name:'Huling recorded stop';
+     if(routeGpsMeta)routeGpsMeta.textContent='GPS live · Tugma sa recorded stop: '+exactStop.name+' · ina-update kada bagong GPS reading';
    }else{
-     if(routePassed)routePassed.textContent='Hindi matukoy sa recorded route';
-     if(routeNext)routeNext.textContent='Hintayin ang susunod na GPS update';
-     unmatchedNotified=false;
+     if(routePassed)routePassed.textContent='Hindi pa matukoy ang eksaktong nadaanan';
+     if(routeNext)routeNext.textContent='Naghihintay ng eksaktong tugma sa susunod na hintuan';
+     if(routeGpsMeta)routeGpsMeta.textContent='GPS live · Wala pang eksaktong tugma sa listahan ng hintuan; hindi manghuhula ng nadaanan o susunod';
    }
+   unmatchedNotified=false;
    if(routeMap&&routeMap.invalidateSize)setTimeout(()=>routeMap&&routeMap.invalidateSize(),120);
  };
  const setStatus=(message)=>{
