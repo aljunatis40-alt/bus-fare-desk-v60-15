@@ -4820,7 +4820,7 @@ function choose(p){
 // Public, narrow bridge for the separate voice UI; all route changes still go through the existing chooser and fare calculator.
 window.busFareDeskVoiceBridge={
  findPlace:function(part){
-  const clean=value=>normalizeSearchText(value).replace(/[^a-z0-9 ]/g,' ').replace(/\\s+/g,' ').trim().replace(/^(?:(?:sa|ang|yung|mga|the|near)\\s+)+/,'').replace(/\\s+(?:please|po|lang|ako|naman)$/,'').trim();
+  const clean=value=>normalizeSearchText(value).replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim().replace(/^(?:(?:sa|ang|yung|mga|the|near)\s+)+/,'').replace(/\s+(?:please|po|lang|ako|naman)$/,'').trim();
   const q=clean(part);if(!q||q.length<2)return null;
   const candidates=places.map(p=>({p,n:clean(p)})).filter(x=>x.n);
   const exact=candidates.find(x=>q===x.n);if(exact)return exact.p;
@@ -5384,7 +5384,7 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
 (function(){
  const panel=document.getElementById('voiceFarePanel'), mic=document.getElementById('voiceFareStart'), speakBtn=document.getElementById('voiceFareSpeak'), status=document.getElementById('voiceFareStatus');
  if(!mic||!speakBtn||!status)return;
- const norm=v=>String(v||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9\\s]/g,' ').replace(/\\s+/g,' ').trim();
+ const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
  let listening=false, oldBoard='', oldAlight='';
  function say(message){
   if(!('speechSynthesis' in window)){status.textContent=message;return;}
@@ -5393,11 +5393,11 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
  function setListening(on){listening=on;panel.classList.toggle('voice-listening',on);mic.setAttribute('aria-pressed',String(on));mic.title=on?'Itigil ang pakikinig':'Magsalita';}
  function findPlace(part){if(!norm(part)||!window.busFareDeskVoiceBridge)return null;return window.busFareDeskVoiceBridge.findPlace(part);}
  function extractSpokenPlaces(raw){
-  const words=norm(raw).split(/\\s+/).filter(Boolean);
+  const words=norm(raw).split(/\s+/).filter(Boolean);
   const found=[];
   const trimCommand=value=>value
-   .replace(/^(?:(?:ako ay|ako|tayo|kami)\\s+)*(?:(?:sumakay|sakay|sakay na|mula|galing|sa|ang|yung|at|tapos|then)\\s+)*/,'')
-   .replace(/\\s+(?:(?:baba|bababa|ibaba|ibaba na|ibaba sa|drop off|destination|papunta|sa|ang|yung|po|lang|please|ako|naman)\\s*)+$/,'')
+   .replace(/^(?:(?:ako ay|ako|tayo|kami)\s+)*(?:(?:sumakay|sakay|sakay na|mula|galing|sa|ang|yung|at|tapos|then)\s+)*/,'')
+   .replace(/\s+(?:(?:baba|bababa|ibaba|ibaba na|ibaba sa|drop off|destination|papunta|sa|ang|yung|po|lang|please|ako|naman)\s*)+$/,'')
    .trim();
   // Hanapin ang maiikling pangalan ng lugar mula kaliwa pakanan.
   // Ang unang makitang lugar ang SAKAY; ang huling magkahiwalay na lugar ang BABA.
