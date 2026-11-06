@@ -398,6 +398,100 @@ body.family-active .change-result strong{font-size:19px}
 @keyframes bfdHeadlightPulse{from{filter:brightness(.8)}to{filter:brightness(1.5)}}
 @media(max-height:600px){#bfdStartupIntro .bfd-bus-wrap{bottom:14%;transform-origin:50% 85%;scale:.82}#bfdStartupIntro .bfd-intro-credit{top:4%}#bfdStartupIntro .bfd-intro-name{bottom:8%}}
 @media(prefers-reduced-motion:reduce){#bfdStartupIntro .bfd-bus-wrap{animation:none;transform:translateX(-50%) scale(1);opacity:1}#bfdStartupIntro .bfd-intro-name span{animation:none;opacity:1;transform:none}#bfdStartupIntro .bfd-intro-credit{animation:none;opacity:1}}
+
+
+/* V60.15 display refinement: compact spacing, readable controls, safe mobile fit.
+   Presentation-only overrides; no fare, GPS, voice, storage, or route logic changed. */
+html{scroll-behavior:smooth;scroll-padding-top:12px}
+body{padding:clamp(10px,3.5vw,18px) clamp(10px,3.2vw,16px) calc(28px + env(safe-area-inset-bottom))}
+.app{width:100%;max-width:680px;margin-inline:auto;min-width:0}
+.brand{gap:9px;margin:2px 1px 10px;min-width:0}
+.brand-name{font-size:18px;line-height:1.15}
+.brand-sub{font-size:11px}
+.creator-signature{line-height:1.15}
+#voiceFarePanel{margin:0 0 9px!important;padding:7px 8px!important;gap:8px!important}
+#voiceFareStart{width:44px!important;height:42px!important;flex-basis:44px!important}
+#voiceFareSpeak{width:38px!important;height:38px!important;flex-basis:38px!important}
+.route-location-panel{margin:3px 0 8px;padding:7px;gap:5px}
+.route-map-frame{height:clamp(112px,30vw,150px);min-height:112px}
+.route-three{gap:5px}
+.route-stop{min-width:0;padding:6px 5px}
+.route-stop strong{overflow-wrap:anywhere;line-height:1.25}
+.top-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 8px}
+.top-actions button,.family-toggle,.settings-toggle{min-height:38px}
+.search-box{height:54px;padding-inline:13px;gap:9px}
+.search-box input{font-size:16px}
+.suggestions{top:56px;max-height:min(56vh,440px)}
+.mode-boxes{gap:8px;margin-top:9px}
+.mode-box{min-height:70px;border-radius:13px}
+.mode-box span{min-height:54px;padding:7px}
+.mode-note{margin:7px 2px 0;line-height:1.4}
+.quick-tools{gap:6px;margin:8px 0}
+.quick-tools button,.access-controls button,.backup-actions button,.quick-denoms button{min-height:40px;min-width:0}
+.favorites-box{margin-top:8px}
+.extra-panel{margin:9px 0;padding:10px;border-radius:14px}
+.extra-head{gap:8px;flex-wrap:wrap}
+.dash-grid{gap:6px}
+.dash-grid>div{min-width:0;padding:8px}
+.dash-grid strong{overflow-wrap:anywhere;line-height:1.25}
+.extra-subhead{margin-top:10px}
+.stop-list{max-height:260px;overflow:auto}
+.passenger-types{margin-top:9px;padding:10px}
+.passenger-options{gap:6px}
+.passenger-option{min-height:74px;padding:7px 3px}
+.family-panel{padding:10px}
+.family-person{padding:9px}
+.family-total{margin-top:10px}
+.fare-shell{margin-top:10px;padding:3px}
+.fare-card{min-height:124px;padding:13px 12px;gap:5px}
+.fare-amount{font-size:clamp(34px,9vw,46px)}
+.payment-panel{margin-top:9px;padding:10px;gap:7px}
+.payment-total-row{padding:8px 9px}
+.denom-grid{gap:6px}
+.denom-grid button{min-height:44px}
+.payment-actions{gap:7px}
+.payment-actions button,.record-btn{min-height:42px}
+.transaction-history{margin-top:9px}
+.settings-panel{padding:8px max(8px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
+.settings-card{width:min(100%,620px);max-height:calc(100dvh - 16px);overflow:auto}
+.extras-dialog{max-height:calc(100dvh - 16px);padding:11px}
+button,input,select,textarea{font-family:inherit}
+button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #2563eb;outline-offset:2px}
+input,select,textarea{max-width:100%;min-width:0}
+img,svg,canvas{max-width:100%}
+@media(max-width:390px){
+ body{padding-inline:9px}
+ .brand-name{font-size:17px}
+ .top-actions{gap:5px}
+ .top-actions button,.family-toggle,.settings-toggle{padding:7px 9px;font-size:11px}
+ .mode-boxes{gap:6px}
+ .mode-box .mode-place{font-size:12px}
+ .quick-tools{gap:5px}
+ .quick-tools button{padding:8px 5px;font-size:11px}
+ .passenger-options{gap:5px}
+ .passenger-option{font-size:10px}
+ .payment-panel{padding:8px}
+}
+@media(max-width:330px){
+ body{padding-inline:7px}
+ .top-actions button,.family-toggle,.settings-toggle{padding:6px 7px;font-size:10px}
+ .mode-boxes{grid-template-columns:1fr 1fr}
+ .mode-box{min-height:66px}
+ .quick-tools{grid-template-columns:1fr 1fr}
+ .passenger-options{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .denom-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-height:600px){
+ body{padding-top:8px;padding-bottom:22px}
+ .route-map-frame{height:108px;min-height:108px}
+ .brand{margin-bottom:7px}
+ .fare-card{min-height:112px}
+}
+@media(prefers-reduced-motion:reduce){
+ html{scroll-behavior:auto}
+}
+
 </style></head><body><div id="bfdStartupIntro" role="status" aria-label="Bus Fare Desk is starting"><div class="bfd-intro-scene"><div class="bfd-light-beams"></div><div class="bfd-intro-credit"><strong>BUS FARE DESK</strong>CREATED BY · PERSONAL EDITION</div><div class="bfd-road"></div><div class="bfd-bus-wrap" aria-hidden="true"><div class="bfd-bus-body"></div><div class="bfd-bus-sign">PITX TO ROAD 2</div><div class="bfd-bus-windshield"><div class="bfd-windshield-glow"></div></div><div class="bfd-bus-door"></div><div class="bfd-headlight left"></div><div class="bfd-headlight right"></div><div class="bfd-bus-grille"></div><div class="bfd-bus-bumper"></div><div class="bfd-wheel"></div><div class="bfd-wheel bfd-wheel-rear"></div></div><div class="bfd-intro-name" aria-label="Aljun Atis"><span>A</span><span>L</span><span>J</span><span>U</span><span>N</span><span>&nbsp;</span><span>A</span><span>T</span><span>I</span><span>S</span></div><div class="bfd-intro-tag">PERSONAL EDITION · READY</div></div></div><main class="app">
 <header class="brand"><div class="bus" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="2.8" width="14" height="18" rx="3"/><path d="M5 8h14M8 15h.01M16 15h.01M8 18.5v2M16 18.5v2M8 5.5h8" stroke-linecap="round"/></svg></div><div><div class="brand-name">Bus Fare Desk</div><div class="brand-sub">Quick place search</div><div class="creator-signature" aria-label="Created by Aljun Atis"><span class="signature-script">Aljun Atis</span><span class="signature-caption">CREATED BY · PERSONAL EDITION</span></div></div></header>
 <div id="voiceFarePanel" style="display:flex;align-items:center;gap:9px;margin:-8px 0 14px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:12px;background:#fff">
