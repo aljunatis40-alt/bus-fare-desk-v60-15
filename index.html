@@ -4820,9 +4820,30 @@ function choose(p){
 // Public, narrow bridge for the separate voice UI; all route changes still go through the existing chooser and fare calculator.
 window.busFareDeskVoiceBridge={
  findPlace:function(part){
-  const q=normalizeSearchText(part);if(!q)return null;
-  const candidates=places.slice().sort((a,b)=>normalizeSearchText(b).length-normalizeSearchText(a).length);
-  return candidates.find(p=>q===normalizeSearchText(p)||q.includes(normalizeSearchText(p))||normalizeSearchText(p).includes(q))||null;
+  const clean=value=>normalizeSearchText(value).replace(/[^a-z0-9 ]/g,' ').replace(/\\s+/g,' ').trim().replace(/^(?:(?:sa|ang|yung|mga|the|near)\\s+)+/,'').replace(/\\s+(?:please|po|lang|ako|naman)$/,'').trim();
+  const q=clean(part);if(!q||q.length<2)return null;
+  const candidates=places.map(p=>({p,n:clean(p)})).filter(x=>x.n);
+  const exact=candidates.find(x=>q===x.n);if(exact)return exact.p;
+  const contained=candidates.filter(x=>q.includes(x.n)||x.n.includes(q)).sort((a,b)=>Math.abs(a.n.length-q.length)-Math.abs(b.n.length-q.length));
+  if(contained.length&&Math.min(contained[0].n.length,q.length)>=4)return contained[0].p;
+  function distance(a,b){
+   const prev=Array.from({length:b.length+1},(_,i)=>i);
+   for(let i=1;i<=a.length;i++){let diag=prev[0];prev[0]=i;for(let j=1;j<=b.length;j++){const old=prev[j];prev[j]=Math.min(prev[j]+1,prev[j-1]+1,diag+(a[i-1]===b[j-1]?0:1));diag=old;}}
+   return prev[b.length];
+  }
+  const qt=q.split(' ').filter(Boolean);
+  let best=null,bestScore=0;
+  for(const x of candidates){
+   const pt=x.n.split(' ').filter(Boolean);
+   const whole=1-distance(q,x.n)/Math.max(q.length,x.n.length,1);
+   let matched=0;
+   for(const token of qt){let score=0;for(const target of pt){score=Math.max(score,1-distance(token,target)/Math.max(token.length,target.length,1));}if(score>=.66)matched+=score;}
+   const tokenScore=matched/Math.max(qt.length,pt.length,1);
+   const score=Math.max(whole*.88,tokenScore);
+   const threshold=q.length<=4?.79:q.length<=7?.72:.66;
+   if(score>bestScore&&score>=threshold){best=x.p;bestScore=score;}
+  }
+  return best;
  },
  setRoute:function(from,to){
   if(familyMode)return false;
@@ -5375,8 +5396,8 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
   const t=norm(raw);
   const split=t.match(/^(.*?)\\s+(?:at )?(?:baba|bababa|ibaba|ibaba na|ibaba sa|drop off|destination|papunta)(?:\\s+sa)?\\s+(.+)$/);
   if(!split)return null;
-  const from=split[1].replace(/^(?:sumakay|sakay|mula|galing)(?:\\s+sa)?\\s+/,'').trim();
-  const to=split[2].replace(/^(?:sa|ay|ng)\\s+/,'').trim();
+  const from=split[1].replace(/^(?:(?:ako\\s+ay|ako)\\s+)?(?:sumakay|sakay|mula|galing)(?:\\s+ako)?(?:\\s+sa)?\\s+/,'').trim();
+  const to=split[2].replace(/^(?:(?:ako\\s+ay|ako)\\s+)?(?:sa|ay|ng|ako\\s+sa)\\s+/,'').trim();
   const origin=findPlace(from), destination=findPlace(to);
   return origin&&destination?{origin,destination}:null;
  }
