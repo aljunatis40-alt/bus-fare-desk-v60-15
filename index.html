@@ -4423,28 +4423,59 @@ function currentFareTotal(){
  let enabled=true,lastSpoken='',speakTimer=0;
  try{localStorage.setItem('busFareDeskAutoFareVoice','1');}catch(e){}
  function syncButtons(){buttons.forEach(btn=>{btn.setAttribute('aria-pressed',String(enabled));btn.textContent=enabled?'🔊 Boses: NAKA-ON':'🔇 Boses: NAKA-MUTE';});syncVoiceStatus();}
- function syncVoiceStatus(){
-  const supported='speechSynthesis' in window;
-  let filipino=false;
-  try{filipino=supported&&window.speechSynthesis.getVoices().some(v=>/^fil(-|$)|^tl(-|$)/i.test(v.lang));}catch(e){}
+ function setVoiceStatus(message){
   buttons.forEach(btn=>{
    let status=btn.parentElement&&btn.parentElement.querySelector('.fare-voice-status');
    if(!status){status=document.createElement('div');status.className='fare-voice-status';status.style.cssText='font-size:10px;line-height:1.35;color:var(--muted,#64748b);margin:4px auto 0;max-width:260px;text-align:center';btn.insertAdjacentElement('afterend',status);}
-   const en=document.documentElement.lang==='en';
-   status.textContent=!supported?(en?'Voice output is not supported on this device.':'Hindi suportado ng device ang voice output.'):!filipino?(en?'No Filipino voice detected. Install Filipino voice data in Android Text-to-speech.':'Walang nakitang Filipino voice. I-download ang Filipino voice data sa Android Text-to-speech.'): (en?'Filipino voice detected. Offline speech depends on downloaded Android voice data.':'May nakitang Filipino voice. Ang offline na pagsasalita ay depende sa naka-download na voice data ng Android.');
+   status.textContent=message;
   });
  }
+ function syncVoiceStatus(){
+  const en=document.documentElement.lang==='en';
+  if(window.BusFareSpeech&&typeof window.BusFareSpeech.speak==='function'){
+   setVoiceStatus(en?'Android Filipino voice is initializing.':'Inihahanda ang Android Filipino voice.');
+   return;
+  }
+  const supported='speechSynthesis' in window;
+  let filipino=false;
+  try{filipino=supported&&window.speechSynthesis.getVoices().some(v=>/^fil(-|$)|^tl(-|$)/i.test(v.lang));}catch(e){}
+  setVoiceStatus(!supported?(en?'Voice output is not supported on this device.':'Hindi suportado ng device ang voice output.'):!filipino?(en?'No Filipino voice detected. Install Filipino voice data in Android Text-to-speech.':'Walang nakitang Filipino voice. I-install ang Filipino voice data sa Android Text-to-speech.'):(en?'Filipino voice detected.':'May nakitang Filipino voice.'));
+ }
+ window.onBusFareTtsStatus=function(code){
+  const en=document.documentElement.lang==='en';
+  const messages={
+   ready:en?'Android Filipino voice is ready. Speech volume is set to maximum.':'Handa na ang Android Filipino voice. Naka-maximum ang volume ng pagsasalita.',
+   loading:en?'Preparing Android text-to-speech…':'Inihahanda ang Android text-to-speech…',
+   speaking:en?'Speaking…':'Nagsasalita…',
+   done:en?'Voice test/announcement finished.':'Tapos na ang pagsasalita.',
+   languageUnavailable:en?'Filipino voice data is unavailable. Install Filipino in Android Text-to-speech settings.':'Walang Filipino voice data. I-install ang Filipino sa Android Text-to-speech settings.',
+   error:en?'Android text-to-speech error. Check the installed voice engine and media volume.':'May error sa Android text-to-speech. Suriin ang voice engine at media volume.'
+  };
+  setVoiceStatus(messages[code]||messages.error);
+ };
  window.busFareDeskSpeakTagalog=function(message){
-  if(!enabled||!message||!('speechSynthesis' in window))return;
+  if(!enabled||!message)return;
   try{
+   if(window.BusFareSpeech&&typeof window.BusFareSpeech.speak==='function'){
+    window.BusFareSpeech.speak(String(message));
+    return;
+   }
+   if(!('speechSynthesis' in window)||typeof SpeechSynthesisUtterance==='undefined'){
+    setVoiceStatus(document.documentElement.lang==='en'?'Voice output is unavailable in this app.':'Hindi available ang voice output sa app na ito.');
+    return;
+   }
    window.speechSynthesis.cancel();
    const utterance=new SpeechSynthesisUtterance(String(message));
-   utterance.lang='fil-PH';utterance.rate=1.08;utterance.pitch=1;
+   utterance.lang='fil-PH';utterance.rate=0.94;utterance.pitch=1;utterance.volume=1;
+   utterance.onstart=()=>window.onBusFareTtsStatus('speaking');
+   utterance.onend=()=>window.onBusFareTtsStatus('done');
+   utterance.onerror=()=>window.onBusFareTtsStatus('error');
    const voices=window.speechSynthesis.getVoices();
    const filipino=voices.find(v=>/^fil(-|$)|^tl(-|$)/i.test(v.lang));
    if(filipino)utterance.voice=filipino;
+   window.speechSynthesis.resume();
    window.speechSynthesis.speak(utterance);
-  }catch(e){}
+  }catch(e){window.onBusFareTtsStatus('error');}
  };
  function currentSpokenFare(){
   const el=familyMode?group:single;
@@ -4465,8 +4496,13 @@ function currentFareTotal(){
   enabled=!enabled;
   try{localStorage.setItem('busFareDeskAutoFareVoice',enabled?'1':'0');}catch(e){}
   syncButtons();
-  if(!enabled&&'speechSynthesis' in window)window.speechSynthesis.cancel();
-  else announceFare();
+  if(!enabled){
+   if('speechSynthesis' in window)window.speechSynthesis.cancel();
+   if(window.BusFareSpeech&&typeof window.BusFareSpeech.stopSpeaking==='function')window.BusFareSpeech.stopSpeaking();
+  }else{
+   window.busFareDeskSpeakTagalog('Pagsubok ng boses ng Bus Fare Desk. Handa na ang pagsasalita sa Tagalog.');
+   announceFare();
+  }
  }));
  const observer=new MutationObserver(()=>{
   if(!enabled)return;
