@@ -361,7 +361,36 @@ body.family-active .change-result strong{font-size:19px}
 .tutorial-center{color:inherit}.tutorial-intro{font-size:12px;line-height:1.55;color:#475569}.tutorial-callout{padding:11px 12px;border:1px solid #d6b45b;border-radius:11px;background:linear-gradient(135deg,#f0fdf4,#fffbeb);font-size:12px;line-height:1.5;margin:10px 0}.tutorial-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:10px 0}.tutorial-actions button,.tutorial-step button{border:1px solid #b9a05b;border-radius:9px;padding:9px;background:#f5f7ed;color:#174b32;font:inherit;font-size:11px;font-weight:800}.tutorial-step{border:1px solid #d8dee8;border-radius:11px;margin:8px 0;background:#fff;overflow:hidden}.tutorial-step summary{padding:12px;font-size:12px;font-weight:850;color:#174b32;cursor:pointer;background:#f7f8f2}.tutorial-step p{font-size:11px;line-height:1.6;margin:9px 12px;color:#263445}.tutorial-step button{margin:2px 12px 12px}.tutorial-footnote{font-size:11px;line-height:1.6;padding:10px;border-left:3px solid #c49b36;background:#fffbeb;color:#57451b}.tutorial-center details[open] summary{border-bottom:1px solid #e2e8f0}body.dark-mode .tutorial-step,body.dark-mode .tutorial-step summary{background:#1e293b;color:#e5edf8;border-color:#475569}body.dark-mode .tutorial-step p{color:#e5edf8}body.dark-mode .tutorial-callout,body.dark-mode .tutorial-footnote{background:#263528;color:#f4e7bd}
 
 #voiceFarePanel.voice-listening{border-color:#1769e8;background:#eff6ff}#voiceFarePanel.voice-listening #voiceFareStart{background:#0f3f9f;box-shadow:0 0 0 5px rgba(23,105,232,.13)}#voiceFarePanel.voice-listening svg path{animation:voiceWave .72s ease-in-out infinite alternate;transform-origin:center}@keyframes voiceWave{from{transform:scaleY(.55)}to{transform:scaleY(1.12)}}
-</style></head><body><main class="app">
+
+/* V60.16 cinematic startup intro — visual overlay only; app initialization continues underneath */
+#bfdStartupIntro{position:fixed;inset:0;z-index:999999;background:#030607;color:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;opacity:1;visibility:visible;transition:opacity .42s ease,visibility .42s ease;font-family:Roboto,"Segoe UI",Arial,sans-serif}
+#bfdStartupIntro.bfd-intro-hide{opacity:0;visibility:hidden;pointer-events:none}
+#bfdStartupIntro .bfd-intro-scene{position:relative;width:100%;max-width:560px;height:100%;min-height:420px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(ellipse at 50% 68%,rgba(0,105,68,.2),transparent 48%),linear-gradient(180deg,#020405 0%,#07100f 100%)}
+#bfdStartupIntro .bfd-road{position:absolute;left:-20%;right:-20%;bottom:12%;height:2px;background:linear-gradient(90deg,transparent,#1b5944,transparent);box-shadow:0 0 18px #00a66a;opacity:.65}
+#bfdStartupIntro .bfd-road:after{content:"";position:absolute;left:0;right:0;top:22px;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent)}
+#bfdStartupIntro .bfd-bus-wrap{position:absolute;left:50%;bottom:24%;width:min(76vw,360px);height:132px;transform:translateX(-50%) scale(.12);opacity:0;animation:bfdBusArrive 1.65s cubic-bezier(.18,.72,.2,1) .12s forwards}
+#bfdStartupIntro .bfd-bus-body{position:absolute;inset:12px 0 14px;background:linear-gradient(180deg,#39d879 0%,#119b51 62%,#08723d 100%);border:2px solid #9affc2;border-radius:17px 22px 12px 12px;box-shadow:0 0 28px rgba(24,255,132,.32),inset 0 -8px 0 rgba(0,0,0,.17)}
+#bfdStartupIntro .bfd-bus-windows{position:absolute;left:18px;right:18px;top:24px;height:42px;display:flex;gap:5px}
+#bfdStartupIntro .bfd-bus-windows i{flex:1;border:2px solid #b7ffe0;border-radius:4px;background:linear-gradient(145deg,#183b42,#071a21 70%);box-shadow:inset 0 0 8px #4c9a8a}
+#bfdStartupIntro .bfd-bus-sign{position:absolute;right:14px;top:3px;max-width:56%;padding:4px 8px;border:1px solid #e6fff0;border-radius:4px;background:#062a1a;color:#baffd4;font-size:clamp(8px,2.4vw,12px);font-weight:900;letter-spacing:1px;text-align:center;white-space:nowrap;text-shadow:0 0 6px #20ff8c}
+#bfdStartupIntro .bfd-bus-front{position:absolute;right:0;top:16px;width:34px;height:82px;border-left:3px solid #baffd4;border-radius:0 13px 8px 0;background:linear-gradient(90deg,#08713d,#052b20)}
+#bfdStartupIntro .bfd-bus-front:before{content:"";position:absolute;left:5px;top:9px;width:22px;height:38px;border-radius:5px;background:linear-gradient(145deg,#24535a,#071b22);border:1px solid #baffd4}
+#bfdStartupIntro .bfd-bus-door{position:absolute;right:42px;top:69px;width:27px;height:45px;border:2px solid #d8ffeb;border-radius:4px 4px 1px 1px;background:linear-gradient(90deg,#0b3b2b,#061b16);transform-origin:right;animation:bfdDoorOpen .48s ease 1.92s forwards}
+#bfdStartupIntro .bfd-wheel{position:absolute;bottom:1px;left:48px;width:30px;height:30px;border:5px solid #17201e;border-radius:50%;background:radial-gradient(circle,#aab9b1 0 22%,#28342e 24% 100%);box-shadow:0 0 0 2px #9affc2}
+#bfdStartupIntro .bfd-wheel.bfd-wheel-rear{left:auto;right:54px}
+#bfdStartupIntro .bfd-headlight{position:absolute;right:-3px;bottom:31px;width:9px;height:12px;border-radius:3px;background:#eaffb0;box-shadow:0 0 18px 5px rgba(221,255,139,.7)}
+#bfdStartupIntro .bfd-intro-name{position:absolute;left:0;right:0;bottom:10%;display:flex;justify-content:center;gap:clamp(2px,1vw,7px);font-size:clamp(25px,8vw,42px);font-weight:950;letter-spacing:2px;color:#f5fff8;text-shadow:0 0 9px #19d978,0 0 25px rgba(18,255,132,.7)}
+#bfdStartupIntro .bfd-intro-name span{opacity:0;transform:translateY(12px);animation:bfdLetterIn .22s ease forwards}
+#bfdStartupIntro .bfd-intro-name span:nth-child(1){animation-delay:2.03s}#bfdStartupIntro .bfd-intro-name span:nth-child(2){animation-delay:2.10s}#bfdStartupIntro .bfd-intro-name span:nth-child(3){animation-delay:2.17s}#bfdStartupIntro .bfd-intro-name span:nth-child(4){animation-delay:2.24s}#bfdStartupIntro .bfd-intro-name span:nth-child(5){animation-delay:2.31s}#bfdStartupIntro .bfd-intro-name span:nth-child(6){animation-delay:2.38s}#bfdStartupIntro .bfd-intro-name span:nth-child(7){animation-delay:2.45s}#bfdStartupIntro .bfd-intro-name span:nth-child(8){animation-delay:2.52s}#bfdStartupIntro .bfd-intro-name span:nth-child(9){animation-delay:2.59s}
+#bfdStartupIntro .bfd-intro-credit{position:absolute;top:11%;left:12px;right:12px;text-align:center;color:#b5c9be;font-size:10px;font-weight:800;letter-spacing:3px;opacity:0;animation:bfdCreditIn .5s ease .35s forwards}
+#bfdStartupIntro .bfd-intro-credit strong{display:block;margin-bottom:8px;color:#a8ffc8;font-size:clamp(13px,4vw,18px);letter-spacing:2px}
+#bfdStartupIntro .bfd-intro-tag{position:absolute;bottom:4%;font-size:9px;letter-spacing:2px;color:#688b79}
+@keyframes bfdBusArrive{0%{transform:translateX(-50%) translateY(8px) scale(.12);opacity:0}12%{opacity:1}75%{transform:translateX(-50%) translateY(0) scale(1.04)}100%{transform:translateX(-50%) translateY(0) scale(1);opacity:1}}
+@keyframes bfdDoorOpen{to{transform:perspective(80px) rotateY(-58deg);background:#174b35}}
+@keyframes bfdLetterIn{to{opacity:1;transform:translateY(0)}}
+@keyframes bfdCreditIn{to{opacity:1}}
+@media(prefers-reduced-motion:reduce){#bfdStartupIntro .bfd-bus-wrap{animation:none;transform:translateX(-50%) scale(1);opacity:1}#bfdStartupIntro .bfd-intro-name span{animation:none;opacity:1;transform:none}#bfdStartupIntro .bfd-intro-credit{animation:none;opacity:1}}
+</style></head><body><div id="bfdStartupIntro" role="status" aria-label="Bus Fare Desk is starting"><div class="bfd-intro-scene"><div class="bfd-intro-credit"><strong>BUS FARE DESK</strong>CREATED BY · PERSONAL EDITION</div><div class="bfd-road"></div><div class="bfd-bus-wrap" aria-hidden="true"><div class="bfd-bus-body"></div><div class="bfd-bus-windows"><i></i><i></i><i></i><i></i></div><div class="bfd-bus-sign">PITX TO ROAD 2</div><div class="bfd-bus-front"></div><div class="bfd-bus-door"></div><div class="bfd-wheel"></div><div class="bfd-wheel bfd-wheel-rear"></div><div class="bfd-headlight"></div></div><div class="bfd-intro-name" aria-label="Aljun Atis"><span>A</span><span>L</span><span>J</span><span>U</span><span>N</span><span>&nbsp;</span><span>A</span><span>T</span><span>I</span><span>S</span></div><div class="bfd-intro-tag">PERSONAL EDITION · READY</div></div></div><main class="app">
 <header class="brand"><div class="bus" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="2.8" width="14" height="18" rx="3"/><path d="M5 8h14M8 15h.01M16 15h.01M8 18.5v2M16 18.5v2M8 5.5h8" stroke-linecap="round"/></svg></div><div><div class="brand-name">Bus Fare Desk</div><div class="brand-sub">Quick place search</div><div class="creator-signature" aria-label="Created by Aljun Atis"><span class="signature-script">Aljun Atis</span><span class="signature-caption">CREATED BY · PERSONAL EDITION</span></div></div></header>
 <div id="voiceFarePanel" style="display:flex;align-items:center;gap:9px;margin:-8px 0 14px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:12px;background:#fff">
  <button type="button" id="voiceFareStart" aria-label="Magsalita para sa sakayan at babaan" title="Magsalita" style="width:48px;height:44px;flex:0 0 48px;border:0;border-radius:12px;background:#1769e8;color:white;display:grid;place-items:center">
@@ -5463,6 +5492,16 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
   rec.onend=finish;
   try{rec.start();}catch(e){finish();status.textContent='Hindi mabuksan ang mikropono. Suriin ang microphone permission.';}
  });
+})();
+</script>
+<script>
+// Hide the cinematic intro after a short activation window. The app is never reloaded.
+(function(){
+ const intro=document.getElementById('bfdStartupIntro');
+ if(!intro)return;
+ const dismiss=()=>{window.setTimeout(()=>{intro.classList.add('bfd-intro-hide');window.setTimeout(()=>intro.remove(),500);},2600);};
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',dismiss,{once:true});
+ else dismiss();
 })();
 </script>
 </body></html>
