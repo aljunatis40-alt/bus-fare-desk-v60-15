@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#ffffff"><title>BUS FARE DESK · V60.15 Personal Edition</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="leaflet/leaflet.css">
 <style>
 :root{--blue:#1769e8;--blue-dark:#1054c5;--ink:#000;--muted:#555;--line:#e5e7eb;--pale:#f6f9ff}
 *{box-sizing:border-box} html,body{margin:0;min-height:100%;background:#fff;color:var(--ink);font-family:Roboto,"Segoe UI",Arial,sans-serif}
@@ -5072,7 +5072,7 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
 })();
 </script>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="leaflet/leaflet.js"></script>
 <script>
 // V60.9: GPS starts ONLY after the user presses the in-app GPS button.
 // Native Android bridge is preferred; browser geolocation is a fallback.
