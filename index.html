@@ -4984,7 +4984,14 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
  function addRecent(from,to){if(!from||!to||from===to)return;let a=recent().filter(x=>!(x.from===from&&x.to===to));a.unshift({from,to,when:new Date().toLocaleString('en-PH')});safeWrite(RECENT_KEY,a.slice(0,12));drawRecent();refreshDashboard()}
  function drawRecent(){const host=$('recentRoutes');if(!host)return;host.innerHTML='';const arr=recent();if(!arr.length){host.innerHTML='<span class="muted-small">No search history yet.</span>';return}arr.forEach(r=>{const b=document.createElement('button');b.type='button';b.className='recent-route';b.textContent=r.from+' → '+r.to;b.title=r.when||'Recent route';b.addEventListener('click',()=>{if(window.busFareDeskVoiceBridge?.isFamily()){showToast('Lumipat muna sa SOLO mode.','short');return}boardingPlace=r.from;alightingPlace=r.to;resetPayment();if($('distanceKm'))$('distanceKm').value='';syncPlaceLabels();updateFare();renderPayment(false);refreshDashboard()});host.appendChild(b)})}
  function fareStatus(){const foot=(($('fareFoot')&&$('fareFoot').textContent)||'').toLowerCase();if(!boardingPlace||!alightingPlace)return 'None yetng ruta';if(foot.includes('estimate')||foot.includes('minimum')||foot.includes('hindi pa')||foot.includes('kilometro')||foot.includes('distance'))return 'Estimate / beripikahin';return 'Check ang fare note'}
- function refreshOfflineStatus(){const el=$('offlineStatus');if(!el)return;const online=navigator.onLine;el.textContent=online?'📶 May internet connection. Naka-save pa rin sa device ang local settings at fares.':'📴 Offline mode: maaari pa ring gamitin ang lokal na HTML app. Ang external links gaya ng Google Maps ay maaaring hindi gumana.';}window.addEventListener('online',refreshOfflineStatus);window.addEventListener('offline',refreshOfflineStatus);refreshOfflineStatus();
+ function refreshOfflineStatus(){
+   const el=$('offlineStatus'),online=navigator.onLine;
+   if(el)el.textContent=online
+     ?'📶 May internet. Naka-save sa device ang pamasahe, settings at custom places. Ang live map tiles, road routing at address lookup ay gumagamit ng internet.'
+     :'📴 OFFLINE: Gumagana ang lokal na pamasahe, SAKAY/BABA, bayad, sukli, saved places at settings. GPS tracking may work kung may GPS signal. Hindi available ang bagong map tiles, road routing at online address search; hindi pa naka-download ang offline map data.';
+   if(!online&&routeMapStatus&&routeMapStatus.textContent.includes('LIVE · GPS + ROUTE'))
+     routeMapStatus.textContent='OFFLINE · GPS TRACKING ONLY · ROUTE DATA NOT SAVED';
+ }window.addEventListener('online',refreshOfflineStatus);window.addEventListener('offline',refreshOfflineStatus);refreshOfflineStatus();
  function refreshDashboard(){if(!$('dashRoute'))return;const route=boardingPlace&&alightingPlace?boardingPlace+' → '+alightingPlace:'None yet';$('dashRoute').textContent=route;$('dashFare').textContent=$('fareAmount')?$('fareAmount').textContent:'—';$('dashFareStatus').textContent=fareStatus();$('dashboardStatus').textContent=boardingPlace&&alightingPlace?'May napiling ruta':'Ready to search';const tx=safeRead('busFareDeskTransactionsV15',[]);$('dashTrips').textContent=Array.isArray(tx)?String(tx.length):'0';const recentCount=recent().length;$('statSearches').textContent=String(recentCount);$('statPayments').textContent=Array.isArray(tx)?String(tx.length):'0';const total=Array.isArray(tx)?tx.reduce((sum,t)=>sum+(Number(t.total)||0),0):0;$('statTotal').textContent='₱'+total.toLocaleString('en-PH',{maximumFractionDigits:2});const q=$('quickPaid');if(q)updateQuickChange()}
  function renderStops(){const host=$('stopList');if(!host)return;const q=norm($('stopFilter').value);const all=(Array.isArray(places)?places:[]).concat(Array.isArray(customPlaces)?customPlaces.map(p=>p.name):[]);const unique=[...new Set(all)].filter(p=>norm(p).includes(q)).sort((a,b)=>a.localeCompare(b,'en',{sensitivity:'base'}));const count=$('stopCount');if(count)count.textContent=unique.length+' places'+(q?' na tumutugma':' sa directory')+(unique.length>100?' · unang 100 ang ipinapakita':'');host.innerHTML='';unique.slice(0,100).forEach(name=>{const d=document.createElement('div');d.className='stop-item';d.textContent='📍 '+name;host.appendChild(d)});if(!unique.length)host.innerHTML='<div class="muted-small">No matching places. Try a shorter name.</div>'}
  function updateQuickChange(){const out=$('quickChangeResult');if(!out)return;const raw=$('quickPaid').value;const paid=Number(raw);let total=NaN;const fareText=($('fareAmount')?.textContent||'').replace(/[^0-9.]/g,'');if(fareText)total=Number(fareText);if(!boardingPlace||!alightingPlace||!Number.isFinite(total)||!raw.trim()){out.textContent='Select a route and enter the amount paid.';return}const diff=paid-total;if(!Number.isFinite(paid)||paid<0){out.textContent='Enter a valid amount.';return}out.textContent=diff>=0?'Sukli: ₱'+diff.toLocaleString('en-PH',{maximumFractionDigits:2}):'Kulang: ₱'+(-diff).toLocaleString('en-PH',{maximumFractionDigits:2})}
@@ -5158,6 +5165,11 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
  initIdleMap();
  const updateDestinationRoute=async(origin)=>{
    if(!destinationCoords||!routeMap||!window.L)return;
+   if(!navigator.onLine){
+     if(routeMapStatus)routeMapStatus.textContent='OFFLINE · GPS TRACKING ONLY · ROUTE DATA NOT SAVED';
+     debugText('Offline: GPS tracking can continue, but road routing needs internet or downloaded route data.');
+     return;
+   }
    const now=Date.now(),originLatLng=L.latLng(origin[0],origin[1]);
    if(lastRouteOrigin&&originLatLng.distanceTo(L.latLng(lastRouteOrigin[0],lastRouteOrigin[1]))<150&&now-lastRouteRequestAt<30000)return;
    if(now-lastRouteRequestAt<12000)return;
@@ -5210,6 +5222,11 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
    if(destinationRouteLine)destinationRouteLine.setLatLngs([]);
    if(destinationMarker&&routeMap){routeMap.removeLayer(destinationMarker);destinationMarker=null;}
    if(!routeMap)initIdleMap();
+   if(!navigator.onLine){
+     if(routeMapStatus)routeMapStatus.textContent='OFFLINE · DESTINATION SEARCH UNAVAILABLE';
+     notify('Walang internet. Hindi makakapaghanap ng bagong destination sa online map. Gamitin ang SAKAY/BABA at pamasahe na naka-save sa app.','short');
+     return;
+   }
    if(routeMapStatus)routeMapStatus.textContent='SEARCHING DESTINATION';
    try{
      const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q='+encodeURIComponent(destination+', Philippines');
