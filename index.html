@@ -13,6 +13,7 @@ body{padding:24px 18px 36px} .app{max-width:620px;margin:0 auto}.brand{display:f
 .fare-card{background:#fff;border-radius:14px;padding:17px 16px 16px;text-align:center;min-height:142px;display:flex;flex-direction:column;justify-content:center;gap:7px;color:#000}
 .fare-label{font-size:12px;font-weight:800;letter-spacing:.09em;color:#111}
 .fare-amount{font-size:clamp(36px,10vw,48px);font-weight:850;letter-spacing:-1px;line-height:1.1;color:#000;font-variant-numeric:tabular-nums}
+.fare-voice-button{display:inline-flex;align-self:center;align-items:center;justify-content:center;gap:6px;margin:7px auto 2px;padding:8px 12px;border:1.5px solid #1769e8;border-radius:999px;background:#eef5ff;color:#1054c5;font:inherit;font-size:11px;font-weight:850;cursor:pointer}.fare-voice-button[aria-pressed="true"]{background:#166534;border-color:#166534;color:#fff}.family-total .fare-voice-button{display:flex;margin:8px auto 7px}
 .fare-route{font-size:12px;color:#333;line-height:1.45;overflow-wrap:anywhere}
 .fare-foot{font-size:12px;color:#444;line-height:1.5;overflow-wrap:anywhere;max-width:440px;margin:2px auto 0}.fare-card{overflow-wrap:anywhere}.passenger-note{overflow-wrap:anywhere}
 @keyframes fareSpin{to{--fare-spin:360deg}}@property --spin{syntax:"<angle>";inherits:false;initial-value:0deg}@property --fare-spin{syntax:"<angle>";inherits:false;initial-value:0deg}@keyframes rainbowSpin{to{--spin:360deg}}@keyframes blackEdge{to{--spin:360deg}}@media(prefers-reduced-motion:reduce){.mode-box,.search-box,.fare-shell{animation:none}}.suggestions{display:none;position:absolute;top:66px;left:0;right:0;max-height:62vh;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 16px 38px #102b551f;padding:6px;z-index:10}.suggestions.show{display:block}.suggestion{display:flex;align-items:center;gap:12px;padding:13px 12px;border-radius:11px;cursor:pointer;min-height:50px}.suggestion:active,.suggestion:hover{background:var(--pale)}.pin{width:32px;height:32px;border-radius:10px;background:#eef4ff;color:var(--blue);display:grid;place-items:center;flex:none}.pin svg{width:17px;height:17px}.suggestion-name{font-size:14px;font-weight:600;line-height:1.35}.suggestion-meta{font-size:11px;color:var(--muted);margin-top:3px}.empty{padding:20px 14px;color:var(--muted);font-size:13px;text-align:center}.hint{margin:18px 4px;color:#8a93a3;font-size:12px;line-height:1.5}.selected{display:none;margin-top:20px;border:1px solid var(--line);border-radius:16px;padding:15px;background:#fff}.selected.show{display:block}.selected-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-weight:700}.selected-name{font-size:17px;font-weight:700;margin-top:6px}.selected-note{font-size:12px;color:var(--muted);margin-top:5px}.footer{position:fixed;bottom:12px;left:0;right:0;text-align:center;color:#a0a7b4;font-size:10px;pointer-events:none}
@@ -467,10 +468,10 @@ body.family-active .change-result strong{font-size:19px}
 <div class="family-intro">Choose one boarding point for the entire group. Each passenger has their own destination, type, and distance. No need to scroll through the single-passenger screen.</div>
 <div id="familyPeople"></div>
 <button type="button" id="addFamilyPerson" class="family-add">＋ Add passenger</button>
-<div class="family-total">TOTAL GROUP FARE<br><strong id="familyGrandTotal">₱0</strong><div id="familySummary" style="font-size:11px;color:#555;margin-top:5px">Set the boarding point and destination for each passenger.</div></div>
+<div class="family-total">TOTAL GROUP FARE<br><strong id="familyGrandTotal">₱0</strong><button type="button" class="fare-voice-button" data-fare-voice aria-pressed="false">🔊 Auto Voice: OFF</button><div id="familySummary" style="font-size:11px;color:#555;margin-top:5px">Set the boarding point and destination for each passenger.</div></div>
 <div id="familyPaymentMount"></div>
 </section>
-<section class="fare-shell" aria-live="polite" aria-label="Kabuuang pamasahe"><div class="fare-card"><div class="fare-label">TOTAL FARE</div><div class="fare-main-grid"><div class="fare-breakdown" id="fareBreakdown" aria-live="polite"><div class="fare-type-row active" data-fare-type="regular"><span class="fare-type-name">👤 Regular</span><strong id="fareRegularValue">₱0.00</strong></div><div class="fare-type-row" data-fare-type="student"><span class="fare-type-name">🎓 Student</span><strong id="fareStudentValue">—</strong></div><div class="fare-type-row" data-fare-type="senior"><span class="fare-type-name">🧓 Senior</span><strong id="fareSeniorValue">—</strong></div><div class="fare-type-row" data-fare-type="pwd"><span class="fare-type-name">♿ PWD</span><strong id="farePwdValue">—</strong></div></div><div class="fare-total-display"><div class="fare-total-caption">SELECTED TOTAL</div><div class="fare-amount" id="fareAmount">₱0.00</div><div class="fare-total-caption">PAMASAHE</div></div></div><div class="fare-route" id="fareRoute">Pumili ng sakayan • Pumili ng babaan</div><div class="fare-foot" id="fareFoot">Select a boarding point and destination first. The fare will appear here when a matching fare card or saved price is available.</div>
+<section class="fare-shell" aria-live="polite" aria-label="Kabuuang pamasahe"><div class="fare-card"><div class="fare-label">TOTAL FARE</div><div class="fare-main-grid"><div class="fare-breakdown" id="fareBreakdown" aria-live="polite"><div class="fare-type-row active" data-fare-type="regular"><span class="fare-type-name">👤 Regular</span><strong id="fareRegularValue">₱0.00</strong></div><div class="fare-type-row" data-fare-type="student"><span class="fare-type-name">🎓 Student</span><strong id="fareStudentValue">—</strong></div><div class="fare-type-row" data-fare-type="senior"><span class="fare-type-name">🧓 Senior</span><strong id="fareSeniorValue">—</strong></div><div class="fare-type-row" data-fare-type="pwd"><span class="fare-type-name">♿ PWD</span><strong id="farePwdValue">—</strong></div></div><div class="fare-total-display"><div class="fare-total-caption">SELECTED TOTAL</div><div class="fare-amount" id="fareAmount">₱0.00</div><button type="button" class="fare-voice-button" data-fare-voice aria-pressed="false">🔊 Auto Voice: OFF</button><div class="fare-total-caption">PAMASAHE</div></div></div><div class="fare-route" id="fareRoute">Pumili ng sakayan • Pumili ng babaan</div><div class="fare-foot" id="fareFoot">Select a boarding point and destination first. The fare will appear here when a matching fare card or saved price is available.</div>
 <section id="paymentPanel" class="payment-panel" aria-label="Bayad at sukli">
  <div class="payment-title">💵 PAYMENT & CHANGE</div>
  <div class="payment-total-row"><span>Total fare</span><strong id="paymentFareTotal">₱0</strong></div>
@@ -4319,6 +4320,58 @@ function currentFareTotal(){
  if(familyMode){let total=0;familyPassengers.forEach(person=>{const f=familyFare(boardingPlace,person.destination,person.type,person.km);if(f!==null)total+=f;});return total;}
  const t=(fareAmount.textContent||'').replace(/[₱,\s]/g,'');const n=Number(t);return Number.isFinite(n)?n:0;
 }
+
+// V60.15 quick fare voice: user enables it once; subsequent fare totals are spoken automatically.
+(function(){
+ const buttons=[...document.querySelectorAll('[data-fare-voice]')];
+ const single=document.getElementById('fareAmount');
+ const group=document.getElementById('familyGrandTotal');
+ if(!buttons.length||!single||!group)return;
+ let enabled=false,lastSpoken='',speakTimer=0;
+ try{enabled=localStorage.getItem('busFareDeskAutoFareVoice')==='1';}catch(e){}
+ function syncButtons(){
+  buttons.forEach(btn=>{btn.setAttribute('aria-pressed',String(enabled));btn.textContent=enabled?'🔊 Auto Voice: ON':'🔊 Auto Voice: OFF';});
+ }
+ function amountText(){
+  const raw=(familyMode?group:single).textContent||'';
+  const value=Number(raw.replace(/[^0-9.]/g,''));
+  return Number.isFinite(value)&&value>0?value:null;
+ }
+ function speakTotal(force=false){
+  const value=amountText();
+  if(value===null){if(force&&typeof showToast==='function')showToast('Pumili muna ng sakayan at babaan para may total.','short');return;}
+  if(!('speechSynthesis' in window)){if(force&&typeof showToast==='function')showToast('Hindi suportado ang voice output sa device na ito.','short');return;}
+  const key=(familyMode?'GROUP':'SOLO')+':'+value;
+  if(!force&&key===lastSpoken)return;
+  lastSpoken=key;
+  try{
+   window.speechSynthesis.cancel();
+   const utterance=new SpeechSynthesisUtterance('Kabuuang pamasahe: '+value+' pesos.');
+   utterance.lang='fil-PH';
+   utterance.rate=1.12;
+   utterance.pitch=1;
+   const voices=window.speechSynthesis.getVoices();
+   const filipino=voices.find(v=>/^fil(-|$)|^tl(-|$)/i.test(v.lang));
+   if(filipino)utterance.voice=filipino;
+   window.speechSynthesis.speak(utterance);
+  }catch(e){if(typeof showToast==='function')showToast('Hindi masimulan ang voice output.','short');}
+ }
+ buttons.forEach(btn=>btn.addEventListener('click',()=>{
+  enabled=!enabled;
+  try{localStorage.setItem('busFareDeskAutoFareVoice',enabled?'1':'0');}catch(e){}
+  syncButtons();
+  if(enabled)speakTotal(true);
+  else if('speechSynthesis' in window)window.speechSynthesis.cancel();
+ }));
+ const observer=new MutationObserver(()=>{
+  if(!enabled)return;
+  clearTimeout(speakTimer);
+  speakTimer=setTimeout(()=>speakTotal(false),180);
+ });
+ observer.observe(single,{childList:true,characterData:true,subtree:true});
+ observer.observe(group,{childList:true,characterData:true,subtree:true});
+ syncButtons();
+})();
 window.busFareDeskNotify=(message,kind='')=>showToast(message,kind);
 function showToast(message,kind=''){
  floatingToast.textContent=message;floatingToast.className='floating-toast show'+(kind?' '+kind:'');
