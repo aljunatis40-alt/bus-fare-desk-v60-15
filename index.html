@@ -4433,7 +4433,7 @@ function currentFareTotal(){
  function syncVoiceStatus(){
   const en=document.documentElement.lang==='en';
   if(window.BusFareSpeech&&typeof window.BusFareSpeech.speak==='function'){
-   setVoiceStatus(en?'Android Filipino voice is initializing.':'Inihahanda ang Android Filipino voice.');
+   setVoiceStatus(en?'Built-in offline Filipino voice is initializing.':'Inihahanda ang built-in offline Filipino voice.');
    return;
   }
   const supported='speechSynthesis' in window;
@@ -4444,12 +4444,12 @@ function currentFareTotal(){
  window.onBusFareTtsStatus=function(code){
   const en=document.documentElement.lang==='en';
   const messages={
-   ready:en?'Android Filipino voice is ready. Speech volume is set to maximum.':'Handa na ang Android Filipino voice. Naka-maximum ang volume ng pagsasalita.',
-   loading:en?'Preparing Android text-to-speech…':'Inihahanda ang Android text-to-speech…',
+   ready:en?'Handa na ang built-in offline Filipino voice. Naka-maximum ang volume ng app.':'Handa na ang built-in offline Filipino voice. Naka-maximum ang volume ng app.',
+   loading:en?'Preparing built-in offline Filipino voice…':'Inihahanda ang built-in offline Filipino voice…',
    speaking:en?'Speaking…':'Nagsasalita…',
    done:en?'Voice test/announcement finished.':'Tapos na ang pagsasalita.',
-   languageUnavailable:en?'Filipino voice data is unavailable. Install Filipino in Android Text-to-speech settings.':'Walang Filipino voice data. I-install ang Filipino sa Android Text-to-speech settings.',
-   error:en?'Android text-to-speech error. Check the installed voice engine and media volume.':'May error sa Android text-to-speech. Suriin ang voice engine at media volume.'
+   languageUnavailable:en?'The built-in voice could not load. The app will try the Android system voice.':'Hindi ma-load ang built-in voice. Susubukan ang Filipino voice ng Android.',
+   error:en?'Built-in voice error. Check media volume or use the Android system voice.':'May error sa built-in voice. Suriin ang media volume o gamitin ang system voice ng Android.'
   };
   setVoiceStatus(messages[code]||messages.error);
  };
