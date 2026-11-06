@@ -117,12 +117,12 @@ jobs:
           if root.exists():
               content = root.read_text(encoding="utf-8")
               if "https://jitpack.io" not in content:
-                  content = content.replace("mavenCentral()", "mavenCentral()\\n        maven { url 'https://jitpack.io' }")
+                  content = content.replace("mavenCentral()", "mavenCentral()\n        maven { url 'https://jitpack.io' }")
               root.write_text(content, encoding="utf-8")
           app = Path("android/app/build.gradle")
           content = app.read_text(encoding="utf-8")
           if "com.github.k2-fsa:sherpa-onnx" not in content:
-              content = content.replace("dependencies {", "dependencies {\\n    implementation 'com.github.k2-fsa:sherpa-onnx:v2.0.1'", 1)
+              content = content.replace("dependencies {", "dependencies {\n    implementation 'com.github.k2-fsa:sherpa-onnx:v2.0.1'", 1)
           app.write_text(content, encoding="utf-8")
           PY
 
