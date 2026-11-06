@@ -586,20 +586,18 @@ jobs:
                       copyAssetIfMissing("tagalog_tts/model.onnx", model);
                       copyAssetIfMissing("tagalog_tts/tokens.txt", tokens);
 
-                      OfflineTtsVitsModelConfig vits = OfflineTtsVitsModelConfig.builder()
-                          .setModel(model.getAbsolutePath())
-                          .setTokens(tokens.getAbsolutePath())
-                          .build();
-                      OfflineTtsModelConfig modelConfig = OfflineTtsModelConfig.builder()
-                          .setVits(vits)
-                          .setNumThreads(2)
-                          .setDebug(false)
-                          .build();
-                      OfflineTtsConfig config = OfflineTtsConfig.builder()
-                          .setModel(modelConfig)
-                          .setMaxNumSentences(1)
-                          .build();
-                      OfflineTts loaded = new OfflineTts(config);
+                      OfflineTtsVitsModelConfig vits = new OfflineTtsVitsModelConfig();
+                      vits.setModel(model.getAbsolutePath());
+                      vits.setTokens(tokens.getAbsolutePath());
+                      OfflineTtsModelConfig modelConfig = new OfflineTtsModelConfig();
+                      modelConfig.setVits(vits);
+                      modelConfig.setNumThreads(2);
+                      modelConfig.setDebug(false);
+                      modelConfig.setProvider("cpu");
+                      OfflineTtsConfig config = new OfflineTtsConfig();
+                      config.setModel(modelConfig);
+                      config.setMaxNumSentences(1);
+                      OfflineTts loaded = new OfflineTts(activity.getAssets(), config);
                       if (closed) { loaded.release(); return; }
                       engine = loaded;
                       notifyStatus("ready");
