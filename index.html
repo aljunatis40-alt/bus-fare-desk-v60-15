@@ -4422,7 +4422,18 @@ function currentFareTotal(){
  if(!single||!group)return;
  let enabled=true,lastSpoken='',speakTimer=0;
  try{localStorage.setItem('busFareDeskAutoFareVoice','1');}catch(e){}
- function syncButtons(){buttons.forEach(btn=>{btn.setAttribute('aria-pressed',String(enabled));btn.textContent=enabled?'🔊 Boses: NAKA-ON':'🔇 Boses: NAKA-MUTE';});}
+ function syncButtons(){buttons.forEach(btn=>{btn.setAttribute('aria-pressed',String(enabled));btn.textContent=enabled?'🔊 Boses: NAKA-ON':'🔇 Boses: NAKA-MUTE';});syncVoiceStatus();}
+ function syncVoiceStatus(){
+  const supported='speechSynthesis' in window;
+  let filipino=false;
+  try{filipino=supported&&window.speechSynthesis.getVoices().some(v=>/^fil(-|$)|^tl(-|$)/i.test(v.lang));}catch(e){}
+  buttons.forEach(btn=>{
+   let status=btn.parentElement&&btn.parentElement.querySelector('.fare-voice-status');
+   if(!status){status=document.createElement('div');status.className='fare-voice-status';status.style.cssText='font-size:10px;line-height:1.35;color:var(--muted,#64748b);margin:4px auto 0;max-width:260px;text-align:center';btn.insertAdjacentElement('afterend',status);}
+   const en=document.documentElement.lang==='en';
+   status.textContent=!supported?(en?'Voice output is not supported on this device.':'Hindi suportado ng device ang voice output.'):!filipino?(en?'No Filipino voice detected. Install Filipino voice data in Android Text-to-speech.':'Walang nakitang Filipino voice. I-download ang Filipino voice data sa Android Text-to-speech.'): (en?'Filipino voice detected. Offline speech depends on downloaded Android voice data.':'May nakitang Filipino voice. Ang offline na pagsasalita ay depende sa naka-download na voice data ng Android.');
+  });
+ }
  window.busFareDeskSpeakTagalog=function(message){
   if(!enabled||!message||!('speechSynthesis' in window))return;
   try{
@@ -4465,6 +4476,7 @@ function currentFareTotal(){
  observer.observe(single,{childList:true,characterData:true,subtree:true});
  observer.observe(group,{childList:true,characterData:true,subtree:true});
  syncButtons();
+ if('speechSynthesis' in window&&typeof window.speechSynthesis.addEventListener==='function')window.speechSynthesis.addEventListener('voiceschanged',syncVoiceStatus);
 })();
 function showToast(message,kind=''){
  floatingToast.textContent=message;floatingToast.className='floating-toast show'+(kind?' '+kind:'');
