@@ -381,7 +381,7 @@ body.family-active .change-result strong{font-size:19px}
 #bfdStartupIntro .bfd-headlight{position:absolute;right:-3px;bottom:31px;width:9px;height:12px;border-radius:3px;background:#eaffb0;box-shadow:0 0 18px 5px rgba(221,255,139,.7)}
 #bfdStartupIntro .bfd-intro-name{position:absolute;left:0;right:0;bottom:10%;display:flex;justify-content:center;gap:clamp(2px,1vw,7px);font-size:clamp(25px,8vw,42px);font-weight:950;letter-spacing:2px;color:#f5fff8;text-shadow:0 0 9px #19d978,0 0 25px rgba(18,255,132,.7)}
 #bfdStartupIntro .bfd-intro-name span{opacity:0;transform:translateY(12px);animation:bfdLetterIn .22s ease forwards}
-#bfdStartupIntro .bfd-intro-name span:nth-child(1){animation-delay:2.03s}#bfdStartupIntro .bfd-intro-name span:nth-child(2){animation-delay:2.10s}#bfdStartupIntro .bfd-intro-name span:nth-child(3){animation-delay:2.17s}#bfdStartupIntro .bfd-intro-name span:nth-child(4){animation-delay:2.24s}#bfdStartupIntro .bfd-intro-name span:nth-child(5){animation-delay:2.31s}#bfdStartupIntro .bfd-intro-name span:nth-child(6){animation-delay:2.38s}#bfdStartupIntro .bfd-intro-name span:nth-child(7){animation-delay:2.45s}#bfdStartupIntro .bfd-intro-name span:nth-child(8){animation-delay:2.52s}#bfdStartupIntro .bfd-intro-name span:nth-child(9){animation-delay:2.59s}
+#bfdStartupIntro .bfd-intro-name span:nth-child(1){animation-delay:2.03s}#bfdStartupIntro .bfd-intro-name span:nth-child(2){animation-delay:2.10s}#bfdStartupIntro .bfd-intro-name span:nth-child(3){animation-delay:2.17s}#bfdStartupIntro .bfd-intro-name span:nth-child(4){animation-delay:2.24s}#bfdStartupIntro .bfd-intro-name span:nth-child(5){animation-delay:2.31s}#bfdStartupIntro .bfd-intro-name span:nth-child(6){animation-delay:2.38s}#bfdStartupIntro .bfd-intro-name span:nth-child(7){animation-delay:2.45s}#bfdStartupIntro .bfd-intro-name span:nth-child(8){animation-delay:2.52s}#bfdStartupIntro .bfd-intro-name span:nth-child(9){animation-delay:2.59s}#bfdStartupIntro .bfd-intro-name span:nth-child(10){animation-delay:2.66s}
 #bfdStartupIntro .bfd-intro-credit{position:absolute;top:11%;left:12px;right:12px;text-align:center;color:#b5c9be;font-size:10px;font-weight:800;letter-spacing:3px;opacity:0;animation:bfdCreditIn .5s ease .35s forwards}
 #bfdStartupIntro .bfd-intro-credit strong{display:block;margin-bottom:8px;color:#a8ffc8;font-size:clamp(13px,4vw,18px);letter-spacing:2px}
 #bfdStartupIntro .bfd-intro-tag{position:absolute;bottom:4%;font-size:9px;letter-spacing:2px;color:#688b79}
@@ -5499,7 +5499,7 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
 (function(){
  const intro=document.getElementById('bfdStartupIntro');
  if(!intro)return;
- const dismiss=()=>{window.setTimeout(()=>{intro.classList.add('bfd-intro-hide');window.setTimeout(()=>intro.remove(),500);},2600);};
+ const dismiss=()=>{window.setTimeout(()=>{intro.classList.add('bfd-intro-hide');window.setTimeout(()=>intro.remove(),500);},3000);};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',dismiss,{once:true});
  else dismiss();
 })();
