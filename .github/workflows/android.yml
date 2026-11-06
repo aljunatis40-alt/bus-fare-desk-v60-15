@@ -225,6 +225,9 @@ jobs:
                   @JavascriptInterface public void stopSpeaking() {
                       runOnUiThread(() -> { if (bundledTagalogTts != null) bundledTagalogTts.stop(); if (textToSpeech != null) textToSpeech.stop(); });
                   }
+                  @JavascriptInterface public void setVoiceGender(String gender) {
+                      runOnUiThread(() -> { if (bundledTagalogTts != null) bundledTagalogTts.setVoiceGender(gender); });
+                  }
               }
 
               private void initializeTagalogTextToSpeech() {
@@ -540,6 +543,11 @@ jobs:
               private final ExecutorService executor = Executors.newSingleThreadExecutor();
               private volatile OfflineTts engine;
               private volatile AudioTrack activeTrack;
+              private volatile float playbackPitch = 1.06f;
+
+              public void setVoiceGender(String gender) {
+                  playbackPitch = "male".equalsIgnoreCase(gender) ? 0.94f : 1.06f;
+              }
               private volatile boolean stopRequested = false;
               private volatile boolean failed = false;
               private volatile boolean closed = false;
@@ -644,7 +652,7 @@ jobs:
 
               private void playAudio(GeneratedAudio audio) throws Exception {
                   float[] samples = audio.getSamples();
-                  int sampleRate = audio.getSampleRate();
+                  int sampleRate = Math.max(8000, Math.min(48000, Math.round(audio.getSampleRate() * playbackPitch)));
                   int minBuffer = AudioTrack.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
                   if (minBuffer <= 0) minBuffer = 8192;
                   AudioTrack track = new AudioTrack.Builder()
@@ -714,7 +722,7 @@ jobs:
                   try { whole = Long.parseLong(parts[0]); } catch (Exception error) { return raw; }
                   String result = integerWords(whole);
                   if (parts.length > 1 && !parts[1].isEmpty()) {
-                      StringBuilder decimal = new StringBuilder(" tuldok");
+                      StringBuilder decimal = new StringBuilder(" point");
                       for (int i = 0; i < parts[1].length(); i++) {
                           decimal.append(' ').append(integerWords(parts[1].charAt(i) - '0'));
                       }
@@ -724,30 +732,30 @@ jobs:
               }
 
               private String integerWords(long value) {
-                  String[] ones = {"sero", "isa", "dalawa", "tatlo", "apat", "lima", "anim", "pito", "walo", "siyam"};
-                  String[] teens = {"sampu", "labing-isa", "labindalawa", "labintatlo", "labing-apat", "labinlima", "labing-anim", "labimpito", "labing-walo", "labinsiyam"};
-                  String[] tens = {"", "", "dalawampu", "tatlumpu", "apatnapu", "limampu", "animnapu", "pitumpu", "walumpu", "siyamnapu"};
+                  String[] ones = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
+                  String[] teens = {"ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"};
+                  String[] tens = {"", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"};
                   if (value < 0) return "minus " + integerWords(-value);
                   if (value < 10) return ones[(int) value];
                   if (value < 20) return teens[(int) value - 10];
                   if (value < 100) {
                       long unit = value % 10;
-                      return tens[(int) (value / 10)] + (unit == 0 ? "" : " at " + ones[(int) unit]);
+                      return tens[(int) (value / 10)] + (unit == 0 ? "" : " " + ones[(int) unit]);
                   }
                   if (value < 1000) {
                       long remainder = value % 100;
-                      return integerWords(value / 100) + " daan" + (remainder == 0 ? "" : " at " + integerWords(remainder));
+                      return integerWords(value / 100) + " hundred" + (remainder == 0 ? "" : " " + integerWords(remainder));
                   }
                   if (value < 1000000) {
                       long remainder = value % 1000;
-                      return integerWords(value / 1000) + " libo" + (remainder == 0 ? "" : " at " + integerWords(remainder));
+                      return integerWords(value / 1000) + " thousand" + (remainder == 0 ? "" : " " + integerWords(remainder));
                   }
                   if (value < 1000000000) {
                       long remainder = value % 1000000;
-                      return integerWords(value / 1000000) + " milyon" + (remainder == 0 ? "" : " at " + integerWords(remainder));
+                      return integerWords(value / 1000000) + " million" + (remainder == 0 ? "" : " " + integerWords(remainder));
                   }
                   long remainder = value % 1000000000;
-                  return integerWords(value / 1000000000) + " bilyon" + (remainder == 0 ? "" : " at " + integerWords(remainder));
+                  return integerWords(value / 1000000000) + " billion" + (remainder == 0 ? "" : " " + integerWords(remainder));
               }
           }
           JAVA
