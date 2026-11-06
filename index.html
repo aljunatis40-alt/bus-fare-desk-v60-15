@@ -363,136 +363,7 @@ body.family-active .change-result strong{font-size:19px}
 
 #voiceFarePanel.voice-listening{border-color:#1769e8;background:#eff6ff}#voiceFarePanel.voice-listening #voiceFareStart{background:#0f3f9f;box-shadow:0 0 0 5px rgba(23,105,232,.13)}#voiceFarePanel.voice-listening svg path{animation:voiceWave .72s ease-in-out infinite alternate;transform-origin:center}@keyframes voiceWave{from{transform:scaleY(.55)}to{transform:scaleY(1.12)}}
 
-/* V60.17 cinematic FRONT-VIEW bus intro — letters emerge from inside the bus */
-#bfdStartupIntro{position:fixed;inset:0;z-index:999999;background:#020504;color:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;opacity:1;visibility:visible;transition:opacity .42s ease,visibility .42s ease;font-family:Roboto,"Segoe UI",Arial,sans-serif}
-#bfdStartupIntro.bfd-intro-hide{opacity:0;visibility:hidden;pointer-events:none}
-#bfdStartupIntro .bfd-intro-scene{position:relative;width:100%;max-width:560px;height:100%;min-height:420px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(ellipse at 50% 48%,rgba(0,255,125,.18),transparent 42%),radial-gradient(ellipse at 50% 100%,rgba(0,105,68,.25),transparent 55%),linear-gradient(180deg,#010303 0%,#07120e 58%,#020504 100%)}
-#bfdStartupIntro .bfd-light-beams{position:absolute;inset:0;background:conic-gradient(from 250deg at 50% 45%,transparent 0 17deg,rgba(83,255,158,.09) 19deg,transparent 24deg 155deg,rgba(83,255,158,.08) 160deg,transparent 166deg);animation:bfdBeamPulse 2.2s ease-in-out infinite alternate}
-#bfdStartupIntro .bfd-road{position:absolute;left:-25%;right:-25%;bottom:9%;height:2px;background:linear-gradient(90deg,transparent,#1b5944,#b8ffce,#1b5944,transparent);box-shadow:0 0 24px #00ff91;opacity:.8}
-#bfdStartupIntro .bfd-road:after{content:"";position:absolute;left:0;right:0;top:17px;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent)}
-#bfdStartupIntro .bfd-bus-wrap{position:absolute;left:50%;bottom:17%;width:min(78vw,330px);height:270px;transform:translateX(-50%) scale(.2);transform-origin:50% 85%;opacity:0;animation:bfdFrontArrive 1.42s cubic-bezier(.14,.78,.18,1) .08s forwards;filter:drop-shadow(0 0 25px rgba(0,255,126,.25))}
-#bfdStartupIntro .bfd-bus-body{position:absolute;left:4%;right:4%;top:30px;bottom:18px;border:3px solid #a7ffd0;border-radius:34px 34px 18px 18px;background:linear-gradient(100deg,#08713d 0%,#26d875 18%,#119b51 50%,#08723d 82%,#064b2b 100%);box-shadow:0 0 32px rgba(24,255,132,.42),inset 0 -15px 0 rgba(0,0,0,.2),inset 0 5px 12px rgba(255,255,255,.2)}
-#bfdStartupIntro .bfd-bus-sign{position:absolute;z-index:3;left:20%;right:20%;top:9px;padding:7px 5px;border:2px solid #d9ffe9;border-radius:7px;background:linear-gradient(#041b12,#0a3824);color:#c8ffdc;font-size:clamp(10px,3vw,15px);font-weight:950;letter-spacing:1.5px;text-align:center;white-space:nowrap;text-shadow:0 0 8px #20ff8c;box-shadow:0 0 14px #00e87980}
-#bfdStartupIntro .bfd-bus-windshield{position:absolute;z-index:2;left:13%;right:13%;top:55px;height:112px;overflow:hidden;border:4px solid #caffdf;border-radius:24px 24px 12px 12px;background:linear-gradient(155deg,#315e62 0%,#0b2529 45%,#020b10 100%);box-shadow:inset 0 0 22px #54ffc044,0 0 18px #00e87966}
-#bfdStartupIntro .bfd-bus-windshield:before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.26),transparent 27% 68%,rgba(57,255,164,.12));}
-#bfdStartupIntro .bfd-windshield-glow{position:absolute;z-index:1;left:24%;right:24%;top:83px;height:52px;background:radial-gradient(ellipse,rgba(89,255,168,.34),transparent 70%);filter:blur(7px);animation:bfdWindowGlow .8s ease-in-out 1.35s infinite alternate}
-#bfdStartupIntro .bfd-bus-grille{position:absolute;left:34%;right:34%;bottom:48px;height:25px;border:2px solid #a8f8c7;border-radius:8px;background:repeating-linear-gradient(0deg,#073c25 0 3px,#1ca65c 3px 5px);box-shadow:0 0 10px #00e87955}
-#bfdStartupIntro .bfd-bus-bumper{position:absolute;left:12%;right:12%;bottom:22px;height:15px;border:2px solid #baffd4;border-radius:8px;background:linear-gradient(#b9c9c0,#34483d 60%,#14251c);box-shadow:0 4px 8px #0008}
-#bfdStartupIntro .bfd-headlight{position:absolute;z-index:4;top:184px;width:28px;height:22px;border:2px solid #f4ffd0;border-radius:8px;background:#f0ffb0;box-shadow:0 0 14px 7px rgba(221,255,139,.72),0 0 42px 14px rgba(221,255,139,.22);animation:bfdHeadlightPulse .8s ease-in-out 1.4s infinite alternate}
-#bfdStartupIntro .bfd-headlight.left{left:8%}#bfdStartupIntro .bfd-headlight.right{right:8%}
-#bfdStartupIntro .bfd-bus-door{position:absolute;z-index:3;right:7%;top:83px;width:18px;height:112px;border:2px solid #baffd4;border-radius:5px;background:linear-gradient(90deg,#0b3b2b,#061b16);transform-origin:right;animation:bfdDoorOpen .5s ease 1.58s forwards}
-#bfdStartupIntro .bfd-wheel{position:absolute;bottom:5px;left:17%;width:34px;height:34px;border:6px solid #17201e;border-radius:50%;background:radial-gradient(circle,#c5d2cb 0 22%,#28342e 24% 100%);box-shadow:0 0 0 2px #9affc2}
-#bfdStartupIntro .bfd-wheel.bfd-wheel-rear{left:auto;right:17%}
-#bfdStartupIntro .bfd-intro-name{position:absolute;z-index:8;left:0;right:0;bottom:11%;display:flex;justify-content:center;gap:clamp(1px,.8vw,6px);font-size:clamp(24px,8vw,43px);font-weight:1000;letter-spacing:2px;color:#f4fff8;text-shadow:0 0 8px #19d978,0 0 20px #19d978,0 0 38px rgba(18,255,132,.9);filter:drop-shadow(0 0 9px #00ff91)}
-#bfdStartupIntro .bfd-intro-name span{opacity:0;transform:translateY(-82px) scale(.28);transform-origin:center;animation:bfdLetterEmerge .38s cubic-bezier(.16,.85,.22,1.25) forwards}
-#bfdStartupIntro .bfd-intro-name span:nth-child(1){animation-delay:1.58s}#bfdStartupIntro .bfd-intro-name span:nth-child(2){animation-delay:1.70s}#bfdStartupIntro .bfd-intro-name span:nth-child(3){animation-delay:1.82s}#bfdStartupIntro .bfd-intro-name span:nth-child(4){animation-delay:1.94s}#bfdStartupIntro .bfd-intro-name span:nth-child(5){animation-delay:2.06s}#bfdStartupIntro .bfd-intro-name span:nth-child(6){animation-delay:2.18s}#bfdStartupIntro .bfd-intro-name span:nth-child(7){animation-delay:2.30s}#bfdStartupIntro .bfd-intro-name span:nth-child(8){animation-delay:2.42s}#bfdStartupIntro .bfd-intro-name span:nth-child(9){animation-delay:2.54s}#bfdStartupIntro .bfd-intro-name span:nth-child(10){animation-delay:2.66s}
-#bfdStartupIntro .bfd-intro-credit{position:absolute;z-index:10;top:8%;left:12px;right:12px;text-align:center;color:#d4f8e1;font-size:10px;font-weight:850;letter-spacing:3px;opacity:0;animation:bfdCreditIn .5s ease .25s forwards;text-shadow:0 0 12px #00ff91}
-#bfdStartupIntro .bfd-intro-credit strong{display:block;margin-bottom:8px;color:#a8ffc8;font-size:clamp(15px,4.5vw,20px);letter-spacing:2px}
-#bfdStartupIntro .bfd-intro-tag{position:absolute;z-index:9;bottom:4%;font-size:9px;letter-spacing:2px;color:#9adbb5;text-shadow:0 0 10px #00ff91}
-@keyframes bfdFrontArrive{0%{transform:translateX(-50%) translateY(18px) scale(.2);opacity:0}12%{opacity:1}78%{transform:translateX(-50%) translateY(0) scale(1.035)}100%{transform:translateX(-50%) translateY(0) scale(1);opacity:1}}
-@keyframes bfdDoorOpen{to{transform:perspective(90px) rotateY(-62deg);background:#174b35}}
-@keyframes bfdLetterEmerge{0%{opacity:0;transform:translateY(-82px) scale(.28);filter:blur(5px)}65%{opacity:1;filter:blur(0)}100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
-@keyframes bfdCreditIn{to{opacity:1}}
-@keyframes bfdBeamPulse{from{opacity:.35;transform:scale(1)}to{opacity:.9;transform:scale(1.08)}}
-@keyframes bfdWindowGlow{from{opacity:.45;transform:scale(.8)}to{opacity:1;transform:scale(1.15)}}
-@keyframes bfdHeadlightPulse{from{filter:brightness(.8)}to{filter:brightness(1.5)}}
-@media(max-height:600px){#bfdStartupIntro .bfd-bus-wrap{bottom:14%;transform-origin:50% 85%;scale:.82}#bfdStartupIntro .bfd-intro-credit{top:4%}#bfdStartupIntro .bfd-intro-name{bottom:8%}}
-@media(prefers-reduced-motion:reduce){#bfdStartupIntro .bfd-bus-wrap{animation:none;transform:translateX(-50%) scale(1);opacity:1}#bfdStartupIntro .bfd-intro-name span{animation:none;opacity:1;transform:none}#bfdStartupIntro .bfd-intro-credit{animation:none;opacity:1}}
-
-
-/* V60.15 display refinement: compact spacing, readable controls, safe mobile fit.
-   Presentation-only overrides; no fare, GPS, voice, storage, or route logic changed. */
-html{scroll-behavior:smooth;scroll-padding-top:12px}
-body{padding:clamp(10px,3.5vw,18px) clamp(10px,3.2vw,16px) calc(28px + env(safe-area-inset-bottom))}
-.app{width:100%;max-width:680px;margin-inline:auto;min-width:0}
-.brand{gap:9px;margin:2px 1px 10px;min-width:0}
-.brand-name{font-size:18px;line-height:1.15}
-.brand-sub{font-size:11px}
-.creator-signature{line-height:1.15}
-#voiceFarePanel{margin:0 0 9px!important;padding:7px 8px!important;gap:8px!important}
-#voiceFareStart{width:44px!important;height:42px!important;flex-basis:44px!important}
-#voiceFareSpeak{width:38px!important;height:38px!important;flex-basis:38px!important}
-.route-location-panel{margin:3px 0 8px;padding:7px;gap:5px}
-.route-map-frame{height:clamp(112px,30vw,150px);min-height:112px}
-.route-three{gap:5px}
-.route-stop{min-width:0;padding:6px 5px}
-.route-stop strong{overflow-wrap:anywhere;line-height:1.25}
-.top-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 8px}
-.top-actions button,.family-toggle,.settings-toggle{min-height:38px}
-.search-box{height:54px;padding-inline:13px;gap:9px}
-.search-box input{font-size:16px}
-.suggestions{top:56px;max-height:min(56vh,440px)}
-.mode-boxes{gap:8px;margin-top:9px}
-.mode-box{min-height:70px;border-radius:13px}
-.mode-box span{min-height:54px;padding:7px}
-.mode-note{margin:7px 2px 0;line-height:1.4}
-.quick-tools{gap:6px;margin:8px 0}
-.quick-tools button,.access-controls button,.backup-actions button,.quick-denoms button{min-height:40px;min-width:0}
-.favorites-box{margin-top:8px}
-.extra-panel{margin:9px 0;padding:10px;border-radius:14px}
-.extra-head{gap:8px;flex-wrap:wrap}
-.dash-grid{gap:6px}
-.dash-grid>div{min-width:0;padding:8px}
-.dash-grid strong{overflow-wrap:anywhere;line-height:1.25}
-.extra-subhead{margin-top:10px}
-.stop-list{max-height:260px;overflow:auto}
-.passenger-types{margin-top:9px;padding:10px}
-.passenger-options{gap:6px}
-.passenger-option{min-height:74px;padding:7px 3px}
-.family-panel{padding:10px}
-.family-person{padding:9px}
-.family-total{margin-top:10px}
-.fare-shell{margin-top:10px;padding:3px}
-.fare-card{min-height:124px;padding:13px 12px;gap:5px}
-.fare-amount{font-size:clamp(34px,9vw,46px)}
-.payment-panel{margin-top:9px;padding:10px;gap:7px}
-.payment-total-row{padding:8px 9px}
-.denom-grid{gap:6px}
-.denom-grid button{min-height:44px}
-.payment-actions{gap:7px}
-.payment-actions button,.record-btn{min-height:42px}
-.transaction-history{margin-top:9px}
-.settings-panel{padding:8px max(8px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
-.settings-card{width:min(100%,620px);max-height:calc(100dvh - 16px);overflow:auto}
-.extras-dialog{max-height:calc(100dvh - 16px);padding:11px}
-button,input,select,textarea{font-family:inherit}
-button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #2563eb;outline-offset:2px}
-input,select,textarea{max-width:100%;min-width:0}
-img,svg,canvas{max-width:100%}
-@media(max-width:390px){
- body{padding-inline:9px}
- .brand-name{font-size:17px}
- .top-actions{gap:5px}
- .top-actions button,.family-toggle,.settings-toggle{padding:7px 9px;font-size:11px}
- .mode-boxes{gap:6px}
- .mode-box .mode-place{font-size:12px}
- .quick-tools{gap:5px}
- .quick-tools button{padding:8px 5px;font-size:11px}
- .passenger-options{gap:5px}
- .passenger-option{font-size:10px}
- .payment-panel{padding:8px}
-}
-@media(max-width:330px){
- body{padding-inline:7px}
- .top-actions button,.family-toggle,.settings-toggle{padding:6px 7px;font-size:10px}
- .mode-boxes{grid-template-columns:1fr 1fr}
- .mode-box{min-height:66px}
- .quick-tools{grid-template-columns:1fr 1fr}
- .passenger-options{grid-template-columns:repeat(2,minmax(0,1fr))}
- .denom-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
-}
-@media(max-height:600px){
- body{padding-top:8px;padding-bottom:22px}
- .route-map-frame{height:108px;min-height:108px}
- .brand{margin-bottom:7px}
- .fare-card{min-height:112px}
-}
-@media(prefers-reduced-motion:reduce){
- html{scroll-behavior:auto}
-}
-
-</style></head><body><div id="bfdStartupIntro" role="status" aria-label="Bus Fare Desk is starting"><div class="bfd-intro-scene"><div class="bfd-light-beams"></div><div class="bfd-intro-credit"><strong>BUS FARE DESK</strong>CREATED BY · PERSONAL EDITION</div><div class="bfd-road"></div><div class="bfd-bus-wrap" aria-hidden="true"><div class="bfd-bus-body"></div><div class="bfd-bus-sign">PITX TO ROAD 2</div><div class="bfd-bus-windshield"><div class="bfd-windshield-glow"></div></div><div class="bfd-bus-door"></div><div class="bfd-headlight left"></div><div class="bfd-headlight right"></div><div class="bfd-bus-grille"></div><div class="bfd-bus-bumper"></div><div class="bfd-wheel"></div><div class="bfd-wheel bfd-wheel-rear"></div></div><div class="bfd-intro-name" aria-label="Aljun Atis"><span>A</span><span>L</span><span>J</span><span>U</span><span>N</span><span>&nbsp;</span><span>A</span><span>T</span><span>I</span><span>S</span></div><div class="bfd-intro-tag">PERSONAL EDITION · READY</div></div></div><main class="app">
+</style></head><body><main class="app">
 <header class="brand"><div class="bus" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="2.8" width="14" height="18" rx="3"/><path d="M5 8h14M8 15h.01M16 15h.01M8 18.5v2M16 18.5v2M8 5.5h8" stroke-linecap="round"/></svg></div><div><div class="brand-name">Bus Fare Desk</div><div class="brand-sub">Quick place search</div><div class="creator-signature" aria-label="Created by Aljun Atis"><span class="signature-script">Aljun Atis</span><span class="signature-caption">CREATED BY · PERSONAL EDITION</span></div></div></header>
 <div id="voiceFarePanel" style="display:flex;align-items:center;gap:9px;margin:-8px 0 14px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:12px;background:#fff">
  <button type="button" id="voiceFareStart" aria-label="Magsalita para sa sakayan at babaan" title="Magsalita" style="width:48px;height:44px;flex:0 0 48px;border:0;border-radius:12px;background:#1769e8;color:white;display:grid;place-items:center">
@@ -588,6 +459,7 @@ img,svg,canvas{max-width:100%}
 <div class="settings-card"><div class="settings-head"><strong id="settingsHeading">⚙️ Settings</strong><button type="button" id="closeSettings" class="settings-close" aria-label="Close">×</button></div>
 <div class="settings-menu" role="group" aria-label="Settings sections"><button type="button" class="active" data-settings-tab="language"><span class="menu-icon">🌐</span><span id="languageMenuText">Language</span></button><button type="button" data-settings-tab="add"><span class="menu-icon">📍</span><span id="addMenuText">Add place</span></button><button type="button" data-settings-tab="edit"><span class="menu-icon">🏷️</span><span id="editMenuText">Edit places</span></button><button type="button" data-settings-tab="fares"><span class="menu-icon">💸</span><span id="fareMenuText">Fare editor</span></button><button type="button" data-settings-tab="themes"><span class="menu-icon">🎨</span><span>Themes and design</span></button><button type="button" data-settings-tab="tutorial"><span class="menu-icon">📘</span><span>Tutorial / Gabay</span></button></div>
 <div class="settings-section" data-settings-content="language"><div class="settings-label" id="languageLabel">🌐 Language / Wika</div><div class="language-options"><button type="button" data-lang="tl" id="langTl">🇵🇭 Filipino</button><button type="button" data-lang="en" id="langEn">🇬🇧 English</button></div></div>
+<div class="settings-section" data-settings-content="language"><div class="settings-label">🔊 Voice / Boses</div><label for="voiceGender">Voice type / Uri ng boses</label><select id="voiceGender" class="settings-input"><option value="female">Babae / Female</option><option value="male">Lalaki / Male</option></select><button type="button" id="voiceGenderTest" class="settings-save">▶ Test voice / Subukan ang boses</button></div>
 <div class="settings-section" data-settings-content="add" hidden><div class="settings-label" id="placeManagerLabel">📍 Add place at area</div><label id="newPlaceLabel" for="newPlace">Place name</label><input id="newPlace" class="settings-input" placeholder="e.g. New terminal"><label id="newAreaLabel" for="newArea">Assigned area</label><select id="newArea" class="settings-input"></select><button type="button" id="savePlace" class="settings-save">＋ Save place</button><div id="settingsFeedback" class="settings-feedback" aria-live="polite"></div></div>
 <div class="settings-section" data-settings-content="edit" hidden><div class="settings-label" id="savedPlacesLabel">🏷️ Added places — tap ✏️ to edit</div><input id="placeEditSearch" class="settings-input fare-edit-search" type="search" placeholder="🔎 Search place name…" autocomplete="off"><div id="customPlaceList" class="custom-place-list"></div></div><div class="settings-section" data-settings-content="fares" hidden><div class="settings-label" id="fareEditorLabel">💸 Edit fares for all places</div><div id="fareAuditNotice" role="status" style="padding:10px 12px;border:1px solid #f0c36d;background:#fffbeb;color:#78350f;border-radius:10px;font-size:11px;line-height:1.5;margin:8px 0">Fare check: same-price areas are listed below. You can edit each area fare here.</div><input id="fareSearch" class="settings-input fare-edit-search" placeholder="🔎 Search for a place…"><div class="route-fare-editor"><div class="settings-label" id="routeFareTitle">🛣️ Exact fare between two places</div><div id="existingRouteFarePanel" class="existing-route-fare" role="status" aria-live="polite" style="border:1px solid #94a3b8;border-radius:12px;padding:10px 12px;margin:10px 0;background:#f8fafc;color:#0f172a"><strong id="existingRouteFareHeading">📋 Currently saved fares</strong><div id="existingRouteFareDetails" style="margin-top:5px">Select a boarding point and destination to view the current fare before editing.</div></div><div class="route-fare-grid"><label><span id="routeFromLabel">Boarding point</span><input id="routeFromSearch" type="search" class="route-place-search" placeholder="🔎 Search boarding point…" autocomplete="off"><select id="routeFareFrom"></select></label><label><span id="routeToLabel">Destination</span><input id="routeToSearch" type="search" class="route-place-search" placeholder="🔎 Search destination…" autocomplete="off"><select id="routeFareTo"></select></label><label><span id="routeAmountLabel">Regular (₱)</span><input id="routeFareAmount" type="number" min="0" max="9999" step="1" inputmode="numeric" placeholder="e.g. 35"></label><label><span id="routeDiscountLabel">Student / Senior / PWD (₱)</span><input id="routeDiscountAmount" type="number" min="0" max="9999" step="1" inputmode="numeric" placeholder="e.g. 30"></label><label style="display:flex;align-items:center;gap:7px;margin-top:18px"><input id="routeFareBoth" type="checkbox" checked style="width:auto;margin:0"><span id="routeBothLabel">Same fare on return trip</span></label></div><button type="button" id="saveRouteFare" class="route-fare-save">💾 <span id="saveRouteFareText">Save fare for this route</span></button><div id="routeFareFeedback" class="settings-feedback" aria-live="polite"></div></div><div id="fareEditList" class="fare-edit-list"></div><div class="settings-feedback" id="fareSaveFeedback" aria-live="polite"></div><div class="settings-feedback" id="fareEditorNote"></div></div>
 
@@ -4420,7 +4292,15 @@ function currentFareTotal(){
  const buttons=[...document.querySelectorAll('[data-fare-voice]')];
  const single=document.getElementById('fareAmount'),group=document.getElementById('familyGrandTotal');
  if(!single||!group)return;
- let enabled=true,lastSpoken='',speakTimer=0;
+ const voiceGenderSelect=document.getElementById('voiceGender');
+ let voiceGender='female';
+ try{voiceGender=localStorage.getItem('busFareDeskVoiceGender')==='male'?'male':'female';}catch(e){}
+ function applyVoiceGender(){
+  if(voiceGenderSelect)voiceGenderSelect.value=voiceGender;
+  try{localStorage.setItem('busFareDeskVoiceGender',voiceGender);}catch(e){}
+  if(window.BusFareSpeech&&typeof window.BusFareSpeech.setVoiceGender==='function')window.BusFareSpeech.setVoiceGender(voiceGender);
+ }
+ let enabled=true,lastSpoken='';
  try{localStorage.setItem('busFareDeskAutoFareVoice','1');}catch(e){}
  function syncButtons(){buttons.forEach(btn=>{btn.setAttribute('aria-pressed',String(enabled));btn.textContent=enabled?'🔊 Boses: NAKA-ON':'🔇 Boses: NAKA-MUTE';});syncVoiceStatus();}
  function setVoiceStatus(message){
@@ -4466,7 +4346,7 @@ function currentFareTotal(){
    }
    window.speechSynthesis.cancel();
    const utterance=new SpeechSynthesisUtterance(String(message));
-   utterance.lang='fil-PH';utterance.rate=0.94;utterance.pitch=1;utterance.volume=1;
+   utterance.lang='fil-PH';utterance.rate=0.94;utterance.pitch=voiceGender==='male'?0.92:1.08;utterance.volume=1;
    utterance.onstart=()=>window.onBusFareTtsStatus('speaking');
    utterance.onend=()=>window.onBusFareTtsStatus('done');
    utterance.onerror=()=>window.onBusFareTtsStatus('error');
@@ -4506,11 +4386,18 @@ function currentFareTotal(){
  }));
  const observer=new MutationObserver(()=>{
   if(!enabled)return;
-  clearTimeout(speakTimer);
-  speakTimer=setTimeout(announceFare,280);
+  announceFare();
  });
  observer.observe(single,{childList:true,characterData:true,subtree:true});
  observer.observe(group,{childList:true,characterData:true,subtree:true});
+ applyVoiceGender();
+ if(voiceGenderSelect)voiceGenderSelect.addEventListener('change',()=>{
+  voiceGender=voiceGenderSelect.value==='male'?'male':'female';
+  applyVoiceGender();
+  window.busFareDeskSpeakTagalog('Subukan ang napiling boses.');
+ });
+ const voiceTest=document.getElementById('voiceGenderTest');
+ if(voiceTest)voiceTest.addEventListener('click',()=>window.busFareDeskSpeakTagalog('Pagsubok ng napiling boses. Handa na ang Bus Fare Desk.'));
  syncButtons();
  if('speechSynthesis' in window&&typeof window.speechSynthesis.addEventListener==='function')window.speechSynthesis.addEventListener('voiceschanged',syncVoiceStatus);
 })();
@@ -5719,14 +5606,5 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
  });
 })();
 </script>
-<script>
-// Hide the cinematic intro after a short activation window. The app is never reloaded.
-(function(){
- const intro=document.getElementById('bfdStartupIntro');
- if(!intro)return;
- const dismiss=()=>{window.setTimeout(()=>{intro.classList.add('bfd-intro-hide');window.setTimeout(()=>intro.remove(),500);},3400);};
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',dismiss,{once:true});
- else dismiss();
-})();
-</script>
+
 </body></html>
