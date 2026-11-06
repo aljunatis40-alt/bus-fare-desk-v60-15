@@ -122,7 +122,7 @@ jobs:
           app = Path("android/app/build.gradle")
           content = app.read_text(encoding="utf-8")
           if "com.github.k2-fsa:sherpa-onnx" not in content:
-              content = content.replace("dependencies {", "dependencies {\n    implementation 'com.github.k2-fsa:sherpa-onnx:v2.0.1'", 1)
+              content = content.replace("dependencies {", "dependencies {\n    implementation('com.github.k2-fsa:sherpa-onnx:v2.0.1') {\n        exclude group: 'com.github.k2-fsa.sherpa-onnx', module: 'sherpa-onnx-jvm'\n    }", 1)
           app.write_text(content, encoding="utf-8")
           PY
 
