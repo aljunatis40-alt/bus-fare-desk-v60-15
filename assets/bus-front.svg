@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><defs>
+ <linearGradient id="paint" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9ff73"/><stop offset=".42" stop-color="#83df28"/><stop offset="1" stop-color="#149447"/></linearGradient>
+ <linearGradient id="roof" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#eaff9a"/><stop offset="1" stop-color="#56c51d"/></linearGradient>
+ <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#164b48"/><stop offset=".55" stop-color="#062f35"/><stop offset="1" stop-color="#0b6657"/></linearGradient>
+ <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e7f3f4"/><stop offset="1" stop-color="#8ca8a6"/></linearGradient>
+ <filter id="shadow" x="-40%" y="-30%" width="180%" height="180%"><feGaussianBlur stdDeviation="3"/></filter>
+</defs>
+<ellipse cx="48" cy="87" rx="34" ry="5" fill="#082b21" opacity=".25" filter="url(#shadow)"/>
+<path d="M17 25 Q20 12 32 10 H64 Q76 12 79 25 L84 73 Q83 82 74 84 H22 Q13 82 12 73Z" fill="#07563b" stroke="#e1ffd2" stroke-width="2"/>
+<path d="M20 26 Q23 16 33 15 H63 Q73 16 76 26 L78 57 H18Z" fill="url(#paint)"/>
+<path d="M25 25 Q28 19 35 19 H61 Q68 19 71 25 L73 48 H23Z" fill="url(#glass)" stroke="#b6f6a0" stroke-width="2"/>
+<path d="M29 23 L44 21 L34 44 H25Z" fill="#fff" opacity=".22"/>
+<rect x="20" y="58" width="56" height="13" rx="5" fill="#54bd24"/>
+<circle cx="28" cy="69" r="5" fill="#fff6c5" stroke="#d8ff9b"/><circle cx="68" cy="69" r="5" fill="#fff6c5" stroke="#d8ff9b"/>
+<rect x="36" y="76" width="24" height="4" rx="2" fill="url(#metal)"/>
+<rect x="10" y="40" width="7" height="19" rx="3" fill="#064638"/><rect x="79" y="40" width="7" height="19" rx="3" fill="#064638"/>
+<path d="M22 83 H74" stroke="#e9ffe0" stroke-width="2" opacity=".8"/>
+</svg>
