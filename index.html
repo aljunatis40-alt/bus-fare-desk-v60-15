@@ -605,7 +605,7 @@ body.family-active .change-result strong{font-size:19px}
 <script>
 let places = [
 'Dulo ng Sapang Palay','Road 2','Quarry','Road 1','España','Area ng Towerville','Area ng Palmera','Area ng Tungko','Area ng Malaria hanggang Sampaguita','Area Pangarap','Area Amparo','Area SM Fairview','Area Regalado Ave','Area North Fairview to FCM','Area Peacock','Area Commonwealth','Area ng Ever','Area ng Tandang Sora','Area Philcoa','Area Visayas','Area Lung Center','Area Q. Ave','Area Domingo','Area Welcome Rotonda','Area España','Area Quiapo','Area Lawton','Area UN','Area Taft','Area Buendia','Area Seaside','Area Aseana','Area Parañaque',
-'España Boulevard','España Blvd','Blumentritt','Maceda','Quiapo','Lawton','Quintos','City Hall Manila','Finance','PNR','Vicente','Dela Fuente','Lacson','Florida','Arellano','Avida','Arellano Avida','Faura / PGH','Pedro Gil','UST Gate 1','UST Gate 2','Malvar','Nakpil','Remedios','P. Noval','Quirino','Green Mall','Morayta','Lerma','La Salle','Vito Cruz','Buendia','DLTB','Leveriza','Harrison','World Trade','World Trade Center','PNB','Seaside','HK','Hobbies','Petron Macapagal','Tytana','Met Live','DoubleDragon','Heritage','Shell Residence','MOA','ICE Tower','W Mall','DFA','Parqal','COD','Ayala Mall','Coastal Road','PITX',
+'España Boulevard','España Blvd','Blumentritt','Maceda','Quiapo','Lawton','Quintos','City Hall Manila','Finance','PNR','PNR España','Vicente','Vicente Cruz','Dela Fuente','Lacson','Florida','Arellano','Avida','Arellano Avida','Faura / PGH','Pedro Gil','UST Gate 1','UST Gate 2','Malvar','Nakpil','Remedios','P. Noval','Quirino','Green Mall','Morayta','Lerma','La Salle','Vito Cruz','Buendia','DLTB','Sakayan ng Laguna','Leveriza','Harrison','World Trade','World Trade Center','PNB','Seaside','HK','Hobbies','Petron Macapagal','Tytana','Met Live','DoubleDragon','Heritage','Shell Residence','MOA','ICE Tower','W Mall','DFA','Parqal','COD','Ayala Mall','Coastal Road','PITX',
 'Newtown','Towerville','Tialo','Sto Cristo','Classics','Curba','Northgate',
 'Palmera','Egay','Francisco','Grace Hospital',
 'SM / Builders','Paradise / North Diamond','Skyline / Robes / Gumaok East','Marcela II','Pacific Wave','Savano / Diamond Crest',"Pleasant 1'2 / Colinas",
@@ -659,8 +659,8 @@ const areaLocations={
 'Area Lawton':['Lawton / City Hall','SM / Intramuros','Finance Road'],
 'Area UN':['UN / Kalaw','Adamson'],
 'Area Taft':['Faura / PGH','Pedro Gil / Malvar / Nakpil','Remedios / Quirino','Green Mall / La Salle','Estrada / Vito Cruz'],
-'Area España':['España Boulevard','España Blvd','Blumentritt / Maceda','Blumentritt','Maceda','Quintos / PNR','Quintos','PNR','Vicente / Dela Fuente','Vicente','Dela Fuente','Lacson / Florida','Lacson','Florida','UST Gate 1 & 2','UST Gate 1','UST Gate 2','P. Noval','Morayta','FEU / Lerma','FEU','Lerma'],
-'Area Buendia':['Buendia / DLTB','Buendia','DLTB','Boarding point Laguna','Laguna Bus Terminal','Arellano','Avida','Arellano Avida','McDo / Leveriza / Harrison','Leveriza','Harrison','World Trade','World Trade Center'],
+'Area España':['España Boulevard','España Blvd','Blumentritt / Maceda','Blumentritt','Maceda','Quintos / PNR','Quintos','PNR','PNR España','Vicente / Dela Fuente','Vicente','Vicente Cruz','Dela Fuente','Lacson / Florida','Lacson','Florida','UST Gate 1 & 2','UST Gate 1','UST Gate 2','P. Noval','Morayta','FEU / Lerma','FEU','Lerma'],
+'Area Buendia':['Buendia / DLTB','Buendia','DLTB','Sakayan ng Laguna','Boarding point Laguna','Laguna Bus Terminal','Arellano','Avida','Arellano Avida','McDo / Leveriza / Harrison','Leveriza','Harrison','World Trade','World Trade Center'],
 'Area Seaside':['PNB / Seaside','PNB','Seaside','HK','Hobbies','Petron Macapagal','Hobbies / Petron Macapagal','Tytana'],
 'Area Aseana':['Met Live / Double Dragon','Heritage / Shell Residence','MOA / ICE Tower','Escape / Island / W. Mall','DFA / Parqal / COD','Ayala Mall'],
 'Area Parañaque':['Coastal / PITX']};
@@ -4504,6 +4504,27 @@ function showLtfrbMissingFare(from,to){
  if(typeof renderPayment==='function')renderPayment(false);
 }
 function updateFareCore(){
+ // User-confirmed zone fare: any España boarding stop to any Buendia destination.
+ // Keep this check before the official matrix so the specified fare always takes priority.
+ const zoneFareNorm=(value)=>String(value||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\\s+/g,' ').trim();
+ const espanaBoardingStops=new Set([
+  'Blumentritt','Maceda','Quintos','Quintos / PNR','PNR','PNR España','Vicente Cruz','Vicente','Vicente / Dela Fuente','Dela Fuente','Lacson','Lacson / Florida','Florida','UST Gate 1 & 2','UST Gate 1','UST Gate 2','P. Noval','Morayta','FEU','FEU / Lerma','Lerma','España Boulevard','España Blvd'
+ ].map(zoneFareNorm));
+ const buendiaDestinationStops=new Set([
+  'Arellano','Avida','Arellano Avida','Buendia / DLTB','Buendia','DLTB','Leveriza','Harrison','McDo / Leveriza / Harrison','Sakayan ng Laguna','Boarding point Laguna','Laguna Bus Terminal','World Trade','World Trade Center'
+ ].map(zoneFareNorm));
+ if(boardingPlace && alightingPlace && espanaBoardingStops.has(zoneFareNorm(boardingPlace)) && buendiaDestinationStops.has(zoneFareNorm(alightingPlace))){
+   const zoneRegular=30, zoneDiscounted=25, zoneApplied=passengerType==='regular'?zoneRegular:zoneDiscounted;
+   distancePanel.style.display='none';
+   fareAmount.textContent='₱'+zoneApplied.toFixed(2);
+   fareRoute.textContent=boardingPlace+' → '+alightingPlace+' · '+({regular:'Regular',student:'Student',senior:'Senior',pwd:'PWD'}[passengerType]||'Discounted');
+   fareFoot.textContent='España → Buendia zone fare: Regular ₱30.00 | Student / Senior / PWD ₱25.00.';
+   passengerNote.textContent=(passengerType==='regular'?'Regular':'Discounted')+' fare: ₱'+zoneApplied.toFixed(2)+'.';
+   const zonePreview=document.getElementById('regularFarePreview');if(zonePreview)zonePreview.textContent='₱30.00';
+   document.querySelectorAll('.passenger-option').forEach(btn=>{const small=btn.querySelector('small');if(small)small.textContent='₱'+(btn.dataset.type==='regular'?zoneRegular:zoneDiscounted).toFixed(2);});
+   if(typeof renderPayment==='function')renderPayment(false);
+   return;
+ }
  // All boarding and alighting place aliases now use the exact 28x28 area matrix.
  // The V60 official area matrix is the single default fare source.
  if(boardingPlace && alightingPlace){
