@@ -4400,13 +4400,13 @@ function currentFareTotal(){
  }
  window.busFareDeskEnglishMoney=englishFareWords;
  window.busFareDeskSpeakEnglish=function(message){
-  if(!enabled||!message)return;
+  if(!enabled||!message)return false;
   try{
    if(window.BusFareSpeech&&typeof window.BusFareSpeech.speakEnglish==='function'){
-    window.BusFareSpeech.speakEnglish(String(message));return;
+    window.BusFareSpeech.speakEnglish(String(message));return true;
    }
    if(!('speechSynthesis' in window)||typeof SpeechSynthesisUtterance==='undefined'){
-    setVoiceStatus('English voice output is unavailable on this device.');return;
+    setVoiceStatus('English voice output is unavailable on this device.');return false;
    }
    window.speechSynthesis.cancel();
    const utterance=new SpeechSynthesisUtterance(String(message));
@@ -4417,8 +4417,8 @@ function currentFareTotal(){
    const voices=window.speechSynthesis.getVoices();
    const english=voices.find(v=>/^en(-|$)/i.test(v.lang)&&/US|GB|PH/i.test(v.lang))||voices.find(v=>/^en(-|$)/i.test(v.lang));
    if(english)utterance.voice=english;
-   window.speechSynthesis.resume();window.speechSynthesis.speak(utterance);
-  }catch(e){window.onBusFareTtsStatus('error');}
+   window.speechSynthesis.resume();window.speechSynthesis.speak(utterance);return true;
+  }catch(e){window.onBusFareTtsStatus('error');return false;}
  };
  window.busFareDeskSpeakTagalog=function(message){
   if(!enabled||!message)return;
@@ -4446,17 +4446,18 @@ function currentFareTotal(){
   const routeKey=familyMode?'GROUP:'+boardingPlace+':'+familyPassengers.map(p=>p.destination).join('|')+':'+value:
    'SOLO:'+boardingPlace+':'+alightingPlace+':'+passengerType+':'+value;
   if(routeKey===lastSpoken)return;
-  lastSpoken=routeKey;
   const routeText=familyMode
    ?'From '+boardingPlace+'. Destinations: '+familyPassengers.map(p=>p.destination).filter(Boolean).join(', ')+'.'
    :'From '+boardingPlace+' to '+alightingPlace+'.';
-  window.busFareDeskSpeakEnglish('Total fare: '+englishFareWords(value)+'. '+routeText);
+  const accepted=window.busFareDeskSpeakEnglish('Total fare: '+englishFareWords(value)+'. '+routeText);
+  if(accepted!==false)lastSpoken=routeKey;
  }
  if(autoVoiceToggle)autoVoiceToggle.addEventListener('change',()=>{
   enabled=autoVoiceToggle.checked;
   try{localStorage.setItem('busFareDeskAutoFareVoice',enabled?'1':'0');}catch(e){}
   syncVoiceToggle();
   if(!enabled){if('speechSynthesis' in window)window.speechSynthesis.cancel();if(window.BusFareSpeech&&typeof window.BusFareSpeech.stopSpeaking==='function')window.BusFareSpeech.stopSpeaking();lastSpoken='';}
+  else{lastSpoken='';announceFare();}
  });
  const observer=new MutationObserver(()=>{
   if(!enabled)return;
