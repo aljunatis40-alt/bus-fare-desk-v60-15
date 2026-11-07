@@ -4319,23 +4319,23 @@ function currentFareTotal(){
  function syncVoiceStatus(){
   const en=document.documentElement.lang==='en';
   if(window.BusFareSpeech&&typeof window.BusFareSpeech.speak==='function'){
-   setVoiceStatus(en?'Built-in offline Filipino voice is initializing.':'Inihahanda ang built-in offline Filipino voice.');
+   setVoiceStatus(en?'English voice is initializing.':'Inihahanda ang English voice.');
    return;
   }
   const supported='speechSynthesis' in window;
   let filipino=false;
   try{filipino=supported&&window.speechSynthesis.getVoices().some(v=>/^fil(-|$)|^tl(-|$)/i.test(v.lang));}catch(e){}
-  setVoiceStatus(!supported?(en?'Voice output is not supported on this device.':'Hindi suportado ng device ang voice output.'):!filipino?(en?'No Filipino voice detected. Install Filipino voice data in Android Text-to-speech.':'Walang nakitang Filipino voice. I-install ang Filipino voice data sa Android Text-to-speech.'):(en?'Filipino voice detected.':'May nakitang Filipino voice.'));
+  setVoiceStatus(!supported?(en?'Voice output is not supported on this device.':'Hindi suportado ng device ang voice output.'):!filipino?(en?'No English voice detected. Install English voice data in Android Text-to-speech.':'Walang English voice. I-install ang English voice data sa Android Text-to-speech.'):(en?'English voice detected.':'May English voice.'));
  }
  window.onBusFareTtsStatus=function(code){
   const en=document.documentElement.lang==='en';
   const messages={
-   ready:en?'Handa na ang built-in offline Filipino voice. Naka-maximum ang volume ng app.':'Handa na ang built-in offline Filipino voice. Naka-maximum ang volume ng app.',
-   loading:en?'Preparing built-in offline Filipino voice…':'Inihahanda ang built-in offline Filipino voice…',
+   ready:en?'English voice is ready. App speech volume is set to maximum.':'Handa na ang English voice. Naka-maximum ang speech volume ng app.',
+   loading:en?'Preparing English voice…':'Inihahanda ang English voice…',
    speaking:en?'Speaking…':'Nagsasalita…',
    done:en?'Voice test/announcement finished.':'Tapos na ang pagsasalita.',
-   languageUnavailable:en?'The built-in voice could not load. The app will try the Android system voice.':'Hindi ma-load ang built-in voice. Susubukan ang Filipino voice ng Android.',
-   error:en?'Built-in voice error. Check media volume or use the Android system voice.':'May error sa built-in voice. Suriin ang media volume o gamitin ang system voice ng Android.'
+   languageUnavailable:en?'The English voice could not load.':'Hindi ma-load ang English voice ng Android.',
+   error:en?'English voice error. Check media volume and English voice data.':'May error sa English voice. Suriin ang media volume at English voice data.'
   };
   setVoiceStatus(messages[code]||messages.error);
  };
@@ -4382,6 +4382,20 @@ function currentFareTotal(){
    if(english)utterance.voice=english;
    window.speechSynthesis.resume();window.speechSynthesis.speak(utterance);
   }catch(e){window.onBusFareTtsStatus('error');}
+ };
+ window.busFareDeskSpeakTagalog=function(message){
+  if(!enabled||!message)return;
+  try{
+   if(window.BusFareSpeech&&typeof window.BusFareSpeech.speak==='function'){window.BusFareSpeech.speak(String(message));return;}
+   if(!('speechSynthesis' in window)||typeof SpeechSynthesisUtterance==='undefined')return;
+   window.speechSynthesis.cancel();
+   const utterance=new SpeechSynthesisUtterance(String(message));
+   utterance.lang='fil-PH';utterance.rate=0.94;utterance.pitch=voiceGender==='male'?0.92:1.08;utterance.volume=1;
+   const voices=window.speechSynthesis.getVoices();
+   const filipino=voices.find(v=>/^fil(-|$)|^tl(-|$)/i.test(v.lang));
+   if(filipino)utterance.voice=filipino;
+   window.speechSynthesis.resume();window.speechSynthesis.speak(utterance);
+  }catch(e){}
  };
  function currentSpokenFare(){
   const el=familyMode?group:single;
