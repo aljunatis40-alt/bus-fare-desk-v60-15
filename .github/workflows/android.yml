@@ -5,11 +5,13 @@ on:
   push:
     paths:
       - 'index.html'
+      - 'assets/**'
       - '.github/workflows/android.yml'
   pull_request:
     branches: [main]
     paths:
       - 'index.html'
+      - 'assets/**'
       - '.github/workflows/android.yml'
 
 permissions:
@@ -72,6 +74,8 @@ jobs:
         run: |
           mkdir -p www
           cp index.html www/index.html
+          mkdir -p www/assets
+          cp assets/*.svg www/assets/
 
           cat > package.json <<'EOF'
           {
@@ -90,11 +94,47 @@ jobs:
           }
           EOF
 
-          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6 leaflet@1.9.4
+          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6 leaflet@1.9.4 sharp@0.33.5
           mkdir -p www/leaflet
           cp -R node_modules/leaflet/dist/. www/leaflet/
           npx cap add android
           npx cap sync android
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const sharp = require('sharp');
+          (async () => {
+            const svg = fs.readFileSync('assets/launcher-icon.svg');
+            const res = 'android/app/src/main/res';
+            const densities = { 'mipmap-mdpi':48, 'mipmap-hdpi':72, 'mipmap-xhdpi':96, 'mipmap-xxhdpi':144, 'mipmap-xxxhdpi':192 };
+            for (const [folder,size] of Object.entries(densities)) {
+              fs.mkdirSync(path.join(res,folder),{recursive:true});
+              await sharp(svg).resize(size,size).png().toFile(path.join(res,folder,'ic_launcher.png'));
+              await sharp(svg).resize(size,size).png().toFile(path.join(res,folder,'ic_launcher_round.png'));
+            }
+            fs.mkdirSync(path.join(res,'drawable'),{recursive:true});
+            await sharp(svg).resize(432,432).png().toFile(path.join(res,'drawable','esmiringmap_icon_foreground.png'));
+            fs.mkdirSync(path.join(res,'mipmap-anydpi-v26'),{recursive:true});
+            const adaptive = '<?xml version="1.0" encoding="utf-8"?>\\n<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android"><background android:drawable="@color/esmiringmap_icon_background"/><foreground android:drawable="@drawable/esmiringmap_icon_foreground"/></adaptive-icon>\\n';
+            fs.writeFileSync(path.join(res,'mipmap-anydpi-v26','ic_launcher.xml'),adaptive);
+            fs.writeFileSync(path.join(res,'mipmap-anydpi-v26','ic_launcher_round.xml'),adaptive);
+            fs.mkdirSync(path.join(res,'values'),{recursive:true});
+            fs.writeFileSync(path.join(res,'values','esmiringmap_colors.xml'),'<?xml version="1.0" encoding="utf-8"?>\\n<resources><color name="esmiringmap_icon_background">#78D62C</color></resources>\\n');
+          })().catch(e => { console.error(e); process.exit(1); });
+          NODE
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          manifest = Path("android/app/src/main/AndroidManifest.xml")
+          content = manifest.read_text(encoding="utf-8")
+          def patch(match):
+              attrs = match.group(1)
+              if 'android:icon=' not in attrs: attrs += ' android:icon="@mipmap/ic_launcher"'
+              if 'android:roundIcon=' not in attrs: attrs += ' android:roundIcon="@mipmap/ic_launcher_round"'
+              return '<application' + attrs + '>'
+          content = re.sub(r'<application\\b([^>]*)>', patch, content, count=1)
+          manifest.write_text(content, encoding="utf-8")
+          PY
           mkdir -p android/app/src/main/assets/tagalog_tts
           curl -fL --retry 3 --retry-delay 2 -o android/app/src/main/assets/tagalog_tts/model.onnx "https://huggingface.co/willwade/mms-tts-multilingual-models-onnx/resolve/main/tgl/model.onnx"
           curl -fL --retry 3 --retry-delay 2 -o android/app/src/main/assets/tagalog_tts/tokens.txt "https://huggingface.co/willwade/mms-tts-multilingual-models-onnx/resolve/main/tgl/tokens.txt"
@@ -259,9 +299,14 @@ jobs:
               }
 
               private void initializeEnglishTextToSpeech() {
+                  sendTtsStatus("loading");
                   try {
                       englishTextToSpeech = new TextToSpeech(this, status -> runOnUiThread(() -> {
-                          if (status != TextToSpeech.SUCCESS || englishTextToSpeech == null) return;
+                          if (status != TextToSpeech.SUCCESS || englishTextToSpeech == null) {
+                              englishTextToSpeechReady = false;
+                              sendTtsStatus("error");
+                              return;
+                          }
                           try {
                               AudioAttributes attributes = new AudioAttributes.Builder()
                                   .setUsage(AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY)
@@ -269,19 +314,31 @@ jobs:
                                   .build();
                               englishTextToSpeech.setAudioAttributes(attributes);
                               int result = englishTextToSpeech.setLanguage(Locale.US);
+                              if (result < TextToSpeech.LANG_AVAILABLE) result = englishTextToSpeech.setLanguage(new Locale("en", "PH"));
                               if (result < TextToSpeech.LANG_AVAILABLE) result = englishTextToSpeech.setLanguage(Locale.ENGLISH);
-                              if (result < TextToSpeech.LANG_AVAILABLE) return;
+                              if (result < TextToSpeech.LANG_AVAILABLE) {
+                                  englishTextToSpeechReady = false;
+                                  sendTtsStatus("languageUnavailable");
+                                  return;
+                              }
                               englishTextToSpeechReady = true;
                               englishTextToSpeech.setSpeechRate(1.0f);
                               englishTextToSpeech.setPitch(1.0f);
+                              sendTtsStatus("ready");
                               if (!pendingEnglishSpeech.isEmpty()) {
                                   String queued = pendingEnglishSpeech;
                                   pendingEnglishSpeech = "";
                                   speakEnglishNowOrQueue(queued);
                               }
-                          } catch (Exception ignored) { englishTextToSpeechReady = false; }
+                          } catch (Exception error) {
+                              englishTextToSpeechReady = false;
+                              sendTtsStatus("error");
+                          }
                       }));
-                  } catch (Exception ignored) { englishTextToSpeechReady = false; }
+                  } catch (Exception error) {
+                      englishTextToSpeechReady = false;
+                      sendTtsStatus("error");
+                  }
               }
 
               private void speakEnglishNowOrQueue(String message) {
@@ -294,8 +351,9 @@ jobs:
                       Bundle parameters = new Bundle();
                       parameters.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0f);
                       parameters.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
-                      englishTextToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, parameters, "busfare-en-" + System.currentTimeMillis());
-                  } catch (Exception ignored) {}
+                      int result = englishTextToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, parameters, "busfare-en-" + System.currentTimeMillis());
+                      if (result == TextToSpeech.ERROR) sendTtsStatus("error");
+                  } catch (Exception error) { sendTtsStatus("error"); }
               }
 
               private void initializeSystemTtsFallback() {
