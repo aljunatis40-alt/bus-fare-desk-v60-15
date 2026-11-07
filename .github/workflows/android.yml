@@ -178,8 +178,11 @@ jobs:
               private static final int AUDIO_PERMISSION_REQUEST = 7402;
               private SpeechRecognizer speechRecognizer;
               private TextToSpeech textToSpeech;
+              private TextToSpeech englishTextToSpeech;
               private BundledTagalogTts bundledTagalogTts;
               private boolean textToSpeechReady = false;
+              private boolean englishTextToSpeechReady = false;
+              private String pendingEnglishSpeech = "";
               private String pendingTagalogSpeech = "";
               private int speechLanguageAttempt = 0;
               private final String[] speechLanguages = {"fil-PH", "fil", "en-PH", ""};
@@ -193,6 +196,7 @@ jobs:
                   getBridge().getWebView().addJavascriptInterface(new LocationBridge(), "BusFareLocation");
                   getBridge().getWebView().addJavascriptInterface(new SpeechBridge(), "BusFareSpeech");
                   initializeTagalogTextToSpeech();
+                  initializeEnglishTextToSpeech();
               }
 
               private final LocationListener locationListener = new LocationListener() {
@@ -222,8 +226,12 @@ jobs:
                       if (message == null) return;
                       runOnUiThread(() -> speakTagalog(message));
                   }
+                  @JavascriptInterface public void speakEnglish(String message) {
+                      if (message == null) return;
+                      runOnUiThread(() -> speakEnglishNowOrQueue(message));
+                  }
                   @JavascriptInterface public void stopSpeaking() {
-                      runOnUiThread(() -> { if (bundledTagalogTts != null) bundledTagalogTts.stop(); if (textToSpeech != null) textToSpeech.stop(); });
+                      runOnUiThread(() -> { if (bundledTagalogTts != null) bundledTagalogTts.stop(); if (textToSpeech != null) textToSpeech.stop(); if (englishTextToSpeech != null) englishTextToSpeech.stop(); });
                   }
                   @JavascriptInterface public void setVoiceGender(String gender) {
                       runOnUiThread(() -> { if (bundledTagalogTts != null) bundledTagalogTts.setVoiceGender(gender); });
@@ -248,6 +256,46 @@ jobs:
                           sendTtsStatus(status);
                       }
                   }));
+              }
+
+              private void initializeEnglishTextToSpeech() {
+                  try {
+                      englishTextToSpeech = new TextToSpeech(this, status -> runOnUiThread(() -> {
+                          if (status != TextToSpeech.SUCCESS || englishTextToSpeech == null) return;
+                          try {
+                              AudioAttributes attributes = new AudioAttributes.Builder()
+                                  .setUsage(AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY)
+                                  .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                                  .build();
+                              englishTextToSpeech.setAudioAttributes(attributes);
+                              int result = englishTextToSpeech.setLanguage(Locale.US);
+                              if (result < TextToSpeech.LANG_AVAILABLE) result = englishTextToSpeech.setLanguage(Locale.ENGLISH);
+                              if (result < TextToSpeech.LANG_AVAILABLE) return;
+                              englishTextToSpeechReady = true;
+                              englishTextToSpeech.setSpeechRate(1.0f);
+                              englishTextToSpeech.setPitch(1.0f);
+                              if (!pendingEnglishSpeech.isEmpty()) {
+                                  String queued = pendingEnglishSpeech;
+                                  pendingEnglishSpeech = "";
+                                  speakEnglishNowOrQueue(queued);
+                              }
+                          } catch (Exception ignored) { englishTextToSpeechReady = false; }
+                      }));
+                  } catch (Exception ignored) { englishTextToSpeechReady = false; }
+              }
+
+              private void speakEnglishNowOrQueue(String message) {
+                  if (message == null || message.trim().isEmpty()) return;
+                  if (englishTextToSpeech == null || !englishTextToSpeechReady) {
+                      pendingEnglishSpeech = message;
+                      return;
+                  }
+                  try {
+                      Bundle parameters = new Bundle();
+                      parameters.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0f);
+                      parameters.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
+                      englishTextToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, parameters, "busfare-en-" + System.currentTimeMillis());
+                  } catch (Exception ignored) {}
               }
 
               private void initializeSystemTtsFallback() {
@@ -505,6 +553,11 @@ jobs:
                       try { textToSpeech.stop(); textToSpeech.shutdown(); } catch (Exception ignored) {}
                       textToSpeech = null;
                       textToSpeechReady = false;
+                  }
+                  if (englishTextToSpeech != null) {
+                      try { englishTextToSpeech.stop(); englishTextToSpeech.shutdown(); } catch (Exception ignored) {}
+                      englishTextToSpeech = null;
+                      englishTextToSpeechReady = false;
                   }
                   super.onDestroy();
               }
