@@ -82,7 +82,7 @@ jobs:
             "name": "esmiringmap",
             "version": "1.0.0",
             "private": true,
-            "description": "EsmiringMap V60.17 Personal Edition"
+            "description": "EsmiringMap V60.18 Personal Edition"
           }
           EOF
 
@@ -881,7 +881,7 @@ jobs:
       - name: Save APK
         uses: actions/upload-artifact@v4
         with:
-          name: ESMIRINGMAP-V60.17-APK
+          name: ESMIRINGMAP-V60.18-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
