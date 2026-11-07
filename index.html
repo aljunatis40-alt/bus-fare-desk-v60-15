@@ -4590,6 +4590,9 @@ function updateFareCore(){
    fareFoot.textContent='España → Buendia zone fare: Regular ₱30.00 | Student / Senior / PWD ₱25.00.';
    passengerNote.textContent=(passengerType==='regular'?'Regular':'Discounted')+' fare: ₱'+zoneApplied.toFixed(2)+'.';
    const zonePreview=document.getElementById('regularFarePreview');if(zonePreview)zonePreview.textContent='₱30.00';
+   // Keep the four visible fare-breakdown rows synchronized with the special zone fare.
+   const zoneBreakdown={fareRegularValue:zoneRegular,fareStudentValue:zoneDiscounted,fareSeniorValue:zoneDiscounted,farePwdValue:zoneDiscounted};
+   Object.entries(zoneBreakdown).forEach(([id,amount])=>{const node=document.getElementById(id);if(node)node.textContent='₱'+amount.toFixed(2);});
    document.querySelectorAll('.passenger-option').forEach(btn=>{const small=btn.querySelector('small');if(small)small.textContent='₱'+(btn.dataset.type==='regular'?zoneRegular:zoneDiscounted).toFixed(2);});
    if(typeof renderPayment==='function')renderPayment(false);
    return;
