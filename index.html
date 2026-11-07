@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#ffffff"><title>EsmiringMap · V60.15 Personal Edition</title>
-<link rel="stylesheet" href="leaflet/leaflet.css">
+<meta name="theme-color" content="#ffffff"><title>EsmiringMap · V60.17 Personal Edition</title>
+<link rel="icon" type="image/svg+xml" href="assets/launcher-icon.svg"><link rel="stylesheet" href="leaflet/leaflet.css">
 <style>
 :root{--blue:#1769e8;--blue-dark:#1054c5;--ink:#000;--muted:#555;--line:#e5e7eb;--pale:#f6f9ff}
 *{box-sizing:border-box} html,body{margin:0;min-height:100%;background:#fff;color:var(--ink);font-family:Roboto,"Segoe UI",Arial,sans-serif}
@@ -376,7 +376,33 @@ body.family-active .change-result strong{font-size:19px}
 .bus-live-marker svg{display:block;width:27px;height:37px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.42));transform-origin:50% 50%;transition:transform .22s linear}
 .leaflet-marker-icon:has(.bus-live-marker){background:transparent!important;border:0!important}
 @media(max-width:390px){.route-map-frame{height:clamp(280px,46vh,430px)!important;min-height:280px!important}.route-location-panel{margin-top:3px!important}}
-</style></head><body><main class="app">
+</style><style>
+/* EsmiringMap V60.17 — floating full-screen map and 3D bus marker */
+.bus-3d-div-icon{background:transparent!important;border:0!important}
+.bus-live-marker{width:54px;height:70px;display:grid;place-items:center;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;color:transparent!important}
+.bus-live-marker .bus-3d-view{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 3px 4px rgba(0,0,0,.48));transform-origin:50% 50%;transition:transform .12s ease;pointer-events:none}
+.map-view-strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:12px 0 6px;padding:8px;background:#f1f5f9;border:1px solid #dbe3ee;border-radius:12px}
+.map-view-strip img{width:100%;height:58px;object-fit:contain;background:#fff;border-radius:8px;padding:3px}
+body.map-background-mode{padding:0!important;background:#edf2f5!important}
+body.map-background-mode .app{position:relative;isolation:isolate;max-width:none;width:100%;margin:0;padding:12px 10px calc(38px + env(safe-area-inset-bottom,0px))}
+body.map-background-mode #routeLocationPanel{position:fixed!important;inset:0!important;z-index:0!important;display:block!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;pointer-events:none!important;overflow:hidden}
+body.map-background-mode .route-map-frame{position:absolute!important;inset:0!important;width:100%!important;height:100dvh!important;min-height:100dvh!important;border-radius:0!important;box-shadow:none!important;overflow:hidden}
+body.map-background-mode #liveRouteMap{width:100%!important;height:100%!important;opacity:1!important;pointer-events:auto!important}
+body.map-background-mode .route-map-head{position:absolute!important;top:calc(env(safe-area-inset-top,0px) + 6px)!important;left:9px!important;right:9px!important;z-index:850!important;display:flex!important;padding:7px 10px!important;border:1px solid #cbd5e1!important;border-radius:11px!important;background:rgba(255,255,255,.94)!important;box-shadow:0 3px 12px #0002!important;pointer-events:auto!important}
+body.map-background-mode .route-location-title{position:absolute!important;top:calc(env(safe-area-inset-top,0px) + 42px)!important;left:9px!important;right:9px!important;z-index:850!important;background:rgba(234,248,239,.95)!important;box-shadow:0 2px 8px #0002!important;pointer-events:auto!important}
+body.map-background-mode .route-address{position:absolute!important;top:calc(env(safe-area-inset-top,0px) + 88px)!important;left:9px!important;right:9px!important;z-index:850!important;background:rgba(240,253,244,.95)!important;box-shadow:0 2px 8px #0002!important;pointer-events:auto!important}
+body.map-background-mode .route-three{position:absolute!important;top:calc(env(safe-area-inset-top,0px) + 136px)!important;left:9px!important;right:9px!important;z-index:850!important;gap:5px!important;pointer-events:auto!important}
+body.map-background-mode .route-gps-meta{position:absolute!important;top:calc(env(safe-area-inset-top,0px) + 190px)!important;left:12px!important;right:12px!important;z-index:850!important;padding:4px 7px!important;border-radius:8px!important;background:rgba(255,255,255,.88)!important;pointer-events:auto!important}
+body.map-background-mode .route-map-placeholder{pointer-events:none!important}
+body.map-background-mode .app>:not(#routeLocationPanel){position:relative;z-index:1}
+body.map-background-mode .fare-card,body.map-background-mode .passenger-types,body.map-background-mode .payment-panel,body.map-background-mode .family-panel,body.map-background-mode .selected{background:rgba(255,255,255,.94)!important;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);box-shadow:0 5px 18px rgba(15,23,42,.13)}
+body.map-background-mode .fare-shell,body.map-background-mode .family-total{box-shadow:0 5px 18px rgba(15,23,42,.18)}
+body.map-background-mode .top-actions{background:rgba(255,255,255,.88);border:1px solid #dbe3ee;border-radius:13px;padding:6px;box-shadow:0 3px 14px #0002;backdrop-filter:blur(8px)}
+body.map-background-mode .search-box,body.map-background-mode .mode-box::before{background:rgba(255,255,255,.96)!important}
+body.map-background-mode .hint{display:none}
+@media(max-width:390px){body.map-background-mode .route-three{top:calc(env(safe-area-inset-top,0px) + 142px)!important}body.map-background-mode .route-gps-meta{top:calc(env(safe-area-inset-top,0px) + 196px)!important}.bus-live-marker{width:48px;height:62px}}
+</style>
+</head><body><main class="app">
 <header class="brand"><div class="bus" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="2.8" width="14" height="18" rx="3"/><path d="M5 8h14M8 15h.01M16 15h.01M8 18.5v2M16 18.5v2M8 5.5h8" stroke-linecap="round"/></svg></div><div><div class="brand-name">Bus Fare Desk</div><div class="brand-sub">Quick place search</div><div class="creator-signature" aria-label="Created by Aljun Atis"><span class="signature-script">Aljun Atis</span><span class="signature-caption">CREATED BY · PERSONAL EDITION</span></div></div></header>
 <div id="voiceFarePanel" style="display:flex;align-items:center;gap:6px;margin:-8px 0 8px;padding:5px 7px;border:1px solid #e5e7eb;border-radius:10px;background:#fff">
  <button type="button" id="voiceFareStart" aria-label="Magsalita para sa sakayan at babaan" title="Magsalita" style="width:36px;height:34px;flex:0 0 36px;border:0;border-radius:9px;background:#1769e8;color:white;display:grid;place-items:center">
@@ -470,9 +496,10 @@ body.family-active .change-result strong{font-size:19px}
 <section class="selected" id="selected"><div class="selected-label">Selected place</div><div class="selected-name" id="selectedName"></div><div class="selected-note">Exact place name selected from the list.</div></section>
 <section id="settingsPanel" class="settings-panel" hidden aria-label="Settings">
 <div class="settings-card"><div class="settings-head"><button type="button" id="settingsBackToMenu" class="settings-back" hidden aria-label="Back to settings">‹ Settings</button><strong id="settingsHeading">⚙️ Settings</strong><button type="button" id="closeSettings" class="settings-close" aria-label="Close">×</button></div>
-<div class="settings-menu" role="group" aria-label="Settings sections"><button type="button" class="active" data-settings-tab="language"><span class="menu-icon">🌐</span><span id="languageMenuText">Language</span></button><button type="button" data-settings-tab="voice"><span class="menu-icon">🔊</span><span>Voice / Pagbigkas</span></button><button type="button" data-settings-tab="add"><span class="menu-icon">📍</span><span id="addMenuText">Add place</span></button><button type="button" data-settings-tab="edit"><span class="menu-icon">🏷️</span><span id="editMenuText">Edit places</span></button><button type="button" data-settings-tab="fares"><span class="menu-icon">💸</span><span id="fareMenuText">Fare editor</span></button><button type="button" data-settings-tab="themes"><span class="menu-icon">🎨</span><span>Themes and design</span></button><button type="button" data-settings-tab="notifications"><span class="menu-icon">🔔</span><span>Notifications / Mga Abiso</span></button><button type="button" data-settings-tab="tutorial"><span class="menu-icon">📘</span><span>Tutorial / Gabay</span></button></div>
+<div class="settings-menu" role="group" aria-label="Settings sections"><button type="button" class="active" data-settings-tab="language"><span class="menu-icon">🌐</span><span id="languageMenuText">Language</span></button><button type="button" data-settings-tab="voice"><span class="menu-icon">🔊</span><span>Voice / Pagbigkas</span></button><button type="button" data-settings-tab="map"><span class="menu-icon">🗺️</span><span>Map Display Mode</span></button><button type="button" data-settings-tab="add"><span class="menu-icon">📍</span><span id="addMenuText">Add place</span></button><button type="button" data-settings-tab="edit"><span class="menu-icon">🏷️</span><span id="editMenuText">Edit places</span></button><button type="button" data-settings-tab="fares"><span class="menu-icon">💸</span><span id="fareMenuText">Fare editor</span></button><button type="button" data-settings-tab="themes"><span class="menu-icon">🎨</span><span>Themes and design</span></button><button type="button" data-settings-tab="notifications"><span class="menu-icon">🔔</span><span>Notifications / Mga Abiso</span></button><button type="button" data-settings-tab="tutorial"><span class="menu-icon">📘</span><span>Tutorial / Gabay</span></button></div>
 <div class="settings-section" data-settings-content="language"><div class="settings-label" id="languageLabel">🌐 Language / Wika</div><div class="language-options"><button type="button" data-lang="tl" id="langTl">🇵🇭 Filipino</button><button type="button" data-lang="en" id="langEn">🇬🇧 English</button></div></div>
 <div class="settings-section" data-settings-content="voice" hidden><div class="settings-label">🔊 Voice announcements / Pagbigkas ng pamasahe</div><label class="voice-setting-toggle" for="autoFareVoiceToggle"><span><strong>Automatic na pagsasalita</strong><small>Basahin agad ang total fare pagkatapos mapili ang sakayan at babaan.</small></span><input type="checkbox" id="autoFareVoiceToggle" checked></label><div id="voiceSettingsStatus" class="settings-feedback" role="status" aria-live="polite">Awtomatikong pagsasalita: NAKA-ON</div><label for="voiceGender">Voice type / Uri ng boses</label><select id="voiceGender" class="settings-input"><option value="female">Babae / Female</option><option value="male">Lalaki / Male</option></select><button type="button" id="voiceGenderTest" class="settings-save">▶ Test voice / Subukan ang boses</button></div>
+<div class="settings-section" data-settings-content="map" hidden><div class="settings-label">🗺️ Map Display Mode</div><label class="voice-setting-toggle" for="mapDisplayModeToggle"><span><strong>Floating Background Map</strong><small>ON: full-screen map sa likod ng mga control. OFF: ibabalik ang compact map panel na may border.</small></span><input type="checkbox" id="mapDisplayModeToggle" checked></label><div id="mapDisplayModeStatus" class="settings-feedback" role="status">Floating Background Map: NAKA-ON</div><div class="map-view-strip" aria-label="Mga view ng 3D bus"><img src="assets/bus-front.svg" alt="Front view"><img src="assets/bus-rear.svg" alt="Rear view"><img src="assets/bus-left.svg" alt="Left view"><img src="assets/bus-right.svg" alt="Right view"><img src="assets/bus-top.svg" alt="Top view"></div><small class="settings-feedback">Nagpapalit ang anggulo ng bus marker ayon sa direksiyon ng GPS. Kailangan ng internet para sa bagong map tiles at road routing; tuloy pa rin ang lokal na fare at GPS functions kapag offline.</small></div>
 <div class="settings-section" data-settings-content="add" hidden><div class="settings-label" id="placeManagerLabel">📍 Add place at area</div><label id="newPlaceLabel" for="newPlace">Place name</label><input id="newPlace" class="settings-input" placeholder="e.g. New terminal"><label id="newAreaLabel" for="newArea">Assigned area</label><select id="newArea" class="settings-input"></select><button type="button" id="savePlace" class="settings-save">＋ Save place</button><div id="settingsFeedback" class="settings-feedback" aria-live="polite"></div></div>
 <div class="settings-section" data-settings-content="edit" hidden><div class="settings-label" id="savedPlacesLabel">🏷️ Added places — tap ✏️ to edit</div><input id="placeEditSearch" class="settings-input fare-edit-search" type="search" placeholder="🔎 Search place name…" autocomplete="off"><div id="customPlaceList" class="custom-place-list"></div></div><div class="settings-section" data-settings-content="fares" hidden><div class="settings-label" id="fareEditorLabel">💸 Edit fares for all places</div><div id="fareAuditNotice" role="status" style="padding:10px 12px;border:1px solid #f0c36d;background:#fffbeb;color:#78350f;border-radius:10px;font-size:11px;line-height:1.5;margin:8px 0">Fare check: same-price areas are listed below. You can edit each area fare here.</div><input id="fareSearch" class="settings-input fare-edit-search" placeholder="🔎 Search for a place…"><div class="route-fare-editor area-wide-editor"><div class="settings-label">🗺️ Area-wide fare edit / Buong area</div><p class="muted-small">Pumili ng area para sabay na ma-update ang lahat ng lugar na sakop nito. Ang sariling pamasahe ng isang lugar ay mananatiling priority; gamitin ang listahan sa ibaba para i-edit ang isang lugar lang.</p><label class="area-fare-select-label">Area<select id="areaFareSelect" class="settings-input"></select></label><div class="route-fare-grid"><label>Regular (₱)<input id="areaFareRegular" type="number" min="1" max="9999" step="1" inputmode="numeric"></label><label>Student / Senior / PWD (₱)<input id="areaFareDiscount" type="number" min="1" max="9999" step="1" inputmode="numeric" placeholder="Optional"></label></div><div id="areaFareMembers" class="muted-small" aria-live="polite"></div><button type="button" id="saveAreaFare" class="route-fare-save">💾 Save fare for entire area</button><div id="areaFareFeedback" class="settings-feedback" aria-live="polite"></div></div><div class="route-fare-editor"><div class="settings-label" id="routeFareTitle">🛣️ Exact fare between two places</div><div id="existingRouteFarePanel" class="existing-route-fare" role="status" aria-live="polite" style="border:1px solid #94a3b8;border-radius:12px;padding:10px 12px;margin:10px 0;background:#f8fafc;color:#0f172a"><strong id="existingRouteFareHeading">📋 Currently saved fares</strong><div id="existingRouteFareDetails" style="margin-top:5px">Select a boarding point and destination to view the current fare before editing.</div></div><div class="route-fare-grid"><label><span id="routeFromLabel">Boarding point</span><input id="routeFromSearch" type="search" class="route-place-search" placeholder="🔎 Search boarding point…" autocomplete="off"><select id="routeFareFrom"></select></label><label><span id="routeToLabel">Destination</span><input id="routeToSearch" type="search" class="route-place-search" placeholder="🔎 Search destination…" autocomplete="off"><select id="routeFareTo"></select></label><label><span id="routeAmountLabel">Regular (₱)</span><input id="routeFareAmount" type="number" min="0" max="9999" step="1" inputmode="numeric" placeholder="e.g. 35"></label><label><span id="routeDiscountLabel">Student / Senior / PWD (₱)</span><input id="routeDiscountAmount" type="number" min="0" max="9999" step="1" inputmode="numeric" placeholder="e.g. 30"></label><label style="display:flex;align-items:center;gap:7px;margin-top:18px"><input id="routeFareBoth" type="checkbox" checked style="width:auto;margin:0"><span id="routeBothLabel">Same fare on return trip</span></label></div><button type="button" id="saveRouteFare" class="route-fare-save">💾 <span id="saveRouteFareText">Save fare for this route</span></button><div id="routeFareFeedback" class="settings-feedback" aria-live="polite"></div></div><div id="fareEditList" class="fare-edit-list"></div><div class="settings-feedback" id="fareSaveFeedback" aria-live="polite"></div><div class="settings-feedback" id="fareEditorNote"></div></div>
 
@@ -5020,7 +5047,25 @@ function updateFare(){
  try{updateFareCore();}finally{passengerType=selectedType;}
  const raw=String(fareAmount.textContent||'').replace(/[₱,\s]/g,'');
  const regular=Number(raw);
- if(!Number.isFinite(regular)||regular<=0)return;
+ if(!Number.isFinite(regular)||regular<=0){
+  // Keep Solo total/payment aligned with the same confirmed zone resolver used by the fare comparison and Family mode.
+  const areaRegular=familyFare(boardingPlace,alightingPlace,'regular',1);
+  const areaApplied=familyFare(boardingPlace,alightingPlace,selectedType,1);
+  if(Number.isFinite(Number(areaRegular))&&Number(areaRegular)>0&&Number.isFinite(Number(areaApplied))&&Number(areaApplied)>0){
+   const label={regular:'Regular',student:'Student',senior:'Senior',pwd:'PWD'}[selectedType]||'Pasahero';
+   distancePanel.style.display='none';
+   fareAmount.textContent='₱'+Number(areaApplied).toFixed(2);
+   fareRoute.textContent=boardingPlace+' → '+alightingPlace+' · '+label;
+   const areaDiscount=familyFare(boardingPlace,alightingPlace,'student',1);
+   fareFoot.textContent='Confirmed zone fare: Regular ₱'+Number(areaRegular).toFixed(2)+' | Student / Senior / PWD ₱'+Number(areaDiscount).toFixed(2)+'.';
+   passengerNote.textContent=label+' fare: ₱'+Number(areaApplied).toFixed(2)+'.';
+   const preview=document.getElementById('regularFarePreview');if(preview)preview.textContent='₱'+Number(areaRegular).toFixed(2);
+   document.querySelectorAll('.passenger-option').forEach(btn=>{const small=btn.querySelector('small');if(small){const v=familyFare(boardingPlace,alightingPlace,btn.dataset.type,1);small.textContent=v===null?'—':'₱'+Number(v).toFixed(2);}});
+   if(typeof renderPayment==='function')renderPayment(false);
+   return;
+  }
+  return;
+ }
  const specialPalmeraSM=isPalmeraToSMFairviewV60(boardingPlace,alightingPlace);
  const ltfrbFallback=(fareFoot.textContent||'').includes('LTFRB_FARE_2026');
  const tariffKm=Number(distanceKm.value);
@@ -5304,9 +5349,21 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
  const routeMapPlaceholder=document.getElementById('routeMapPlaceholder');
  let routeMap=null,routeBusMarker=null,routeAccuracyCircle=null,routeTrackLine=null,destinationMarker=null,destinationRouteLine=null,destinationCoords=null,lastRouteRequestAt=0,lastRouteOrigin=null,routeTrackPoints=[];
  let currentBusHeading=0;
- const busSvg=()=>'<div class="bus-live-marker"><svg viewBox="0 0 32 44" role="presentation" aria-hidden="true"><defs><linearGradient id="busGreenPaint" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#86efac"/><stop offset=".48" stop-color="#16a34a"/><stop offset="1" stop-color="#065f46"/></linearGradient></defs><rect x="5" y="2" width="22" height="40" rx="7" fill="#064e3b"/><rect x="7" y="3" width="18" height="37" rx="5.5" fill="url(#busGreenPaint)" stroke="#f0fdf4" stroke-width="1.2"/><path d="M9 8 Q9 5 12 5 H20 Q23 5 23 8 V14 H9Z" fill="#dbeafe" stroke="#166534" stroke-width=".8"/><path d="M9 17 H23 V29 H9Z" fill="#15803d" opacity=".9"/><path d="M10 32 H22 V36 Q22 38 20 38 H12 Q10 38 10 36Z" fill="#bfdbfe" stroke="#166534" stroke-width=".7"/><rect x="2" y="10" width="3" height="8" rx="1.2" fill="#111827"/><rect x="27" y="10" width="3" height="8" rx="1.2" fill="#111827"/><rect x="2" y="28" width="3" height="8" rx="1.2" fill="#111827"/><rect x="27" y="28" width="3" height="8" rx="1.2" fill="#111827"/><path d="M12 3 L16 1 L20 3" fill="none" stroke="#fef3c7" stroke-width="1.2" stroke-linecap="round"/></svg></div>';
- const busMapIcon=()=>window.L?L.divIcon({className:'',html:busSvg(),iconSize:[27,37],iconAnchor:[13.5,18.5]}):null;
- const updateBusHeading=(heading)=>{if(Number.isFinite(Number(heading))&&heading!==null&&heading!=='')currentBusHeading=(Number(heading)+360)%360;const svg=routeBusMarker&&routeBusMarker.getElement()?.querySelector('.bus-live-marker svg');if(svg)svg.style.transform='rotate('+currentBusHeading+'deg)';};
+ const busViews=['front','front','right','rear-right','rear','rear','left','rear-left'];
+ const busAsset=view=>'assets/bus-'+view+'.svg';
+ const busSvg=()=>'<div class="bus-live-marker"><img class="bus-3d-view" src="assets/bus-top.svg" alt="" draggable="false"></div>';
+ const busMapIcon=()=>window.L?L.divIcon({className:'bus-3d-div-icon',html:busSvg(),iconSize:[54,70],iconAnchor:[27,35]}):null;
+ const updateBusHeading=(heading)=>{
+   if(Number.isFinite(Number(heading))&&heading!==null&&heading!=='')currentBusHeading=(Number(heading)+360)%360;
+   const marker=routeBusMarker&&routeBusMarker.getElement();
+   const img=marker&&marker.querySelector('.bus-3d-view');
+   if(img){
+     const sector=Math.round(currentBusHeading/45)%8;
+     img.src=busAsset(busViews[sector]);
+     img.style.transform='rotate('+currentBusHeading+'deg)';
+     img.dataset.heading=String(currentBusHeading);
+   }
+ };
  // GPS-OFF map is a neutral regional map canvas, not a claimed current position.
  const initIdleMap=()=>{
    if(!window.L||routeMap||!document.getElementById('liveRouteMap'))return;
@@ -5768,4 +5825,22 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
 })();
 </script>
 
+
+<script>
+(()=>{
+ const toggle=document.getElementById('mapDisplayModeToggle');
+ const status=document.getElementById('mapDisplayModeStatus');
+ const apply=(enabled,persist)=>{
+  document.body.classList.toggle('map-background-mode',!!enabled);
+  if(toggle)toggle.checked=!!enabled;
+  if(status)status.textContent=enabled?'Floating Background Map: NAKA-ON':'Compact Map Panel: NAKA-ON';
+  if(persist){try{localStorage.setItem('esmiringMapDisplayMode',enabled?'1':'0');}catch(e){}}
+  window.dispatchEvent(new Event('resize'));
+ };
+ let enabled=true;
+ try{enabled=localStorage.getItem('esmiringMapDisplayMode')!=='0';}catch(e){}
+ apply(enabled,false);
+ if(toggle)toggle.addEventListener('change',()=>apply(toggle.checked,true));
+})();
+</script>
 </body></html>
