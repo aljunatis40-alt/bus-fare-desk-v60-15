@@ -4551,9 +4551,13 @@ renderHistory();
 // Compact fare comparison: use the app's existing route fare resolver for each passenger type.
 function refreshFareBreakdown(){
  const rows={regular:'fareRegularValue',student:'fareStudentValue',senior:'fareSeniorValue',pwd:'farePwdValue'};
- const valid=!!(boardingPlace&&alightingPlace&&boardingPlace!==alightingPlace);
+ const shown=Number((fareAmount.textContent||'').replace(/[^0-9.]/g,''));
+ // Never show comparison prices from the legacy fallback resolver when the
+ // main fare calculator has no confirmed fare for the currently selected route.
+ const hasConfirmedTotal=Number.isFinite(shown)&&shown>0;
+ const valid=hasConfirmedTotal&&!!(boardingPlace&&alightingPlace&&boardingPlace!==alightingPlace);
  Object.keys(rows).forEach(type=>{const el=document.getElementById(rows[type]);if(!el)return;let value=null;try{if(valid&&typeof familyFare==='function')value=familyFare(boardingPlace,alightingPlace,type,1);}catch(e){}
-  if(type==='regular'&&(!Number.isFinite(Number(value))||value===null)){const shown=Number((fareAmount.textContent||'').replace(/[^0-9.]/g,''));value=Number.isFinite(shown)&&shown>0&&passengerType==='regular'?shown:null;}
+  if(type==='regular'&&(!Number.isFinite(Number(value))||value===null)){value=hasConfirmedTotal&&passengerType==='regular'?shown:null;}
   el.textContent=value===null||value===undefined?'—':money(value);
  });
  document.querySelectorAll('.fare-type-row').forEach(row=>row.classList.toggle('active',row.dataset.fareType===passengerType));
