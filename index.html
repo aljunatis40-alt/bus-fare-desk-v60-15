@@ -4503,9 +4503,7 @@ function showLtfrbMissingFare(from,to){
  document.querySelectorAll('.passenger-option').forEach(btn=>{const small=btn.querySelector('small');if(small)small.textContent='₱'+(btn.dataset.type==='regular'?regular:discounted);});
  if(typeof renderPayment==='function')renderPayment(false);
 }
-function updateFareCore(){
- // User-confirmed zone fare: any España boarding stop to any Buendia destination.
- // Keep this check before the official matrix so the specified fare always takes priority.
+function isEspanaToBuendiaZoneFare(from,to){
  const zoneFareNorm=(value)=>String(value||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\\s+/g,' ').trim();
  const espanaBoardingStops=new Set([
   'Blumentritt','Maceda','Quintos','Quintos / PNR','PNR','PNR España','Vicente Cruz','Vicente','Vicente / Dela Fuente','Dela Fuente','Lacson','Lacson / Florida','Florida','UST Gate 1 & 2','UST Gate 1','UST Gate 2','P. Noval','Morayta','FEU','FEU / Lerma','Lerma','España Boulevard','España Blvd'
@@ -4513,7 +4511,12 @@ function updateFareCore(){
  const buendiaDestinationStops=new Set([
   'Arellano','Avida','Arellano Avida','Buendia / DLTB','Buendia','DLTB','Leveriza','Harrison','McDo / Leveriza / Harrison','Sakayan ng Laguna','Boarding point Laguna','Laguna Bus Terminal','World Trade','World Trade Center'
  ].map(zoneFareNorm));
- if(boardingPlace && alightingPlace && espanaBoardingStops.has(zoneFareNorm(boardingPlace)) && buendiaDestinationStops.has(zoneFareNorm(alightingPlace))){
+ return Boolean(from&&to&&espanaBoardingStops.has(zoneFareNorm(from))&&buendiaDestinationStops.has(zoneFareNorm(to)));
+}
+function updateFareCore(){
+ // User-confirmed zone fare: any España boarding stop to any Buendia destination.
+ // Keep this check before the official matrix so the specified fare always takes priority.
+ if(isEspanaToBuendiaZoneFare(boardingPlace,alightingPlace)){
    const zoneRegular=30, zoneDiscounted=25, zoneApplied=passengerType==='regular'?zoneRegular:zoneDiscounted;
    distancePanel.style.display='none';
    fareAmount.textContent='₱'+zoneApplied.toFixed(2);
@@ -4901,6 +4904,13 @@ function updateFareCore(){
 // legacy area tables, confirmed route cards, reverse fares, and saved regular fares.
 function updateFare(){
  const selectedType=passengerType;
+ // The user-confirmed España → Buendia fare must override saved custom fares.
+ // This prevents stale Fare Editor values from changing the displayed fare or payment total.
+ if(isEspanaToBuendiaZoneFare(boardingPlace,alightingPlace)){
+  updateFareCore();
+  if(typeof renderPayment==='function')renderPayment(false);
+  return;
+ }
  const editableOverride=getEditableFareOverride(boardingPlace,alightingPlace);
  if(editableOverride){
   distancePanel.style.display='none';
