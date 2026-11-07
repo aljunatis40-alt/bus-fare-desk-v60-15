@@ -68,7 +68,7 @@ body.family-active .family-toggle{margin:0 0 8px auto}
 .history-head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;font-weight:900}.history-clear{border:0;background:#fff;color:#b91c1c;font-size:11px;font-weight:800;padding:5px}
 .history-list{display:grid;gap:7px;margin-top:8px}.history-item{padding:9px;border-radius:9px;background:#f8fafc;font-size:11px;line-height:1.45}.history-item strong{font-size:12px}.history-empty{padding:10px 0;font-size:11px;color:#64748b;text-align:center}
 .floating-toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom, 0px));transform:translate(-50%,18px);opacity:0;pointer-events:none;z-index:2147483647;width:max-content;max-width:calc(100vw - 28px);padding:12px 15px;border-radius:14px;background:#111;color:#fff;box-shadow:0 12px 32px #0003;font-size:12px;font-weight:800;text-align:center;white-space:pre-line;line-height:1.45;transition:opacity .18s,transform .18s}
-.floating-toast.show{opacity:1;transform:translate(-50%,0)}.floating-toast.short{background:#ffedd5;border:1px solid #f97316;color:#7c2d12;text-align:left}.floating-toast.good{background:#166534;color:#fff}
+.floating-toast.show{opacity:1;transform:translate(-50%,0)}.floating-toast.short{background:#ffedd5;border:1px solid #f97316;color:#7c2d12;text-align:left}.floating-toast.warning{background:#fff7ed;border:1px solid #fb923c;color:#7c2d12}.floating-toast.good{background:#166534;color:#fff}
 body.family-active #paymentPanel{margin-top:12px}
 
 @media(max-width:360px){.mode-boxes{gap:7px}.mode-box{min-height:72px}.mode-box span{padding:7px 4px}.mode-box.has-place .mode-place{font-size:17px}.family-toggle{padding:5px 8px}}
@@ -4361,7 +4361,7 @@ function currentFareTotal(){
  }
  function englishFareWords(value){
   const whole=Math.floor(value),cents=Math.round((value-whole)*100);
-  return englishNumberWords(whole)+' peso'+(whole===1?'':'s')+(cents?' and '+englishNumberWords(cents)+' centavos':'');
+  return englishNumberWords(whole)+' peso'+(whole===1?'':'s')+(cents?' and '+englishNumberWords(cents)+' cent'+(cents===1?'':'s'):'');
  }
  window.busFareDeskEnglishMoney=englishFareWords;
  window.busFareDeskSpeakEnglish=function(message){
@@ -4487,7 +4487,7 @@ function renderPayment(announce=false){
   let en,tl,kind;
   if(diff>0){en='Amount paid: '+words(paid)+'. Total fare: '+words(total)+'. Change: '+words(diff)+'.';tl='Bayad: '+money(paid)+'. Total pamasahe: '+money(total)+'. Sukli: '+money(diff)+'.';kind='good';}
   else if(diff===0){en='Amount paid: '+words(paid)+'. Exact payment. No change.';tl='Bayad: '+money(paid)+'. Sakto ang bayad. Walang sukli.';kind='good';}
-  else{en='Amount paid: '+words(paid)+'. Total fare: '+words(total)+'. Short by '+words(-diff)+'.';tl='Bayad: '+money(paid)+'. Total pamasahe: '+money(total)+'. Kulang pa ng '+money(-diff)+'.';kind='short';}
+  else{en='Amount paid: '+words(paid)+'. Total fare: '+words(total)+'. Short by '+words(-diff)+'.';tl='Bayad: '+money(paid)+'. Total pamasahe: '+money(total)+'. Kulang pa ng '+money(-diff)+'.';kind='warning';}
   showToast(en+'\n'+tl,kind);
   if(typeof window.busFareDeskSpeakEnglish==='function')window.busFareDeskSpeakEnglish(en);
  }
