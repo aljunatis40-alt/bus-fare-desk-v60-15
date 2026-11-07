@@ -4450,7 +4450,7 @@ function currentFareTotal(){
  }
  function announceFare(){
   const value=currentSpokenFare();
-  if(value===null||!boardingPlace||(!familyMode&&!alightingPlace))return;
+  if(value===null||!boardingPlace||(!familyMode&&!alightingPlace)){lastSpoken='';return;}
   const routeKey=familyMode?'GROUP:'+boardingPlace+':'+familyPassengers.map(p=>p.destination).join('|')+':'+value:
    'SOLO:'+boardingPlace+':'+alightingPlace+':'+passengerType+':'+value;
   if(routeKey===lastSpoken)return;
@@ -5918,6 +5918,41 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
 })();
 </script>
 
-<style id="floating-check-style">#floatingCheckIndicator{position:fixed;right:9px;bottom:10px;z-index:1900;padding:5px 8px;border:1px solid #86efac;border-radius:999px;background:#f0fdf4;color:#166534;font:800 10px/1.2 Roboto,Arial,sans-serif;box-shadow:0 2px 8px #0002;pointer-events:none;opacity:.92}body.dark-mode #floatingCheckIndicator{background:#14532d;color:#dcfce7;border-color:#4ade80}</style>
+<style id="floating-check-style">#floatingCheckIndicator{position:fixed;right:9px;bottom:10px;z-index:1900;padding:5px 8px;border:1px solid #86efac;border-radius:999px;background:#f0fdf4;color:#166534;font:800 10px/1.2 Roboto,Arial,sans-serif;box-shadow:0 2px 8px #0002;pointer-events:none;opacity:.92}body.dark-mode #floatingCheckIndicator{background:#14532d;color:#dcfce7;border-color:#4ade80}
+/* Restore the prominent TOTAL FARE frame and readable amount. */
+.fare-shell{
+  margin-top:14px!important;
+  padding:6px!important;
+  border-radius:20px!important;
+  background:conic-gradient(from var(--fare-spin,0deg),#16803d,#d4af37,#c0c0c0,#f3d36a,#15803d,#c0c0c0,#d4af37,#16803d)!important;
+  animation:fareSpin 2.6s linear infinite!important;
+  box-shadow:0 0 0 2px #d4af3738,0 0 18px #c9a22755!important;
+}
+.fare-card{
+  border:1px solid #d4af37!important;
+  border-radius:14px!important;
+  padding:12px!important;
+  min-height:150px!important;
+}
+.fare-total-display{
+  border:3px solid #d4af37!important;
+  border-radius:14px!important;
+  box-shadow:inset 0 0 0 2px #d4af3726,0 2px 8px #14532d18!important;
+  padding:10px 5px!important;
+}
+.fare-total-display .fare-amount{
+  font-size:clamp(32px,9vw,44px)!important;
+  font-weight:950!important;
+  line-height:1.05!important;
+  margin:7px 0!important;
+}
+@media(max-width:360px){
+  .fare-shell{padding:5px!important}
+  .fare-card{padding:9px!important;min-height:0!important}
+  .fare-total-display{border-width:2px!important;padding:7px 3px!important}
+  .fare-total-display .fare-amount{font-size:clamp(27px,8vw,34px)!important}
+}
+
+</style>
 <div id="floatingCheckIndicator" role="status" aria-live="polite">✓ CHECK PASSED</div>
 </body></html>
