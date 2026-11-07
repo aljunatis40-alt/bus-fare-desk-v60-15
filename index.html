@@ -4339,28 +4339,48 @@ function currentFareTotal(){
   };
   setVoiceStatus(messages[code]||messages.error);
  };
- window.busFareDeskSpeakTagalog=function(message){
+ function englishNumberWords(value){
+  const ones=['zero','one','two','three','four','five','six','seven','eight','nine'];
+  const teens=['ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+  const tens=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+  function underThousand(n){
+   let out='';
+   if(n>=100){out+=ones[Math.floor(n/100)]+' hundred';n%=100;if(n)out+=' ';}
+   if(n>=20){out+=tens[Math.floor(n/10)];if(n%10)out+='-'+ones[n%10];}
+   else if(n>=10)out+=teens[n-10];
+   else if(n>0||!out)out+=ones[n];
+   return out;
+  }
+  if(!Number.isFinite(value)||value<0)return 'zero';
+  let n=Math.floor(value),out='';
+  if(n>=1000000){out+=underThousand(Math.floor(n/1000000))+' million';n%=1000000;if(n)out+=' ';}
+  if(n>=1000){out+=underThousand(Math.floor(n/1000))+' thousand';n%=1000;if(n)out+=' ';}
+  if(n>0||!out)out+=underThousand(n);
+  return out;
+ }
+ function englishFareWords(value){
+  const whole=Math.floor(value),cents=Math.round((value-whole)*100);
+  return englishNumberWords(whole)+' peso'+(whole===1?'':'s')+(cents?' and '+englishNumberWords(cents)+' centavo'+(cents===1?'':'s'):'');
+ }
+ window.busFareDeskSpeakEnglish=function(message){
   if(!enabled||!message)return;
   try{
-   if(window.BusFareSpeech&&typeof window.BusFareSpeech.speak==='function'){
-    window.BusFareSpeech.speak(String(message));
-    return;
+   if(window.BusFareSpeech&&typeof window.BusFareSpeech.speakEnglish==='function'){
+    window.BusFareSpeech.speakEnglish(String(message));return;
    }
    if(!('speechSynthesis' in window)||typeof SpeechSynthesisUtterance==='undefined'){
-    setVoiceStatus(document.documentElement.lang==='en'?'Voice output is unavailable in this app.':'Hindi available ang voice output sa app na ito.');
-    return;
+    setVoiceStatus('English voice output is unavailable on this device.');return;
    }
    window.speechSynthesis.cancel();
    const utterance=new SpeechSynthesisUtterance(String(message));
-   utterance.lang='fil-PH';utterance.rate=0.94;utterance.pitch=voiceGender==='male'?0.92:1.08;utterance.volume=1;
+   utterance.lang='en-US';utterance.rate=1.0;utterance.pitch=1.0;utterance.volume=1;
    utterance.onstart=()=>window.onBusFareTtsStatus('speaking');
    utterance.onend=()=>window.onBusFareTtsStatus('done');
    utterance.onerror=()=>window.onBusFareTtsStatus('error');
    const voices=window.speechSynthesis.getVoices();
-   const filipino=voices.find(v=>/^fil(-|$)|^tl(-|$)/i.test(v.lang));
-   if(filipino)utterance.voice=filipino;
-   window.speechSynthesis.resume();
-   window.speechSynthesis.speak(utterance);
+   const english=voices.find(v=>/^en(-|$)/i.test(v.lang)&&/US|GB|PH/i.test(v.lang))||voices.find(v=>/^en(-|$)/i.test(v.lang));
+   if(english)utterance.voice=english;
+   window.speechSynthesis.resume();window.speechSynthesis.speak(utterance);
   }catch(e){window.onBusFareTtsStatus('error');}
  };
  function currentSpokenFare(){
@@ -4376,7 +4396,10 @@ function currentFareTotal(){
    'SOLO:'+boardingPlace+':'+alightingPlace+':'+passengerType+':'+value;
   if(routeKey===lastSpoken)return;
   lastSpoken=routeKey;
-  window.busFareDeskSpeakTagalog('Ang kabuuang pamasahe ay '+value+' pesos.');
+  const routeText=familyMode
+   ?'From '+boardingPlace+'. Destinations: '+familyPassengers.map(p=>p.destination).filter(Boolean).join(', ')+'.'
+   :'From '+boardingPlace+' to '+alightingPlace+'.';
+  window.busFareDeskSpeakEnglish('Total fare: '+englishFareWords(value)+'. '+routeText);
  }
  buttons.forEach(btn=>btn.addEventListener('click',()=>{
   enabled=!enabled;
@@ -5555,9 +5578,40 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
  if(!mic||!speakBtn||!status)return;
  const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
  let listening=false, oldBoard='', oldAlight='';
+ function englishNumberWords(value){
+  const ones=['zero','one','two','three','four','five','six','seven','eight','nine'];
+  const teens=['ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+  const tens=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+  function underThousand(n){
+   let out='';
+   if(n>=100){out+=ones[Math.floor(n/100)]+' hundred';n%=100;if(n)out+=' ';}
+   if(n>=20){out+=tens[Math.floor(n/10)];if(n%10)out+='-'+ones[n%10];}
+   else if(n>=10)out+=teens[n-10];
+   else if(n>0||!out)out+=ones[n];
+   return out;
+  }
+  if(!Number.isFinite(value)||value<0)return 'zero';
+  let n=Math.floor(value),out='';
+  if(n>=1000000){out+=underThousand(Math.floor(n/1000000))+' million';n%=1000000;if(n)out+=' ';}
+  if(n>=1000){out+=underThousand(Math.floor(n/1000))+' thousand';n%=1000;if(n)out+=' ';}
+  if(n>0||!out)out+=underThousand(n);
+  return out;
+ }
+ function englishFareWords(value){
+  const whole=Math.floor(value),cents=Math.round((value-whole)*100);
+  return englishNumberWords(whole)+' peso'+(whole===1?'':'s')+(cents?' and '+englishNumberWords(cents)+' centavo'+(cents===1?'':'s'):'');
+ }
  function say(message){
-  if(!('speechSynthesis' in window)){status.textContent=message;return;}
-  try{window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(message);u.lang='fil-PH';u.rate=.94;window.speechSynthesis.speak(u);}catch(e){status.textContent=message;}
+  try{
+   if(window.BusFareSpeech&&typeof window.BusFareSpeech.speakEnglish==='function'){window.BusFareSpeech.speakEnglish(String(message));return;}
+   if(!('speechSynthesis' in window)||typeof SpeechSynthesisUtterance==='undefined'){status.textContent=message;return;}
+   window.speechSynthesis.cancel();
+   const u=new SpeechSynthesisUtterance(message);u.lang='en-US';u.rate=1.0;u.pitch=1.0;u.volume=1;
+   const voices=window.speechSynthesis.getVoices();
+   const english=voices.find(v=>/^en(-|$)/i.test(v.lang)&&/US|GB|PH/i.test(v.lang))||voices.find(v=>/^en(-|$)/i.test(v.lang));
+   if(english)u.voice=english;
+   window.speechSynthesis.resume();window.speechSynthesis.speak(u);
+  }catch(e){status.textContent=message;}
  }
  function setListening(on){listening=on;panel.classList.toggle('voice-listening',on);mic.setAttribute('aria-pressed',String(on));mic.title=on?'Itigil ang pakikinig':'Magsalita';}
  function findPlace(part){if(!norm(part)||!window.busFareDeskVoiceBridge)return null;return window.busFareDeskVoiceBridge.findPlace(part);}
@@ -5603,7 +5657,7 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
   const regular=document.getElementById('fareRegularValue')?.textContent||'',student=document.getElementById('fareStudentValue')?.textContent||'',senior=document.getElementById('fareSeniorValue')?.textContent||'',pwd=document.getElementById('farePwdValue')?.textContent||'';
   const numeric=Number(amount.replace(/[^0-9.]/g,''));
   if(!from||from==='Tap to search'||!to||to==='Tap to search'||!Number.isFinite(numeric)||numeric<=0){status.textContent='Pumili muna ng wastong sakayan at babaan.';return;}
-  const msg='Ang pamasahe mula '+from+' papuntang '+to+' ay '+amount+'. Regular '+regular+'. Estudyante '+student+'. Senior '+senior+'. P W D '+pwd+'.';
+  const msg='Total fare: '+englishFareWords(numeric)+'. From '+from+' to '+to+'.';
   status.textContent=msg;say(msg);
  }
  function handleTranscript(text,isFinal){
