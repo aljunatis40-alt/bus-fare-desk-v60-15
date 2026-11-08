@@ -4617,8 +4617,8 @@ function resolveFareBreakdownValue(type){
  const editable=getEditableFareOverride(boardingPlace,alightingPlace);
  if(editable)return type==='regular'?editable.regular:editable.discounted;
  const foot=String(fareFoot.textContent||'');
- const regularInFoot=foot.match(/Regular\\s*₱\\s*([\\d,]+(?:\\.\\d+)?)/i);
- const discountInFoot=foot.match(/(?:Student\\s*\\/\\s*Senior\\s*\\/\\s*PWD|Discounted)\\s*₱\\s*([\\d,]+(?:\\.\\d+)?)/i);
+ const regularInFoot=foot.match(/Regular\s*₱\s*([\d,]+(?:\.\d+)?)/i);
+ const discountInFoot=foot.match(/(?:Student\s*\/\s*Senior\s*\/\s*PWD|Discounted)\s*₱\s*([\d,]+(?:\.\d+)?)/i);
  if(regularInFoot){
   const regular=Number(regularInFoot[1].replace(/,/g,''));
   const discounted=discountInFoot?Number(discountInFoot[1].replace(/,/g,'')):null;
