@@ -6199,7 +6199,7 @@ let savedDark=false;try{if(localStorage.getItem('esmiringWhiteRestoreV1')!=='1')
   const details=[...missing,...fareIssues];
   const summary=document.getElementById('floatingCheckSummary');
   if(summary){summary.textContent=valid?bilingual('FLOATING CHECK PASSED · Controls and fare totals match.','LUMUSOT ANG FLOATING CHECK · Tugma ang controls at pamasahe.'):bilingual('FLOATING CHECK FAILED · '+details.join(' '),'BUMAGSAK ANG FLOATING CHECK · '+details.join(' '));summary.style.background=valid?'#f0fdf4':'#fff7ed';summary.style.color=valid?'#166534':'#9a3412';summary.style.borderColor=valid?'#86efac':'#fdba74'}
-  const indicator=document.getElementById('floatingCheckIndicator');if(indicator){indicator.textContent=valid?'✓ FLOATING CHECK PASSED':'⚠ FLOATING CHECK FAILED';indicator.style.background=valid?'#f0fdf4':'#fff7ed';indicator.style.color=valid?'#166534':'#9a3412';indicator.style.borderColor=valid?'#86efac':'#fdba74'}
+  // Keep validation internal; do not show a persistent floating status badge.
   if(!valid){const key=details.join('|');if(!lastFailures.has(key)){addError('ERR_FLOAT_SYNC_04','CRITICAL','Fare_UI',details.join('; '));lastFailures.add(key)}}else lastFailures.clear();
   return {valid,missing,fareIssues};
  }
@@ -6233,51 +6233,8 @@ let savedDark=false;try{if(localStorage.getItem('esmiringWhiteRestoreV1')!=='1')
 })();
 </script>
 
-<style id="floating-check-style">#floatingCheckIndicator{position:fixed;right:9px;bottom:10px;z-index:1900;padding:5px 8px;border:1px solid #86efac;border-radius:999px;background:#f0fdf4;color:#166534;font:800 10px/1.2 Roboto,Arial,sans-serif;box-shadow:0 2px 8px #0002;pointer-events:none;opacity:.92}body.dark-mode #floatingCheckIndicator{background:#14532d;color:#dcfce7;border-color:#4ade80}
-/* Restore the prominent TOTAL FARE frame and readable amount. */
-.fare-shell{
-  margin-top:14px!important;
-  padding:6px!important;
-  border-radius:20px!important;
-  background:conic-gradient(from var(--fare-spin,0deg),#16803d,#d4af37,#c0c0c0,#f3d36a,#15803d,#c0c0c0,#d4af37,#16803d)!important;
-  animation:fareSpin 2.6s linear infinite!important;
-  box-shadow:0 0 0 2px #d4af3738,0 0 18px #c9a22755!important;
-}
-.fare-card{
-  border:1px solid #d4af37!important;
-  border-radius:14px!important;
-  padding:12px!important;
-  min-height:150px!important;
-}
-.fare-total-display{
-  border:3px solid #d4af37!important;
-  border-radius:14px!important;
-  box-shadow:inset 0 0 0 2px #d4af3726,0 2px 8px #14532d18!important;
-  padding:10px 5px!important;
-}
-.fare-total-display .fare-amount{
-  font-size:clamp(32px,9vw,44px)!important;
-  font-weight:950!important;
-  line-height:1.05!important;
-  margin:7px 0!important;
-}
-@media(max-width:360px){
-  .fare-shell{padding:5px!important}
-  .fare-card{padding:9px!important;min-height:0!important}
-  .fare-total-display{border-width:2px!important;padding:7px 3px!important}
-  .fare-total-display .fare-amount{font-size:clamp(27px,8vw,34px)!important}
-}
+<style id="floating-check-style">/* Floating status badge removed; validation remains available in Settings. */</style>
 
-\n.voice-control-card{display:grid;gap:6px;padding:11px;border:1px solid #cbd5e1;border-radius:12px;background:#f8fafc;margin:10px 0}.voice-control-heading{font-size:12px;font-weight:900;color:#123b70}.voice-status-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.settings-section[data-settings-content=\"voice\"] input[type=range]{width:100%;accent-color:#1769e8;margin:8px 0 14px}.settings-section[data-settings-content=\"voice\"] .settings-feedback{line-height:1.5}\n
-<style id="esmiring-restore-white-bordered-map">
-/* White is the default canvas; keep the user-selected dark theme working. */
-html{background:#fff}
-body:not(.dark-mode){background:#fff!important;color:#000!important}
-body:not(.map-background-mode) .route-map-frame{border:1px solid #166534!important;border-radius:10px!important;box-shadow:0 2px 7px #0002!important}
-.search-wrap{position:relative!important;z-index:6000!important}
-.search-wrap .suggestions{z-index:6001!important}
-</style>
-<div id="floatingCheckIndicator" role="status" aria-live="polite">✓ CHECK PASSED</div>
 
 <script>
 // Settings enhancement layer: isolated from fare matrix and existing place/payment data.
@@ -6425,4 +6382,39 @@ body.settings-open #selected{display:none!important;visibility:hidden!important;
 @media(max-width:360px){.fare-total-display .fare-total-value-row .fare-amount{font-size:24px}.peso-note-sticker{flex-basis:37px;width:37px;height:24px}.family-total .group-total-value-row strong{font-size:29px}.denom{min-height:56px}.denom-sticker{height:29px}}
 
 </style>
+
+<style id="tools-modal-search-fix-v6020">
+/* The dashboard place finder must never cover the Additional Tools / Settings modal. */
+body.settings-open .search-wrap,
+body.settings-open .search-wrap *,
+body.settings-open #hint,
+body.settings-open #selected{
+ display:none!important;
+ visibility:hidden!important;
+ pointer-events:none!important;
+}
+#settingsPanel:not([hidden]){z-index:2147483000!important}
+#settingsPanel:not([hidden]) .settings-card{position:relative!important;z-index:2147483001!important}
+</style>
+<script id="tools-modal-search-fix-v6020">
+(function(){
+ const panel=document.getElementById('settingsPanel');
+ const wrap=document.querySelector('.search-wrap');
+ if(!panel||!wrap)return;
+ function hideDashboardFinder(){
+  const open=!panel.hidden;
+  document.body.classList.toggle('settings-open',open);
+  if(open){
+   const suggestions=wrap.querySelector('.suggestions');
+   if(suggestions)suggestions.classList.remove('show');
+   const field=wrap.querySelector('input');
+   if(field)field.blur();
+  }
+ }
+ hideDashboardFinder();
+ new MutationObserver(hideDashboardFinder).observe(panel,{attributes:true,attributeFilter:['hidden']});
+ document.getElementById('settingsToggle')?.addEventListener('click',hideDashboardFinder,true);
+ document.getElementById('closeSettings')?.addEventListener('click',()=>{document.body.classList.remove('settings-open')},true);
+})();
+</script>
 </body></html>
