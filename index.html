@@ -4314,6 +4314,7 @@ function palmeraFareForDestination(place,type){const area=findCanonicalArea(plac
 function isPalmeraToSMFairviewV60(from,to){const area=findCanonicalArea(to);return isPalmeraOrigin(from)&&!!area&&area.name==='Area SM Fairview';}
 function towervilleFareForDestination(place,type){const area=findCanonicalArea(place);if(!area)return null;const index=canonicalAreasV49.indexOf(area);if(index<0)return null;return towervilleOriginFares[index][type==='regular'?0:1];}
 
+function isSamePlaceSelection(from,to){return !!(from&&to&&normalizeSearchText(from)===normalizeSearchText(to));}
 function getAreaFareKeyForPlace(place){if(!place)return null;const raw=areaForPlace[place]||place;try{return canonicalizeV60(raw)||String(raw).trim()||null}catch(e){return String(raw).trim()||null}}
 function getAreaRouteFareOverride(from,to){const a=getAreaFareKeyForPlace(from),b=getAreaFareKeyForPlace(to);if(!a||!b)return null;const saved=areaRouteFareOverrides[a+' → '+b];if(!saved||!Number.isFinite(Number(saved.regular))||Number(saved.regular)<=0)return null;const regular=Math.round(Number(saved.regular));const discounted=Number.isFinite(Number(saved.discounted))&&Number(saved.discounted)>0?Math.round(Number(saved.discounted)):fareAfterGlobalDiscount20(regular);return {regular,discounted,source:'area-to-area'};}
 function getEditableFareOverride(from,to){
@@ -4381,13 +4382,21 @@ function fareAfterGlobalDiscount20(regularFare){
  return !Number.isFinite(rawRegular)||rawRegular<=0?null:Math.round((rawRegular*0.80)/5)*5;
 }
 function familyFare(from,to,type,personKm=1){
+ if(!from||!to)return null;
+ if(isSamePlaceSelection(from,to))return 0;
  const editableOverride=getEditableFareOverride(from,to);
  if(editableOverride)return type==='regular'?editableOverride.regular:editableOverride.discounted;
- if(isPalmeraToSMFairviewV60(from,to))return type==='regular'?40:35;
- const regular=familyFareCore(from,to,'regular',personKm);
- if(regular===null||regular===undefined)return null;
- const roundedRegular=roundFareNearest5(regular);
- return type==='regular'?roundedRegular:fareAfterGlobalDiscount20(regular);
+ const originArea=canonicalizeV60(from),destinationArea=canonicalizeV60(to);
+ if(originArea&&destinationArea&&originArea===destinationArea)return type==='regular'?18:15;
+ if(isTowervilleToPalmeraZoneFare(from,to))return type==='regular'?18:15;
+ if(isEspanaToBuendiaZoneFare(from,to))return type==='regular'?30:25;
+ const resolved=familyFareCore(from,to,type,personKm);
+ if(resolved!==null&&resolved!==undefined&&Number.isFinite(Number(resolved)))return Number(resolved);
+ if(type!=='regular'){
+  const regular=familyFareCore(from,to,'regular',personKm);
+  if(regular!==null&&regular!==undefined&&Number.isFinite(Number(regular)))return fareAfterGlobalDiscount20(Number(regular));
+ }
+ return null;
 }
 function renderFamily(){
  familyPeople.innerHTML='';
@@ -4534,7 +4543,9 @@ function currentFareTotal(){
   const el=familyMode?group:single;
   const raw=(el.textContent||'').replace(/[₱,\s]/g,'');
   const value=Number(raw);
-  return Number.isFinite(value)&&value>0?value:null;
+  const sameSolo=!familyMode&&isSamePlaceSelection(boardingPlace,alightingPlace);
+  const completeGroup=familyMode&&familyPassengers.length>0&&familyPassengers.every(person=>!!person.destination);
+  return Number.isFinite(value)&&(value>0||sameSolo||(completeGroup&&value===0))?value:null;
  }
  function announceFare(){
   const value=currentSpokenFare();
@@ -4542,6 +4553,9 @@ function currentFareTotal(){
   const routeKey=familyMode?'GROUP:'+boardingPlace+':'+familyPassengers.map(p=>p.destination).join('|')+':'+value:
    'SOLO:'+boardingPlace+':'+alightingPlace+':'+passengerType+':'+value;
   if(routeKey===lastSpoken)return;
+  const sameSolo=!familyMode&&isSamePlaceSelection(boardingPlace,alightingPlace);
+  const sameGroup=familyMode&&familyPassengers.length>0&&familyPassengers.every(p=>isSamePlaceSelection(boardingPlace,p.destination));
+  if(sameSolo||sameGroup){const accepted=window.busFareDeskSpeakTagalog('ALJUN. Pareho ang sakayan at babaan. Zero pesos ang pamasahe.');if(accepted!==false)lastSpoken=routeKey;return;}
   const routeText=familyMode
    ?'From '+boardingPlace+'. Destinations: '+familyPassengers.map(p=>p.destination).filter(Boolean).join(', ')+'.'
    :'From '+boardingPlace+' to '+alightingPlace+'.';
@@ -4609,7 +4623,10 @@ function renderPayment(announce=false){
  const total=Math.round(currentFareTotal());paymentFareTotal.textContent=money(total);paymentPaid.textContent=money(paidAmount);
  if(cashStackDisplay){cashStackDisplay.innerHTML='';const entries=Object.keys(paidDenomCounts).map(Number).filter(v=>paidDenomCounts[v]>0).sort((a,b)=>b-a);if(!entries.length){cashStackDisplay.textContent='Wala pang naidaragdag na bayad.';}else{entries.forEach(v=>{const chip=document.createElement('span');chip.className='cash-chip';chip.textContent=(v>=20?'💵 ':'🪙 ')+'₱'+v.toLocaleString('en-PH');const count=document.createElement('b');count.textContent='×'+paidDenomCounts[v];chip.appendChild(count);cashStackDisplay.appendChild(chip);});}}
  const diff=paidAmount-total;changeResult.classList.remove('short','wait');
- if(total<=0){changeResult.classList.add('wait');changeLabel.textContent=appLanguage==='en'?'CHANGE / SHORTAGE':'SUKLI / KULANG';changeAmount.textContent='—';changeSub.textContent=appLanguage==='en'?'Choose the boarding point and destination first.':'Pumili muna ng sakayan at babaan para makuwenta ang pamasahe.';}
+ const sameSoloPlace=!familyMode&&isSamePlaceSelection(boardingPlace,alightingPlace);
+ const sameGroupPlaces=familyMode&&familyPassengers.length>0&&familyPassengers.every(person=>isSamePlaceSelection(boardingPlace,person.destination));
+ if(total<=0&&(sameSoloPlace||sameGroupPlaces)){changeResult.classList.add('wait');changeLabel.textContent=appLanguage==='en'?'NO FARE':'WALANG PAMASAHE';changeAmount.textContent='₱0';changeSub.textContent=appLanguage==='en'?'Boarding and destination are the same place.':'Pareho ang sakayan at babaan. Zero ang pamasahe.';}
+ else if(total<=0){changeResult.classList.add('wait');changeLabel.textContent=appLanguage==='en'?'CHANGE / SHORTAGE':'SUKLI / KULANG';changeAmount.textContent='—';changeSub.textContent=appLanguage==='en'?'Choose the boarding point and destination first.':'Pumili muna ng sakayan at babaan para makuwenta ang pamasahe.';}
  else if(paidAmount===0){changeResult.classList.add('wait');changeLabel.textContent='CHANGE / SHORTAGE';changeAmount.textContent='₱0';changeSub.textContent=appLanguage==='en'?'Tap the amount paid.':'Pindutin ang halaga ng perang ibinayad.';}
  else if(diff>=0){changeLabel.textContent=appLanguage==='en'?'CHANGE':'SUKLI';changeAmount.textContent=money(diff);changeSub.textContent=diff===0?(appLanguage==='en'?'Exact payment. No change.':'Saktong bayad. Walang sukli.'):(appLanguage==='en'?'Change to return to the passenger.':'Sukli na dapat ibalik sa pasahero.');}
  else{changeResult.classList.add('short');changeLabel.textContent=appLanguage==='en'?'REMAINING':'KULANG PA';changeAmount.textContent=money(-diff);changeSub.textContent=appLanguage==='en'?'Add payment to cover the full fare.':'Dagdagan pa ang bayad para mabuo ang pamasahe.';}
@@ -4642,7 +4659,8 @@ renderHistory();
 
 // Compact fare comparison: use the app's existing route fare resolver for each passenger type.
 function resolveFareBreakdownValue(type){
- if(!boardingPlace||!alightingPlace||boardingPlace===alightingPlace)return null;
+ if(!boardingPlace||!alightingPlace)return null;
+ if(isSamePlaceSelection(boardingPlace,alightingPlace))return 0;
  const areaPairOverride=getAreaRouteFareOverride(boardingPlace,alightingPlace);if(areaPairOverride)return type==='regular'?areaPairOverride.regular:areaPairOverride.discounted;
  const originArea=canonicalizeV60(boardingPlace),destinationArea=canonicalizeV60(alightingPlace);
  if(originArea&&destinationArea&&originArea===destinationArea)return type==='regular'?18:15;
@@ -4670,7 +4688,7 @@ function resolveFareBreakdownValue(type){
 function refreshFareBreakdown(){
  const rows={regular:'fareRegularValue',student:'fareStudentValue',senior:'fareSeniorValue',pwd:'farePwdValue'};
  const shown=Number((fareAmount.textContent||'').replace(/[^0-9.]/g,''));
- const valid=Number.isFinite(shown)&&shown>0&&!!(boardingPlace&&alightingPlace&&boardingPlace!==alightingPlace);
+ const valid=Number.isFinite(shown)&&shown>=0&&!!(boardingPlace&&alightingPlace);
  Object.keys(rows).forEach(type=>{
   const el=document.getElementById(rows[type]);if(!el)return;
   let value=null;
@@ -5176,6 +5194,13 @@ function updateFareCore(){
 // legacy area tables, confirmed route cards, reverse fares, and saved regular fares.
 function updateFare(){
  const selectedType=passengerType;
+ if(isSamePlaceSelection(boardingPlace,alightingPlace)){
+  distancePanel.style.display='none';fareAmount.textContent='₱0.00';fareRoute.textContent=boardingPlace+' → '+alightingPlace+' · Same place';fareFoot.textContent='Same boarding and destination place. Fare is ₱0.00 for Regular, Student, Senior and PWD.';passengerNote.textContent='Parehong lugar ang SAKAY at BABA. Walang pamasahe.';
+  const preview=document.getElementById('regularFarePreview');if(preview)preview.textContent='₱0.00';
+  ['fareRegularValue','fareStudentValue','fareSeniorValue','farePwdValue'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='₱0.00';});
+  document.querySelectorAll('.passenger-option').forEach(btn=>{const small=btn.querySelector('small');if(small)small.textContent='₱0.00';});
+  if(typeof renderPayment==='function')renderPayment(false);return;
+ }
  const areaPairOverride=getAreaRouteFareOverride(boardingPlace,alightingPlace);
  if(areaPairOverride){distancePanel.style.display='none';const applied=selectedType==='regular'?areaPairOverride.regular:areaPairOverride.discounted;const label={regular:'Regular',senior:'Senior',student:'Student',pwd:'PWD'}[selectedType]||'Pasahero';fareAmount.textContent='₱'+applied;fareRoute.textContent=boardingPlace+' → '+alightingPlace+' · '+label;fareFoot.textContent='Saved area-to-area fare is applied. Regular ₱'+areaPairOverride.regular+' | Student / Senior / PWD ₱'+areaPairOverride.discounted+'.';passengerNote.textContent=label+' fare: ₱'+applied+'.';const preview=document.getElementById('regularFarePreview');if(preview)preview.textContent='₱'+areaPairOverride.regular;document.querySelectorAll('.passenger-option').forEach(btn=>{const small=btn.querySelector('small');if(small)small.textContent='₱'+(btn.dataset.type==='regular'?areaPairOverride.regular:areaPairOverride.discounted);});if(typeof renderPayment==='function')renderPayment(false);return;}
  // The user-confirmed España → Buendia fare must override saved custom fares.
