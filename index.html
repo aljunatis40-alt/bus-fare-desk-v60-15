@@ -4692,7 +4692,9 @@ function updateFareCore(){
  // share one fare, regardless of the individual stop names.
  const sameOriginArea=canonicalizeV60(boardingPlace);
  const sameDestinationArea=canonicalizeV60(alightingPlace);
- if(sameOriginArea && sameDestinationArea && sameOriginArea===sameDestinationArea){
+ const towervilleToPalmera=sameOriginArea==='Towerville' && sameDestinationArea==='Palmera';
+ const sameAreaPair=sameOriginArea && sameDestinationArea && sameOriginArea===sameDestinationArea;
+ if(sameAreaPair || towervilleToPalmera){
    const zoneRegular=18, zoneDiscounted=15;
    const zoneApplied=passengerType==='regular'?zoneRegular:zoneDiscounted;
    distancePanel.style.display='none';
