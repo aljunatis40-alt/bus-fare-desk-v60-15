@@ -164,7 +164,7 @@ body.one-hand .mode-box{min-height:100px;padding:18px 12px}body.one-hand .settin
 .route-location-panel{margin:4px 0 10px;padding:7px;border:1px solid #dbe7df;border-radius:13px;background:linear-gradient(180deg,rgba(248,252,249,.94),rgba(255,255,255,.98));box-shadow:0 4px 15px rgba(15,60,40,.10);display:grid;gap:6px;position:relative;z-index:1}
 .route-location-panel[hidden]{display:none!important}
 .route-map-head{display:flex;align-items:center;justify-content:space-between;padding:0 3px;color:#166534;font-size:10px;font-weight:850;letter-spacing:.06em}
-.route-map-frame{height:210px;min-height:210px;border-radius:9px;overflow:hidden;background:linear-gradient(135deg,#edf4ef,#e6eee9);position:relative;box-shadow:inset 0 0 0 1px rgba(22,101,52,.12)}
+.route-map-frame{height:210px;min-height:210px;border:2px solid #166534;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#edf4ef,#e6eee9);position:relative;box-shadow:0 3px 12px rgba(0,0,0,.16),inset 0 0 0 1px rgba(22,101,52,.12)}
 #liveRouteMap{height:100%;width:100%;opacity:.88}
 .route-map-placeholder{position:absolute;inset:0;display:grid;place-items:center;color:#557565;font-size:11px;font-weight:700;pointer-events:none;background:linear-gradient(135deg,rgba(238,246,240,.72),rgba(225,237,229,.62));z-index:400}
 .route-map-placeholder[hidden]{display:none!important}
@@ -525,8 +525,13 @@ body.map-background-mode .hint{display:none}
   <div class="settings-item-card"><div class="settings-item-title"><span class="settings-item-icon">📐</span><strong>Settings Layout</strong></div><select id="settingsLayoutMode" class="settings-input"><option value="expanded">Expanded</option><option value="compact">Compact</option></select></div>
   <div class="settings-item-card"><div class="settings-item-title"><span class="settings-item-icon">🏷️</span><strong>Status Badges</strong></div>
   <label class="voice-setting-toggle"><span><strong>Show Status Badges</strong><small>ON/OFF/READY/WARNING labels sa Settings menu.</small></span><input type="checkbox" id="settingsShowBadges" checked></label></div>
-  <div class="settings-action-row"><button type="button" id="settingsApply" class="settings-save">✓ Apply Changes</button><button type="button" id="settingsCancel" class="settings-save">Cancel</button><select id="settingsResetTarget" class="settings-input"><option value="settingsThemeMode">Theme</option><option value="settingsFontSize">Font size</option><option value="settingsButtonSize">Button size</option><option value="settingsLayoutMode">Layout</option><option value="settingsShowBadges">Status badges</option></select><button type="button" id="settingsResetOne" class="settings-save">↺ Reset Selected Setting</button></div>
+  <div class="settings-action-row"><button type="button" id="settingsApply" class="settings-save">✓ Apply Changes</button><button type="button" id="settingsCancel" class="settings-save">Cancel</button><select id="settingsResetTarget" class="settings-input"><option value="settingsThemeMode">Theme</option><option value="settingsFontSize">Font size</option><option value="settingsButtonSize">Button size</option><option value="settingsLayoutMode">Layout</option><option value="settingsShowBadges">Status badges</option><option value="smartFareDetectionEnabled">Smart Fare Detection</option><option value="fareChangeWarningEnabled">Fare Change Warning</option></select><button type="button" id="settingsResetOne" class="settings-save">↺ Reset Selected Setting</button></div>
   <div id="settingsEnhanceFeedback" class="settings-feedback" role="status" aria-live="polite"></div>
+ </div>
+ <div class="settings-enhance-card">
+  <div class="settings-item-title"><span class="settings-item-icon">🧭</span><strong>Fare Alerts / Mga Babala sa Pamasahe</strong></div>
+  <label class="voice-setting-toggle" for="smartFareDetectionEnabled"><span><strong>Smart Fare Detection</strong><small>Magbabala kapag may napiling sakayan at babaan pero walang katugmang pamasahe.</small></span><input type="checkbox" id="smartFareDetectionEnabled" checked></label>
+  <label class="voice-setting-toggle" for="fareChangeWarningEnabled"><span><strong>Fare Change Warning</strong><small>Magbabala kapag nagbago ang total fare para sa kasalukuyang ruta.</small></span><input type="checkbox" id="fareChangeWarningEnabled" checked></label>
  </div>
  <div class="settings-enhance-card">
   <div class="settings-item-title"><span class="settings-item-icon">🗂️</span><strong>Settings Profiles</strong></div><select id="settingsProfile" class="settings-input"><option value="">Choose profile</option><option value="day">Day</option><option value="night">Night</option><option value="driving">Driving</option></select>
@@ -5234,7 +5239,7 @@ document.getElementById('swapRouteBtn')?.addEventListener('click',()=>{if(family
 document.getElementById('saveFavoriteBtn')?.addEventListener('click',()=>{if(familyMode){showToast('Sa SOLO mode muna mag-save ng paboritong ruta.','short');return}if(!boardingPlace||!alightingPlace||boardingPlace===alightingPlace){showToast('Pumili muna ng magkaibang sakayan at babaan.','short');return}const list=getFavorites();if(list.some(r=>r.from===boardingPlace&&r.to===alightingPlace)){showToast('Nasa paboritong ruta na ito.','short');return}list.unshift({from:boardingPlace,to:alightingPlace});try{localStorage.setItem(favoriteKey,JSON.stringify(list.slice(0,12)))}catch(e){showToast('Hindi ma-save sa device.','short');return}drawFavorites();showToast('Saved sa paboritong ruta.','good')});
 document.getElementById('copyFareBtn')?.addEventListener('click',()=>{const route=(fareRoute.textContent||'').trim();const amount=(fareAmount.textContent||'').trim();if(!boardingPlace||!alightingPlace||!amount||amount==='—'){showToast('Kumpletuhin muna ang sakayan at babaan.','short');return}const summary='Bus Fare Desk\nBoarding point: '+boardingPlace+'\nDestination: '+alightingPlace+'\nUri ng pasahero: '+(typeNames[passengerType]||'Regular')+'\nPamasahe: '+amount+'\n'+route;const ta=document.createElement('textarea');ta.value=summary;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}ta.remove();if(ok){showToast('Nakopya ang detalye ng pamasahe.','good')}else{window.prompt('Copy ang detalye ng pamasahe:',summary)}});
 const themeButton=document.getElementById('themeToggle');function applyTheme(dark){document.body.classList.toggle('dark-mode',dark);if(themeButton){themeButton.textContent=dark?'☀️':'🌙';themeButton.setAttribute('aria-label',dark?'Light mode':'Dark mode')}try{localStorage.setItem('busFareDeskDarkMode',dark?'1':'0')}catch(e){}}
-let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')==='1'}catch(e){}applyTheme(savedDark);themeButton?.addEventListener('click',()=>applyTheme(!document.body.classList.contains('dark-mode')));drawFavorites();
+let savedDark=false;try{if(localStorage.getItem('esmiringWhiteRestoreV1')!=='1'){localStorage.setItem('busFareDeskDarkMode','0');localStorage.setItem('esmiringWhiteRestoreV1','1')}savedDark=localStorage.getItem('busFareDeskDarkMode')==='1'}catch(e){}applyTheme(savedDark);themeButton?.addEventListener('click',()=>applyTheme(!document.body.classList.contains('dark-mode')));drawFavorites();
 
 
 
@@ -5905,8 +5910,8 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
   if(persist){try{localStorage.setItem('esmiringMapDisplayMode',enabled?'1':'0');}catch(e){}}
   window.dispatchEvent(new Event('resize'));
  };
- let enabled=true;
- try{enabled=localStorage.getItem('esmiringMapDisplayMode')!=='0';}catch(e){}
+ let enabled=false;
+ try{if(localStorage.getItem('esmiringMapBorderRestoreV1')!=='1'){localStorage.setItem('esmiringMapDisplayMode','0');localStorage.setItem('esmiringMapBorderRestoreV1','1')}enabled=localStorage.getItem('esmiringMapDisplayMode')==='1';}catch(e){}
  apply(enabled,false);
  if(toggle)toggle.addEventListener('change',()=>apply(toggle.checked,true));
 })();
@@ -6010,7 +6015,12 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
   .fare-total-display .fare-amount{font-size:clamp(27px,8vw,34px)!important}
 }
 
-\n.voice-control-card{display:grid;gap:6px;padding:11px;border:1px solid #cbd5e1;border-radius:12px;background:#f8fafc;margin:10px 0}.voice-control-heading{font-size:12px;font-weight:900;color:#123b70}.voice-status-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.settings-section[data-settings-content=\"voice\"] input[type=range]{width:100%;accent-color:#1769e8;margin:8px 0 14px}.settings-section[data-settings-content=\"voice\"] .settings-feedback{line-height:1.5}\n</style>
+\n.voice-control-card{display:grid;gap:6px;padding:11px;border:1px solid #cbd5e1;border-radius:12px;background:#f8fafc;margin:10px 0}.voice-control-heading{font-size:12px;font-weight:900;color:#123b70}.voice-status-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.settings-section[data-settings-content=\"voice\"] input[type=range]{width:100%;accent-color:#1769e8;margin:8px 0 14px}.settings-section[data-settings-content=\"voice\"] .settings-feedback{line-height:1.5}\n
+<style id="esmiring-restore-white-bordered-map">
+/* Restore the classic white app canvas and bordered compact map panel. */
+html,body{background:#fff!important;color:#000!important}
+body:not(.map-background-mode) .route-map-frame{border:2px solid #166534!important;border-radius:12px!important;box-shadow:0 3px 12px #0002!important}
+</style>
 <div id="floatingCheckIndicator" role="status" aria-live="polite">✓ CHECK PASSED</div>
 
 <script>
@@ -6018,8 +6028,8 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
 (function(){
  const panel=document.getElementById('settingsPanel');if(!panel)return;
  const $=id=>document.getElementById(id), menu=panel.querySelector('.settings-menu');
- const controls=['settingsThemeMode','settingsFontSize','settingsButtonSize','settingsLayoutMode','settingsShowBadges'];
- const defaults={settingsThemeMode:'auto',settingsFontSize:'normal',settingsButtonSize:'normal',settingsLayoutMode:'expanded',settingsShowBadges:true};
+ const controls=['settingsThemeMode','settingsFontSize','settingsButtonSize','settingsLayoutMode','settingsShowBadges','smartFareDetectionEnabled','fareChangeWarningEnabled'];
+ const defaults={settingsThemeMode:'light',settingsFontSize:'normal',settingsButtonSize:'normal',settingsLayoutMode:'expanded',settingsShowBadges:true,smartFareDetectionEnabled:true,fareChangeWarningEnabled:true};
  const read=()=>{const o={};controls.forEach(id=>{const el=$(id);if(el)o[id]=el.type==='checkbox'?el.checked:el.value;});return o;};
  const write=o=>{controls.forEach(id=>{const el=$(id);if(el&&o&&o[id]!==undefined){if(el.type==='checkbox')el.checked=!!o[id];else el.value=o[id];}});};
  let saved={...defaults};try{saved={...saved,...JSON.parse(localStorage.getItem('esmiringSettingsPrefs')||'{}')};}catch(e){}
@@ -6042,7 +6052,7 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
  function updateDashboard(){const gps=$('settingsGpsStatus'),voice=$('settingsVoiceStatus'),map=$('settingsMapStatus'),fare=$('settingsFareStatus'),storage=$('settingsStorageStatus');if(gps)gps.textContent=$('gpsToggleText')?.textContent||'GPS status';if(voice)voice.textContent=$('voiceSettingsStatus')?.textContent||'Voice status';if(map)map.textContent=$('mapDisplayModeToggle')?.checked?'Floating ON':'Compact mode';const amount=($('fareAmount')?.textContent||'').trim();if(fare)fare.textContent=amount&&amount!=='₱0.00'?'Fare available':'Waiting for route';if(storage){try{storage.textContent=typeof localStorage==='object'?'Local storage ready':'Unavailable';}catch(e){storage.textContent='Unavailable';}}}
  updateDashboard();const dashObserver=new MutationObserver(updateDashboard);['gpsToggleText','voiceSettingsStatus','mapDisplayModeStatus','fareAmount'].forEach(id=>{const el=$(id);if(el)dashObserver.observe(el,{childList:true,characterData:true,subtree:true});});$('settingsToggle')?.addEventListener('click',updateDashboard);
  const fareAlert=document.createElement('div');fareAlert.id='smartFareDetectionAlert';fareAlert.setAttribute('role','alert');fareAlert.style.cssText='display:none;margin:8px 0;padding:10px;border:1px solid #dc2626;border-radius:10px;background:#fef2f2;color:#991b1b;font-size:12px;font-weight:750;line-height:1.45';fareAlert.textContent='⚠️ Walang katugmang pamasahe para sa napiling sakayan at babaan. Suriin ang lugar at fare records.';const foot=$('fareFoot');if(foot)foot.insertAdjacentElement('afterend',fareAlert);
- let lastValid=null,lastRoute='';let lastWarningKey='';function checkFare(){const from=$('boardPlaceLabel')?.textContent?.trim()||'',to=$('alightPlaceLabel')?.textContent?.trim()||'',raw=$('fareAmount')?.textContent||'',n=Number(raw.replace(/[₱,\s]/g,''));const both=from&&!/tap to search|choose/i.test(from)&&to&&!/tap to search|choose/i.test(to);fareAlert.style.display=both&&(!Number.isFinite(n)||n<=0)?'block':'none';if(!both||!Number.isFinite(n)||n<=0){lastValid=null;lastRoute='';return;}const route=from+' → '+to;if(lastValid!==null&&route===lastRoute&&Math.abs(n-lastValid)>0.001){const key=route+':'+lastValid+':'+n;if(key!==lastWarningKey){if(typeof window.showToast==='function')window.showToast('⚠️ Nagbago ang total fare: ₱'+lastValid.toFixed(2)+' → ₱'+n.toFixed(2),'short');lastWarningKey=key;}}lastValid=n;lastRoute=route;}
+ let lastValid=null,lastRoute='';let lastWarningKey='';function checkFare(){const from=$('boardPlaceLabel')?.textContent?.trim()||'',to=$('alightPlaceLabel')?.textContent?.trim()||'',raw=$('fareAmount')?.textContent||'',n=Number(raw.replace(/[₱,\s]/g,''));const both=from&&!/tap to search|choose/i.test(from)&&to&&!/tap to search|choose/i.test(to);let alertPrefs={};try{alertPrefs=JSON.parse(localStorage.getItem('esmiringSettingsPrefs')||'{}')}catch(e){}const smartOn=alertPrefs.smartFareDetectionEnabled!==false,changeOn=alertPrefs.fareChangeWarningEnabled!==false;fareAlert.style.display=smartOn&&both&&(!Number.isFinite(n)||n<=0)?'block':'none';if(!both||!Number.isFinite(n)||n<=0){lastValid=null;lastRoute='';return;}const route=from+' → '+to;if(changeOn&&lastValid!==null&&route===lastRoute&&Math.abs(n-lastValid)>0.001){const key=route+':'+lastValid+':'+n;if(key!==lastWarningKey){if(typeof window.showToast==='function')window.showToast('⚠️ Nagbago ang total fare: ₱'+lastValid.toFixed(2)+' → ₱'+n.toFixed(2),'short');lastWarningKey=key;}}lastValid=n;lastRoute=route;}
  const observer=new MutationObserver(checkFare);['fareAmount','boardPlaceLabel','alightPlaceLabel'].forEach(id=>{const el=$(id);if(el)observer.observe(el,{childList:true,characterData:true,subtree:true});});checkFare();
 })();
 </script>
