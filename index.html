@@ -5306,6 +5306,24 @@ function updateFare(){
   document.querySelectorAll('.passenger-option').forEach(btn=>{const small=btn.querySelector('small');if(small)small.textContent='₱0.00';});
   if(typeof renderPayment==='function')renderPayment(false);return;
  }
+ // V60.20: synchronize the selected total with the same-area breakdown.
+ // Morayta and Lerma are different stops in the same España area: Regular ₱18, discounted ₱15.
+ const sameOriginAreaV6020=canonicalizeV60(boardingPlace);
+ const sameDestinationAreaV6020=canonicalizeV60(alightingPlace);
+ if(sameOriginAreaV6020&&sameDestinationAreaV6020&&sameOriginAreaV6020===sameDestinationAreaV6020){
+  const regularV6020=18,discountV6020=15,appliedV6020=selectedType==='regular'?regularV6020:discountV6020;
+  distancePanel.style.display='none';
+  fareAmount.textContent='₱'+appliedV6020.toFixed(2);
+  fareRoute.textContent=boardingPlace+' → '+alightingPlace+' · '+({regular:'Regular',student:'Student',senior:'Senior',pwd:'PWD'}[selectedType]||'Pasahero');
+  fareFoot.textContent='Same-area fare: Regular ₱18.00 | Student / Senior / PWD ₱15.00.';
+  passengerNote.textContent=(selectedType==='regular'?'Regular':'Discounted')+' fare: ₱'+appliedV6020.toFixed(2)+'.';
+  const previewV6020=document.getElementById('regularFarePreview');if(previewV6020)previewV6020.textContent='₱18.00';
+  const breakdownV6020={fareRegularValue:18,fareStudentValue:15,fareSeniorValue:15,farePwdValue:15};
+  Object.entries(breakdownV6020).forEach(([id,amount])=>{const node=document.getElementById(id);if(node)node.textContent='₱'+amount.toFixed(2);});
+  document.querySelectorAll('.passenger-option').forEach(btn=>{const small=btn.querySelector('small');if(small)small.textContent='₱'+(btn.dataset.type==='regular'?18:15).toFixed(2);});
+  if(typeof renderPayment==='function')renderPayment(false);
+  return;
+ }
  const areaPairOverride=getAreaRouteFareOverride(boardingPlace,alightingPlace);
  if(areaPairOverride){distancePanel.style.display='none';const applied=selectedType==='regular'?areaPairOverride.regular:areaPairOverride.discounted;const label={regular:'Regular',senior:'Senior',student:'Student',pwd:'PWD'}[selectedType]||'Pasahero';fareAmount.textContent='₱'+applied;fareRoute.textContent=boardingPlace+' → '+alightingPlace+' · '+label;fareFoot.textContent='Saved area-to-area fare is applied. Regular ₱'+areaPairOverride.regular+' | Student / Senior / PWD ₱'+areaPairOverride.discounted+'.';passengerNote.textContent=label+' fare: ₱'+applied+'.';const preview=document.getElementById('regularFarePreview');if(preview)preview.textContent='₱'+areaPairOverride.regular;document.querySelectorAll('.passenger-option').forEach(btn=>{const small=btn.querySelector('small');if(small)small.textContent='₱'+(btn.dataset.type==='regular'?areaPairOverride.regular:areaPairOverride.discounted);});if(typeof renderPayment==='function')renderPayment(false);return;}
  // The user-confirmed España → Buendia fare must override saved custom fares.
