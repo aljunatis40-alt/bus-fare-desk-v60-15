@@ -6163,4 +6163,32 @@ body:not(.map-background-mode) .route-map-frame{border:1px solid #166534!importa
 .settings-section{padding:16px!important}.settings-card.detail-mode .settings-menu{display:none!important}
 @media(min-width:621px){.settings-card{border-left:1px solid #e5e7eb!important;border-right:1px solid #e5e7eb!important}}
 </style>
+
+<style id="esmiring-hide-dashboard-place-search-in-settings">
+/* The place finder belongs only to the dashboard, never the Settings screen. */
+body.settings-open .search-wrap,
+body.settings-open .search-wrap .suggestions,
+body.settings-open #hint,
+body.settings-open #selected{display:none!important;visibility:hidden!important;pointer-events:none!important}
+</style>
+<script id="esmiring-hide-dashboard-place-search-in-settings">
+(function(){
+ const panel=document.getElementById('settingsPanel');
+ if(!panel)return;
+ function syncSettingsVisibility(){
+   document.body.classList.toggle('settings-open',!panel.hidden);
+   if(!panel.hidden){
+     const search=document.getElementById('search');
+     const suggestions=document.querySelector('.search-wrap .suggestions');
+     if(suggestions)suggestions.classList.remove('show');
+     if(search)search.blur();
+   }
+ }
+ syncSettingsVisibility();
+ new MutationObserver(syncSettingsVisibility).observe(panel,{attributes:true,attributeFilter:['hidden']});
+ document.getElementById('settingsToggle')?.addEventListener('click',syncSettingsVisibility,true);
+ document.getElementById('closeSettings')?.addEventListener('click',()=>{document.body.classList.remove('settings-open')},true);
+ panel.addEventListener('click',e=>{if(e.target===panel)document.body.classList.remove('settings-open')},true);
+})();
+</script>
 </body></html>
