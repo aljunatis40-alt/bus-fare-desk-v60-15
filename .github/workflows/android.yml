@@ -222,6 +222,7 @@ jobs:
               private BundledTagalogTts bundledTagalogTts;
               private boolean textToSpeechReady = false;
               private boolean englishTextToSpeechReady = false;
+              private volatile float speechVolume = 1.0f;
               private String pendingEnglishSpeech = "";
               private String pendingTagalogSpeech = "";
               private int speechLanguageAttempt = 0;
@@ -275,6 +276,9 @@ jobs:
                   }
                   @JavascriptInterface public void setVoiceGender(String gender) {
                       runOnUiThread(() -> { if (bundledTagalogTts != null) bundledTagalogTts.setVoiceGender(gender); });
+                  }
+                  @JavascriptInterface public void setSpeechVolume(float volume) {
+                      runOnUiThread(() -> speechVolume = Math.max(0.0f, Math.min(1.0f, volume)));
                   }
               }
 
@@ -349,7 +353,7 @@ jobs:
                   }
                   try {
                       Bundle parameters = new Bundle();
-                      parameters.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0f);
+                      parameters.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, speechVolume);
                       parameters.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
                       int result = englishTextToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, parameters, "busfare-en-" + System.currentTimeMillis());
                       if (result == TextToSpeech.ERROR) sendTtsStatus("error");
@@ -420,7 +424,7 @@ jobs:
                   }
                   try {
                       Bundle parameters = new Bundle();
-                      parameters.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0f);
+                      parameters.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, speechVolume);
                       parameters.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
                       textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, parameters, "busfare-" + System.currentTimeMillis());
                   } catch (Exception error) {
