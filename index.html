@@ -4672,8 +4672,8 @@ function showLtfrbMissingFare(from,to){
  document.querySelectorAll('.passenger-option').forEach(btn=>{const small=btn.querySelector('small');if(small)small.textContent='₱'+(btn.dataset.type==='regular'?regular:discounted);});
  if(typeof renderPayment==='function')renderPayment(false);
 }
+function zoneFareNorm(value){return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();}
 function isEspanaToBuendiaZoneFare(from,to){
- const zoneFareNorm=(value)=>String(value||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\\s+/g,' ').trim();
  const espanaBoardingStops=new Set([
   'Blumentritt','Maceda','Quintos','Quintos / PNR','PNR','PNR España','Vicente Cruz','Vicente','Vicente / Dela Fuente','Dela Fuente','Lacson','Lacson / Florida','Florida','UST Gate 1 & 2','UST Gate 1','UST Gate 2','P. Noval','Morayta','FEU','FEU / Lerma','Lerma','España Boulevard','España Blvd'
  ].map(zoneFareNorm));
