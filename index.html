@@ -4628,8 +4628,8 @@ function render(){
  if(!q){box.classList.remove('show');box.innerHTML='';return;}
  const normalizeSmart=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('en').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
  const nq=normalizeSmart(raw), tokens=nq.split(' ').filter(Boolean);
- const scored=places.map((p,index)=>{const np=normalizeSmart(p);let score=0;if(np===nq)score=1000;else if(np.startsWith(nq))score=800;else if(np.includes(nq))score=650;else{const matched=tokens.filter(t=>np.split(' ').some(w=>w.startsWith(t))).length;if(matched===tokens.length&&matched)score=450+matched;else if(tokens.length===1&&np.split(' ').some(w=>w.includes(tokens[0])))score=250;}return {p,index,score}}).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||a.index-b.index);
- const matches=scored.slice(0,40).map(x=>x.p);
+ const scored=places.map((p,index)=>{const np=normalizeSmart(p);let score=0;if(np===nq)score=1000;else if(np.startsWith(nq))score=800;else if(np.includes(nq))score=650;else{const words=np.split(' ');const matched=tokens.filter(t=>words.some(w=>w.startsWith(t))).length;if(matched===tokens.length&&matched)score=450+matched;else if(tokens.every(t=>np.includes(t)))score=200+tokens.length;}return {p,index,score}}).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||a.index-b.index);
+ const matches=scored.slice(0,100).map(x=>x.p);
  box.innerHTML='';
  if(!matches.length){box.innerHTML='<div class="empty">'+(appLanguage==='en'?'No matches found. Try another spelling.':'No  tugma sa listahan. Subukan ang ibang baybay.')+'</div>';box.classList.add('show');return;}
  matches.forEach(p=>{const row=document.createElement('div');row.className='suggestion';row.setAttribute('role','option');row.innerHTML='<div class="pin">'+searchIcon+'</div><div><div class="suggestion-name"></div><div class="suggestion-meta"></div></div>';row.querySelector('.suggestion-name').textContent=p;row.querySelector('.suggestion-meta').textContent=(activeMode==='board'||activeMode==='family-board')?(appLanguage==='en'?'Set as BOARDING POINT':'Itakda bilang SAKAYAN'):activeMode==='family'?(appLanguage==='en'?'Set as DESTINATION for Passenger ':'Itakda bilang BABAAAN ng Pasahero ')+(familySearchIndex+1):(appLanguage==='en'?'Set as DESTINATION':'Itakda bilang BABAAAN');row.addEventListener('click',()=>choose(p));box.appendChild(row)});
@@ -6046,4 +6046,20 @@ let savedDark=false;try{savedDark=localStorage.getItem('busFareDeskDarkMode')===
  const observer=new MutationObserver(checkFare);['fareAmount','boardPlaceLabel','alightPlaceLabel'].forEach(id=>{const el=$(id);if(el)observer.observe(el,{childList:true,characterData:true,subtree:true});});checkFare();
 })();
 </script>
+
+<style id="esmiring-search-dashboard-regression-fix">
+/* Keep place suggestions floating above every nearby panel and control. */
+.search-wrap{position:relative;z-index:5}
+.search-wrap:focus-within,.search-wrap.active{z-index:5000!important}
+.search-wrap .suggestions{position:absolute!important;top:calc(100% + 8px)!important;left:0!important;right:0!important;z-index:5001!important;max-height:min(58vh,520px)!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
+/* Reduce dashboard density without removing its information or actions. */
+#enhancedDashboard{padding:10px!important;margin:10px 0!important;border-radius:13px!important}
+#enhancedDashboard .dash-grid{gap:6px!important;margin-top:7px!important}
+#enhancedDashboard .dash-grid>div{padding:7px 8px!important;border-radius:9px!important}
+#enhancedDashboard .dash-grid small{font-size:8px!important;margin-bottom:3px!important}
+#enhancedDashboard .dash-grid strong{font-size:12px!important;line-height:1.25!important}
+#enhancedDashboard .extra-subhead{margin:10px 0 5px!important;font-size:11px!important}
+#enhancedDashboard .recent-routes{max-width:100%;padding-bottom:3px}
+@media(max-width:390px){#enhancedDashboard{padding:8px!important}#enhancedDashboard .dash-grid{gap:5px!important}#enhancedDashboard .dash-grid>div{padding:6px!important}}
+</style>
 </body></html>
