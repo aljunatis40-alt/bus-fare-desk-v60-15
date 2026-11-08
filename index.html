@@ -5311,16 +5311,19 @@ function updateFare(){
  const sameOriginAreaV6020=canonicalizeV60(boardingPlace);
  const sameDestinationAreaV6020=canonicalizeV60(alightingPlace);
  if(sameOriginAreaV6020&&sameDestinationAreaV6020&&sameOriginAreaV6020===sameDestinationAreaV6020){
-  const regularV6020=18,discountV6020=15,appliedV6020=selectedType==='regular'?regularV6020:discountV6020;
+  const sameAreaOverrideV6020=getAreaRouteFareOverride(boardingPlace,alightingPlace);
+  const regularV6020=sameAreaOverrideV6020?Number(sameAreaOverrideV6020.regular):18;
+  const discountV6020=sameAreaOverrideV6020?Number(sameAreaOverrideV6020.discounted):15;
+  const appliedV6020=selectedType==='regular'?regularV6020:discountV6020;
   distancePanel.style.display='none';
   fareAmount.textContent='₱'+appliedV6020.toFixed(2);
   fareRoute.textContent=boardingPlace+' → '+alightingPlace+' · '+({regular:'Regular',student:'Student',senior:'Senior',pwd:'PWD'}[selectedType]||'Pasahero');
   fareFoot.textContent='Same-area fare: Regular ₱18.00 | Student / Senior / PWD ₱15.00.';
   passengerNote.textContent=(selectedType==='regular'?'Regular':'Discounted')+' fare: ₱'+appliedV6020.toFixed(2)+'.';
   const previewV6020=document.getElementById('regularFarePreview');if(previewV6020)previewV6020.textContent='₱18.00';
-  const breakdownV6020={fareRegularValue:18,fareStudentValue:15,fareSeniorValue:15,farePwdValue:15};
+  const breakdownV6020={fareRegularValue:regularV6020,fareStudentValue:discountV6020,fareSeniorValue:discountV6020,farePwdValue:discountV6020};
   Object.entries(breakdownV6020).forEach(([id,amount])=>{const node=document.getElementById(id);if(node)node.textContent='₱'+amount.toFixed(2);});
-  document.querySelectorAll('.passenger-option').forEach(btn=>{const small=btn.querySelector('small');if(small)small.textContent='₱'+(btn.dataset.type==='regular'?18:15).toFixed(2);});
+  document.querySelectorAll('.passenger-option').forEach(btn=>{const small=btn.querySelector('small');if(small)small.textContent='₱'+(btn.dataset.type==='regular'?regularV6020:discountV6020).toFixed(2);});
   if(typeof renderPayment==='function')renderPayment(false);
   return;
  }
@@ -5373,8 +5376,13 @@ function updateFare(){
  const specialPalmeraSM=isPalmeraToSMFairviewV60(boardingPlace,alightingPlace);
  const ltfrbFallback=(fareFoot.textContent||'').includes('LTFRB_FARE_2026');
  const tariffKm=Number(distanceKm.value);
- const roundedRegular=ltfrbFallback?roundFareNearest5(regularTariff[tariffKm-1]):(specialPalmeraSM?40:roundFareNearest5(regular));
- const discounted=ltfrbFallback?roundFareNearest5(discountTariff[tariffKm-1]):(specialPalmeraSM?35:fareAfterGlobalDiscount20(regular));
+ const fallbackRegular=ltfrbFallback?roundFareNearest5(regularTariff[tariffKm-1]):(specialPalmeraSM?40:roundFareNearest5(regular));
+ const fallbackDiscount=ltfrbFallback?roundFareNearest5(discountTariff[tariffKm-1]):(specialPalmeraSM?35:fareAfterGlobalDiscount20(regular));
+ // Use the exact same resolver as the visible Regular/Student/Senior/PWD breakdown.
+ const resolvedRegularV6020=resolveFareBreakdownValue('regular');
+ const resolvedDiscountV6020=resolveFareBreakdownValue('student');
+ const roundedRegular=resolvedRegularV6020===null||resolvedRegularV6020===undefined?fallbackRegular:Number(resolvedRegularV6020);
+ const discounted=resolvedDiscountV6020===null||resolvedDiscountV6020===undefined?fallbackDiscount:Number(resolvedDiscountV6020);
  const isRegular=selectedType==='regular';
  const applied=isRegular?roundedRegular:discounted;
  const label={senior:'Senior',student:'Student',pwd:'PWD'}[selectedType]||selectedType;
