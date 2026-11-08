@@ -4608,15 +4608,40 @@ function placePaymentPanel(){if(familyMode){familyPaymentMount.appendChild(payme
 renderHistory();
 
 // Compact fare comparison: use the app's existing route fare resolver for each passenger type.
+function resolveFareBreakdownValue(type){
+ if(!boardingPlace||!alightingPlace||boardingPlace===alightingPlace)return null;
+ const originArea=canonicalizeV60(boardingPlace),destinationArea=canonicalizeV60(alightingPlace);
+ if(originArea&&destinationArea&&originArea===destinationArea)return type==='regular'?18:15;
+ if(isTowervilleToPalmeraZoneFare(boardingPlace,alightingPlace))return type==='regular'?18:15;
+ if(isEspanaToBuendiaZoneFare(boardingPlace,alightingPlace))return type==='regular'?30:25;
+ const editable=getEditableFareOverride(boardingPlace,alightingPlace);
+ if(editable)return type==='regular'?editable.regular:editable.discounted;
+ const foot=String(fareFoot.textContent||'');
+ const regularInFoot=foot.match(/Regular\\s*₱\\s*([\\d,]+(?:\\.\\d+)?)/i);
+ const discountInFoot=foot.match(/(?:Student\\s*\\/\\s*Senior\\s*\\/\\s*PWD|Discounted)\\s*₱\\s*([\\d,]+(?:\\.\\d+)?)/i);
+ if(regularInFoot){
+  const regular=Number(regularInFoot[1].replace(/,/g,''));
+  const discounted=discountInFoot?Number(discountInFoot[1].replace(/,/g,'')):null;
+  if(type==='regular')return regular;
+  if(discounted!==null)return discounted;
+  if(/hindi pa (?:kinukuwenta|inilalapat|kumpirmado|binabago)|not yet (?:calculated|applied|confirmed)/i.test(foot))return null;
+  return fareAfterGlobalDiscount20(regular);
+ }
+ let value=null;
+ try{value=latestPointFareV59(boardingPlace,alightingPlace,type);}catch(e){}
+ if(value===null||value===undefined){try{value=familyFare(boardingPlace,alightingPlace,type,1);}catch(e){}}
+ if(value===null||value===undefined||!Number.isFinite(Number(value)))return null;
+ return Number(value);
+}
 function refreshFareBreakdown(){
  const rows={regular:'fareRegularValue',student:'fareStudentValue',senior:'fareSeniorValue',pwd:'farePwdValue'};
  const shown=Number((fareAmount.textContent||'').replace(/[^0-9.]/g,''));
- // Never show comparison prices from the legacy fallback resolver when the
- // main fare calculator has no confirmed fare for the currently selected route.
- const hasConfirmedTotal=Number.isFinite(shown)&&shown>0;
- const valid=hasConfirmedTotal&&!!(boardingPlace&&alightingPlace&&boardingPlace!==alightingPlace);
- Object.keys(rows).forEach(type=>{const el=document.getElementById(rows[type]);if(!el)return;let value=null;try{if(valid&&typeof familyFare==='function')value=familyFare(boardingPlace,alightingPlace,type,1);}catch(e){}
-  if(type==='regular'&&(!Number.isFinite(Number(value))||value===null)){value=hasConfirmedTotal&&passengerType==='regular'?shown:null;}
+ const valid=Number.isFinite(shown)&&shown>0&&!!(boardingPlace&&alightingPlace&&boardingPlace!==alightingPlace);
+ Object.keys(rows).forEach(type=>{
+  const el=document.getElementById(rows[type]);if(!el)return;
+  let value=null;
+  if(valid){try{value=resolveFareBreakdownValue(type);}catch(e){}}
+  if(type==='regular'&&value===null&&valid&&passengerType==='regular')value=shown;
   el.textContent=value===null||value===undefined?'—':money(value);
  });
  document.querySelectorAll('.fare-type-row').forEach(row=>row.classList.toggle('active',row.dataset.fareType===passengerType));
@@ -5969,12 +5994,30 @@ let savedDark=false;try{if(localStorage.getItem('esmiringWhiteRestoreV1')!=='1')
   });
  }
  function runCheck(){
-  const missing=requiredIds.filter(id=>!document.getElementById(id));const valid=missing.length===0;
+  const missing=requiredIds.filter(id=>!document.getElementById(id));
+  const fareIssues=[];
+  const hasRoute=!!(typeof boardingPlace!=='undefined'&&boardingPlace&&typeof alightingPlace!=='undefined'&&alightingPlace);
+  const shownNode=document.getElementById('fareAmount');
+  const shown=shownNode?Number(String(shownNode.textContent||'').replace(/[^0-9.]/g,'')):0;
+  if(hasRoute&&Number.isFinite(shown)&&shown>0){
+   try{if(typeof refreshFareBreakdown==='function')refreshFareBreakdown();}catch(e){fareIssues.push('Hindi ma-refresh ang fare breakdown.');}
+   const selectedId={regular:'fareRegularValue',student:'fareStudentValue',senior:'fareSeniorValue',pwd:'farePwdValue'}[passengerType]||'fareRegularValue';
+   const selectedNode=document.getElementById(selectedId);
+   const selected=selectedNode?Number(String(selectedNode.textContent||'').replace(/[^0-9.]/g,'')):NaN;
+   if(!Number.isFinite(selected)||Math.round(selected*100)!==Math.round(shown*100))fareIssues.push('Selected Total at '+selectedId+' ay hindi magkatugma.');
+   const paymentNode=document.getElementById('paymentFareTotal');
+   if(!familyMode&&paymentNode){
+    const payment=Number(String(paymentNode.textContent||'').replace(/[^0-9.]/g,''));
+    if(Number.isFinite(payment)&&Math.round(payment*100)!==Math.round(shown*100))fareIssues.push('Payment Total at Selected Total ay hindi magkatugma.');
+   }
+  }
+  const valid=missing.length===0&&fareIssues.length===0;
+  const details=[...missing,...fareIssues];
   const summary=document.getElementById('floatingCheckSummary');
-  if(summary){summary.textContent=valid?bilingual('FLOATING CHECK PASSED · Core controls found.','LUMUSOT ANG FLOATING CHECK · Kumpleto ang mahahalagang control.'):bilingual('FLOATING CHECK FAILED · Missing: '+missing.join(', '),'BUMAGSAK ANG FLOATING CHECK · Nawawala: '+missing.join(', '));summary.style.background=valid?'#f0fdf4':'#fff7ed';summary.style.color=valid?'#166534':'#9a3412';summary.style.borderColor=valid?'#86efac':'#fdba74'}
+  if(summary){summary.textContent=valid?bilingual('FLOATING CHECK PASSED · Controls and fare totals match.','LUMUSOT ANG FLOATING CHECK · Tugma ang controls at pamasahe.'):bilingual('FLOATING CHECK FAILED · '+details.join(' '),'BUMAGSAK ANG FLOATING CHECK · '+details.join(' '));summary.style.background=valid?'#f0fdf4':'#fff7ed';summary.style.color=valid?'#166534':'#9a3412';summary.style.borderColor=valid?'#86efac':'#fdba74'}
   const indicator=document.getElementById('floatingCheckIndicator');if(indicator){indicator.textContent=valid?'✓ FLOATING CHECK PASSED':'⚠ FLOATING CHECK FAILED';indicator.style.background=valid?'#f0fdf4':'#fff7ed';indicator.style.color=valid?'#166534':'#9a3412';indicator.style.borderColor=valid?'#86efac':'#fdba74'}
-  if(!valid){const key='MISSING:'+missing.join(',');if(!lastFailures.has(key)){addError('ERR_FLOAT_SYNC_04','CRITICAL','Core_UI',missing.join(', '));lastFailures.add(key)}}else lastFailures.clear();
-  return {valid,missing};
+  if(!valid){const key=details.join('|');if(!lastFailures.has(key)){addError('ERR_FLOAT_SYNC_04','CRITICAL','Fare_UI',details.join('; '));lastFailures.add(key)}}else lastFailures.clear();
+  return {valid,missing,fareIssues};
  }
  function validateSave(button){
   const fields=button.id==='savePlace'?[['newPlace','place name'],['newArea','assigned area']]:
