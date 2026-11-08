@@ -4688,6 +4688,25 @@ function isTowervilleToPalmeraZoneFare(from,to){
  return Boolean(from&&to&&towervilleOrigins.has(zoneFareNorm(from))&&palmeraDestinations.has(zoneFareNorm(to)));
 }
 function updateFareCore(){
+ // User-confirmed rule: any boarding and alighting places within the same area
+ // share one fare, regardless of the individual stop names.
+ const sameOriginArea=canonicalizeV60(boardingPlace);
+ const sameDestinationArea=canonicalizeV60(alightingPlace);
+ if(sameOriginArea && sameDestinationArea && sameOriginArea===sameDestinationArea){
+   const zoneRegular=18, zoneDiscounted=15;
+   const zoneApplied=passengerType==='regular'?zoneRegular:zoneDiscounted;
+   distancePanel.style.display='none';
+   fareAmount.textContent='₱'+zoneApplied.toFixed(2);
+   fareRoute.textContent=boardingPlace+' → '+alightingPlace+' · '+({regular:'Regular',student:'Student',senior:'Senior',pwd:'PWD'}[passengerType]||'Discounted');
+   fareFoot.textContent='Same-area fare: Regular ₱18.00 | Student / Senior / PWD ₱15.00.';
+   passengerNote.textContent=(passengerType==='regular'?'Regular':'Discounted')+' fare: ₱'+zoneApplied.toFixed(2)+'.';
+   const sameAreaPreview=document.getElementById('regularFarePreview');if(sameAreaPreview)sameAreaPreview.textContent='₱18.00';
+   const sameAreaBreakdown={fareRegularValue:zoneRegular,fareStudentValue:zoneDiscounted,fareSeniorValue:zoneDiscounted,farePwdValue:zoneDiscounted};
+   Object.entries(sameAreaBreakdown).forEach(([id,amount])=>{const node=document.getElementById(id);if(node)node.textContent='₱'+amount.toFixed(2);});
+   document.querySelectorAll('.passenger-option').forEach(btn=>{const small=btn.querySelector('small');if(small)small.textContent='₱'+(btn.dataset.type==='regular'?zoneRegular:zoneDiscounted).toFixed(2);});
+   if(typeof renderPayment==='function')renderPayment(false);
+   return;
+ }
  // User-confirmed zone fare: Towerville area to Palmera area.
  if(isTowervilleToPalmeraZoneFare(boardingPlace,alightingPlace)){
    const zoneRegular=18, zoneDiscounted=15, zoneApplied=passengerType==='regular'?zoneRegular:zoneDiscounted;
