@@ -6037,6 +6037,9 @@ let savedDark=false;try{if(localStorage.getItem('esmiringWhiteRestoreV1')!=='1')
  }
  ['savePlace','saveAreaFare','saveRouteFare'].forEach(id=>{const button=document.getElementById(id);if(button)button.addEventListener('click',event=>{if(!validateSave(button)){event.preventDefault();event.stopImmediatePropagation()}},true)});
  const runButton=document.getElementById('runFloatingCheck');if(runButton)runButton.addEventListener('click',runCheck);
+ // Re-run the consistency check whenever the displayed fare or payment total changes.
+ const fareCheckObserver=new MutationObserver(()=>runCheck());
+ ['fareAmount','paymentFareTotal'].forEach(id=>{const node=document.getElementById(id);if(node)fareCheckObserver.observe(node,{childList:true,characterData:true,subtree:true});});
  const clearButton=document.getElementById('clearErrorHistory');if(clearButton)clearButton.addEventListener('click',()=>{writeLog([]);renderLog()});
  window.addEventListener('error',event=>addError('ERR_RUNTIME_JS','ERROR','JavaScript',String(event.message||'Unknown runtime error')));
  window.addEventListener('unhandledrejection',event=>addError('ERR_ASYNC_REJECTION','ERROR','Async_Task',String(event.reason&&event.reason.message||event.reason||'Unhandled rejection')));
