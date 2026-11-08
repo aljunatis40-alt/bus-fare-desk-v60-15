@@ -6395,6 +6395,32 @@ body.settings-open #selected{
 }
 #settingsPanel:not([hidden]){z-index:2147483000!important}
 #settingsPanel:not([hidden]) .settings-card{position:relative!important;z-index:2147483001!important}
+
+/* V60.20 — prevent the cash-combination sticker from ever covering the total */
+.fare-total-value-row,.group-total-value-row{
+ display:flex!important;flex-flow:row wrap!important;align-items:center!important;
+ justify-content:center!important;align-content:center!important;gap:5px!important;
+ width:100%!important;min-width:0!important;box-sizing:border-box!important;
+}
+.fare-total-display .fare-total-value-row .fare-amount{
+ display:block!important;position:static!important;flex:0 1 auto!important;
+ width:auto!important;max-width:100%!important;min-width:0!important;
+ white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important;
+ text-align:center!important;line-height:1.05!important;
+}
+.fare-total-value-row .peso-note-sticker,.group-total-value-row .peso-note-sticker{
+ position:relative!important;inset:auto!important;float:none!important;
+ flex:0 1 auto!important;width:auto!important;min-width:0!important;
+ max-width:100%!important;box-sizing:border-box!important;
+ margin:2px auto!important;transform:none!important;
+}
+.fare-total-value-row .peso-note-sticker{order:2}
+@media(max-width:420px){
+ .fare-total-value-row{row-gap:3px!important}
+ .fare-total-display .fare-total-value-row .fare-amount{font-size:clamp(25px,8vw,37px)!important}
+ .fare-total-value-row .peso-note-sticker{max-width:100%!important}
+}
+
 </style>
 <script id="tools-modal-search-fix-v6020">
 (function(){
