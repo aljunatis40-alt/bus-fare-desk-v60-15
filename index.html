@@ -6018,9 +6018,12 @@ let savedDark=false;try{if(localStorage.getItem('esmiringWhiteRestoreV1')!=='1')
 
 \n.voice-control-card{display:grid;gap:6px;padding:11px;border:1px solid #cbd5e1;border-radius:12px;background:#f8fafc;margin:10px 0}.voice-control-heading{font-size:12px;font-weight:900;color:#123b70}.voice-status-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.settings-section[data-settings-content=\"voice\"] input[type=range]{width:100%;accent-color:#1769e8;margin:8px 0 14px}.settings-section[data-settings-content=\"voice\"] .settings-feedback{line-height:1.5}\n
 <style id="esmiring-restore-white-bordered-map">
-/* Restore the classic white app canvas and bordered compact map panel. */
-html,body{background:#fff!important;color:#000!important}
+/* White is the default canvas; keep the user-selected dark theme working. */
+html{background:#fff}
+body:not(.dark-mode){background:#fff!important;color:#000!important}
 body:not(.map-background-mode) .route-map-frame{border:2px solid #166534!important;border-radius:12px!important;box-shadow:0 3px 12px #0002!important}
+.search-wrap{position:relative!important;z-index:6000!important}
+.search-wrap .suggestions{z-index:6001!important}
 </style>
 <div id="floatingCheckIndicator" role="status" aria-live="polite">✓ CHECK PASSED</div>
 
